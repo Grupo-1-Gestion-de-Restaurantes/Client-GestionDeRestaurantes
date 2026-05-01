@@ -1,114 +1,94 @@
 @import "tailwindcss";
 
+@theme {
+  --color-brand-dark:        #161925;
+  --color-brand-dark-80:     #2e3347;
+  --color-brand-dark-60:     #464d69;
+  --color-brand-dark-40:     #7d8399;
+  --color-brand-dark-20:     #c5c8d4;
+  --color-brand-dark-10:     #e8e9ee;
+
+  --color-brand-red:         #C1292E;
+  --color-brand-red-dark:    #991f23;
+  --color-brand-red-light:   #e05559;
+  --color-brand-red-soft:    #f5d0d1;
+
+  --color-brand-yellow:      #F1D302;
+  --color-brand-yellow-dark: #c4ac00;
+  --color-brand-yellow-light:#f6de3e;
+  --color-brand-yellow-soft: #fdf6c0;
+
+  --font-sans: 'Montserrat', system-ui, Arial, sans-serif;
+}
 
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
-
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
-
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
+  font-family: 'Montserrat', system-ui, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
+  --bg-base:          #f4f5f7;
+  --bg-surface:       #ffffff;
+  --bg-surface-alt:   #e8e9ee;
+  --bg-nav:           #161925;
+
+  --text-primary:     #161925;
+  --text-secondary:   #464d69;
+  --text-muted:       #7d8399;
+  --text-inverse:     #ffffff;
+
+  --border-color:     #dde0e8;
+  --ring-color:       #C1292E;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
+:root.dark {
+  --bg-base:          #0d0f16;
+  --bg-surface:       #161925;
+  --bg-surface-alt:   #2e3347;
+  --bg-nav:           #0d0f16;
 
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
+  --text-primary:     #e8e9ee;
+  --text-secondary:   #c5c8d4;
+  --text-muted:       #7d8399;
+  --text-inverse:     #161925;
+
+  --border-color:     #2e3347;
+  --ring-color:       #F1D302;
 }
 
 body {
-  margin: 0;
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
+.animate-fadeIn {
+  animation: fadeIn 0.15s ease-out;
 }
 
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
-  margin: 0;
-}
-
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
-}
-
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+.sidebar-underline { position: relative; }
+.sidebar-underline.active::after {
+  content: "";
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 6px;
+  height: 5px;
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    rgba(241, 211, 2, 0.18) 0%,
+    #F1D302 50%,
+    rgba(241, 211, 2, 0.18) 100%
+  );
+  filter: blur(1.5px);
+  z-index: 1;
 }
