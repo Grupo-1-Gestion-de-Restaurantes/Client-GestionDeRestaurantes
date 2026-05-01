@@ -1,6 +1,7 @@
 import { Typography } from "@material-tailwind/react";
 import imgLogo from "../../../assets/img/logoExpress.png"
 import { ThemeToggleButton } from "../../../shared/components/ui/ThemeToggleButton.jsx";
+import { AvatarUser } from '../ui/AvatarUser';
 
 export const Navbar = () => {
     return (
@@ -17,6 +18,7 @@ export const Navbar = () => {
                     </Typography>
                 </div>
                 <ThemeToggleButton />
+                <AvatarUser />
             </div>
         </nav>
     )
