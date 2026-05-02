@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form";
 import { useEffect } from "react";
-import { useSaveEmployee } from "../hooks/useSaveEmployee";
+import { useSaveInventory } from "../hooks/useSaveInventory.js";
 import { Spinner } from "../../../shared/components/layout/Spinner.jsx";
 
 export const InventoryModal = ({ isOpen, onClose, employee }) => {
@@ -14,8 +14,8 @@ export const InventoryModal = ({ isOpen, onClose, employee }) => {
         } else {
             reset({
                 name: "",
-                role: "",
-                restaurant: ""
+                quantity: "",
+                unit: ""
             });
         }
     }, [inventory]);
