@@ -34,8 +34,8 @@ export const Sidebar = () => {
         { label: "Pedidos", to: "/dashboard/orders", icon: <ShoppingBag size={20} /> },
         { label: "Promociones", to: "/dashboard/promotions", icon: <TicketPercent size={20} /> },
         { label: "Reservaciones", to: "/dashboard/reservations", icon: <BookCheck size={20} /> },
-        { label: "Restaurantes", to: "/dashboard/restaurantes", icon: <Store size={20} /> },
         { label: "Mesas", to: "/dashboard/tables", icon: <Table size={20} /> },
+        { label: "Restaurantes", to: "/dashboard/restaurants", icon: <Store size={20} /> },
     ];
     return (
         <aside className="sidebar-container w-60 h-full flex flex-col flex-shrink-0">
