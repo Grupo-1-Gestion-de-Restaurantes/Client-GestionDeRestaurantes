@@ -101,3 +101,19 @@ export const deleteDish = async (id) => {
     console.log("✅ [API] Respuesta del servidor al eliminar:", response.data);
     return response;
 }
+// Promociones
+export const getPromotions = async () => {
+    return axiosAdmin.get("/promotions/get");
+}
+ 
+export const createPromotion = async (data) => {
+    return await axiosAdmin.post("/promotions/create", data);
+}
+ 
+export const updatePromotion = async (id, data) => {
+    return await axiosAdmin.put(`/promotions/${id}`, data);
+}
+ 
+export const deletePromotion = async (id) => {
+    return await axiosAdmin.put(`/promotions/${id}/desactivate`); // Desactivado lógico
+}
