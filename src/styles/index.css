@@ -1,22 +1,26 @@
 @import "tailwindcss";
 
 @theme {
-  --color-brand-dark:        #161925;
-  --color-brand-dark-80:     #2e3347;
-  --color-brand-dark-60:     #464d69;
-  --color-brand-dark-40:     #7d8399;
-  --color-brand-dark-20:     #c5c8d4;
-  --color-brand-dark-10:     #e8e9ee;
+  --color-brand-dark: #161925;
+  --color-brand-dark-80: #2e3347;
+  --color-brand-dark-60: #464d69;
+  --color-brand-dark-40: #7d8399;
+  --color-brand-dark-20: #c5c8d4;
+  --color-brand-dark-10: #e8e9ee;
 
-  --color-brand-red:         #C1292E;
-  --color-brand-red-dark:    #991f23;
-  --color-brand-red-light:   #e05559;
-  --color-brand-red-soft:    #f5d0d1;
+  --color-brand-red: #C1292E;
+  --color-brand-red-dark: #991f23;
+  --color-brand-red-light: #e05559;
+  --color-brand-red-soft: #f5d0d1;
 
-  --color-brand-yellow:      #F1D302;
+  --color-brand-yellow: #F1D302;
   --color-brand-yellow-dark: #c4ac00;
-  --color-brand-yellow-light:#f6de3e;
+  --color-brand-yellow-light: #f6de3e;
   --color-brand-yellow-soft: #fdf6c0;
+
+  --color-background-base: #111317; /* Azul Oscuro */
+  --color-primary: #C1292E; /* Rojo */
+  --color-secondary: #F1D302; /* Amarillo */
 
   --font-sans: 'Montserrat', system-ui, Arial, sans-serif;
 }
@@ -30,33 +34,33 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  --bg-base:          #f4f5f7;
-  --bg-surface:       #ffffff;
-  --bg-surface-alt:   #e8e9ee;
-  --bg-nav:           #161925;
+  --bg-base: #f4f5f7;
+  --bg-surface: #ffffff;
+  --bg-surface-alt: #e8e9ee;
+  --bg-nav: #161925;
 
-  --text-primary:     #161925;
-  --text-secondary:   #464d69;
-  --text-muted:       #7d8399;
-  --text-inverse:     #ffffff;
+  --text-primary: #161925;
+  --text-secondary: #464d69;
+  --text-muted: #7d8399;
+  --text-inverse: #ffffff;
 
-  --border-color:     #dde0e8;
-  --ring-color:       #C1292E;
+  --border-color: #dde0e8;
+  --ring-color: #C1292E;
 }
 
 :root.dark {
-  --bg-base:          #0d0f16;
-  --bg-surface:       #161925;
-  --bg-surface-alt:   #2e3347;
-  --bg-nav:           #0d0f16;
+  --bg-base: #0d0f16;
+  --bg-surface: #161925;
+  --bg-surface-alt: #2e3347;
+  --bg-nav: #0d0f16;
 
-  --text-primary:     #e8e9ee;
-  --text-secondary:   #c5c8d4;
-  --text-muted:       #7d8399;
-  --text-inverse:     #161925;
+  --text-primary: #e8e9ee;
+  --text-secondary: #c5c8d4;
+  --text-muted: #7d8399;
+  --text-inverse: #161925;
 
-  --border-color:     #2e3347;
-  --ring-color:       #F1D302;
+  --border-color: #2e3347;
+  --ring-color: #F1D302;
 }
 
 body {
@@ -66,15 +70,51 @@ body {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-6px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes vibrate {
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(-5deg); }
+  50% { transform: rotate(0deg); }
+  75% { transform: rotate(5deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 .animate-fadeIn {
   animation: fadeIn 0.15s ease-out;
 }
 
-.sidebar-underline { position: relative; }
+.animate-vibrate {
+  animation: vibrate 0.3s linear infinite;
+}
+
+.animate-spin-slow {
+  animation: spin-slow 2s linear infinite;
+}
+
+.animate-throw-stick {
+  animation: throwAndStick 2.5s cubic-bezier(0.1, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.2s;
+}
+
+.sidebar-underline {
+  position: relative;
+}
+
 .sidebar-underline.active::after {
   content: "";
   position: absolute;
@@ -83,12 +123,22 @@ body {
   bottom: 6px;
   height: 5px;
   border-radius: 6px;
-  background: linear-gradient(
-    90deg,
-    rgba(241, 211, 2, 0.18) 0%,
-    #F1D302 50%,
-    rgba(241, 211, 2, 0.18) 100%
-  );
+  background: linear-gradient(90deg,
+      rgba(241, 211, 2, 0.18) 0%,
+      #F1D302 50%,
+      rgba(241, 211, 2, 0.18) 100%);
   filter: blur(1.5px);
   z-index: 1;
+}
+
+@layer utilities {
+  .bg-checkerboard {
+    background-image: conic-gradient(
+      rgba(0, 0, 0, 0.2) 25%, 
+      transparent 25% 50%, 
+      rgba(0, 0, 0, 0.2) 50% 75%, 
+      transparent 75%
+    );
+    background-size: 40px 40px;
+  }
 }
