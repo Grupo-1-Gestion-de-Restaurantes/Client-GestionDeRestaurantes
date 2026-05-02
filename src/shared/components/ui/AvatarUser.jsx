@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { useAuthStore } from "../../../features/auth/store/authStore";
+import { useAuthStore } from "../../../features/auth/store/useAuthStore";
 import defaultAvatarImg from "../../../assets/img/avatarDefault.png";
 import { useUIStore } from "./store/uiStore"; 
 import { Spinner } from "../layout/Spinner"; 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-export const RegisterForm = ({ onNavigate }) => {
+export const RegisterForm = ({ onSwitch }) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = (e) => {
@@ -71,7 +71,7 @@ export const RegisterForm = ({ onNavigate }) => {
       <div className='flex flex-col items-center mt-3'>
         <button 
           type="button" 
-          onClick={() => onNavigate('login')}
+          onClick={() => onSwitch('login')}
           className='text-sm text-gray-400 hover:text-white transition-colors w-full text-center p-1'
         >
           ¿Ya tienes cuenta? <span className='font-bold ml-1 text-secondary'>Inicia Sesión</span>

@@ -54,7 +54,7 @@ export const AuthPage = ({ children }) => {
     }
   };
 
-  // Iconos responsivos
+  // Iconos
   const bgIcons = [
     { name: "bread", style: { top: "10%", left: "5%" }, color: "text-amber-700" },
     { name: "cucumber", style: { bottom: "10%", left: "8%" }, color: "text-green-600" },
@@ -133,7 +133,7 @@ export const AuthPage = ({ children }) => {
                     <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-center lg:text-left w-full leading-tight mb-5 drop-shadow-md">
                       Nosotros <span className='text-primary'>nos encargamos</span> del <span className='text-primary'>caos</span> para que  <span className='text-primary'>tú no</span> lo hagas.
                     </h1>
-                    <LoginForm onNavigate={setCurrentView} />
+                    <LoginForm onSwitch={setCurrentView} />
                   </div>
                 )}
                 {currentView === 'register' && (
@@ -141,7 +141,7 @@ export const AuthPage = ({ children }) => {
                     <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-center lg:text-left w-full leading-tight mb-5 drop-shadow-md">
                       Únete a la <span className='text-secondary'>revolución</span> de tu <span className='text-secondary'>restaurante</span>.
                     </h1>
-                    <RegisterForm onNavigate={setCurrentView} />
+                    <RegisterForm onSwitch={setCurrentView} />
                   </div>
                 )}
                 {currentView === 'forgot' && (
@@ -149,7 +149,7 @@ export const AuthPage = ({ children }) => {
                     <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-center lg:text-left w-full leading-tight mb-5 drop-shadow-md">
                       ¿Ataque de <span className='text-primary'>amnesia</span>? <br />Te ayudamos a <span className='text-secondary'>entrar</span>.
                     </h1>
-                    <ForgotPasswordForm onNavigate={setCurrentView} />
+                    <ForgotPasswordForm onSwitch={setCurrentView} />
                   </div>
                 )}
               </motion.div>

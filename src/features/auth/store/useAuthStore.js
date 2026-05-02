@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import {
+    forgotPassword,
     login as loginRequest,
     register as registerRequest
 } from "../../../shared/api"
@@ -74,7 +75,6 @@ export const useAuthStore = create(
                     set({ loading: true, error: null });
 
                     const { data } = await loginRequest({ emailOrUsername, password })
-                    console.log(data)
 
                     const role = data?.userDetails?.role;
 
@@ -93,7 +93,7 @@ export const useAuthStore = create(
                         })
 
                         showError(message);
-                        return { success: false, error: message}
+                        return { success: false, error: message }
                     }
 
                     set({
@@ -113,9 +113,33 @@ export const useAuthStore = create(
                         err.response?.data?.message || "Error de autenticación";
                     set({ error: message, loading: false })
                     return { success: false, error: message }
+                } finally {
+                    set({ loading: false });
+                }
+            },
+            requestPasswordReset: async (email) => {
+                try {
+                    set({ loading: true, error: null });
+                    const { data } = await forgotPassword(email);
+                    set({ loading: false });
+                    return { success: true, data }
+                } catch (err) {
+                    const message = err.response?.data?.message || "Error al solicitar restablecimiento de contraseña";
+                    set({ error: message, loading: false });
+                    return { success: false, error: message }
                 }
             }
         }),
-        { name: "auth-storage" }
+        {
+            name: "auth-storage",
+            partialize: (state) => ({
+                user: state.user,
+                token: state.token,
+                refreshToken: state.refreshToken,
+                expiresAt: state.expiresAt,
+                isAuthenticated: state.isAuthenticated
+            }),
+        }
+
     )
 )
