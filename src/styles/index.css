@@ -18,6 +18,10 @@
   --color-brand-yellow-light: #f6de3e;
   --color-brand-yellow-soft: #fdf6c0;
 
+  --color-background-base: #111317; /* Azul Oscuro */
+  --color-primary: #C1292E; /* Rojo */
+  --color-secondary: #F1D302; /* Amarillo */
+
   --font-sans: 'Montserrat', system-ui, Arial, sans-serif;
 }
 
@@ -77,8 +81,34 @@ body {
   }
 }
 
+@keyframes vibrate {
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(-5deg); }
+  50% { transform: rotate(0deg); }
+  75% { transform: rotate(5deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 .animate-fadeIn {
   animation: fadeIn 0.15s ease-out;
+}
+
+.animate-vibrate {
+  animation: vibrate 0.3s linear infinite;
+}
+
+.animate-spin-slow {
+  animation: spin-slow 2s linear infinite;
+}
+
+.animate-throw-stick {
+  animation: throwAndStick 2.5s cubic-bezier(0.1, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.2s;
 }
 
 .sidebar-underline {
@@ -99,6 +129,18 @@ body {
       rgba(241, 211, 2, 0.18) 100%);
   filter: blur(1.5px);
   z-index: 1;
+}
+
+@layer utilities {
+  .bg-checkerboard {
+    background-image: conic-gradient(
+      rgba(0, 0, 0, 0.2) 25%, 
+      transparent 25% 50%, 
+      rgba(0, 0, 0, 0.2) 50% 75%, 
+      transparent 75%
+    );
+    background-size: 40px 40px;
+  }
 }
 
 /* --- Efecto Liquid Glass --- */

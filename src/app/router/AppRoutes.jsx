@@ -1,21 +1,39 @@
 import { Routes, Route } from "react-router-dom"
+import { AuthPage } from "../../features/auth/pages/AuthPage.jsx"
+import { VerifyEmailPage } from "../../features/auth/pages/VerifyEmailPage.jsx"
+import { UnauthorizedPage } from "../../features/auth/pages/UnauthorizedPage.jsx"
+import { ResetPasswordPage } from "../../features/auth/pages/ResetPasswordPage.jsx"
+import { ProtectedRoute } from "./ProtectedRoute.jsx"
+import { RoleGuard } from "./RoleGuard.jsx"
 import { DashboardPage } from "../layouts/DashboardPage.jsx"
-import { Reservations } from "../../features/reservations/components/Reservations.jsx";
-import { Orders } from "../../features/orders/components/Orders.jsx";
-import { Invoices } from "../../features/invoices/components/Invoices.jsx";
-import { Employees } from "../../features/employees/components/Employees.jsx";
-import { Restaurants } from "../../features/restaurants/components/Restaurants.jsx";
-import { Inventories } from "../../features/inventory/components/Inventories.jsx";
+
+import { Orders } from "../../features/orders/components/Orders.jsx"
+import { Reservations } from "../../features/reservations/components/Reservations.jsx"
+import { Employees } from "../../features/employees/components/Employees.jsx"
+import { Invoices } from "../../features/invoices/components/Invoices.jsx"
+import { Restaurants } from "../../features/restaurants/components/Restaurants.jsx"
+import { Inventories } from "../../features/inventory/components/Inventories.jsx"
 
 export const AppRoutes = () => {
     return (
         <Routes>
-            <Route 
-                path="/dashboard" 
+            {/* RUTAS PUBLICAS */}
+            <Route path="/" element={<AuthPage />} />
+            <Route path="/verify-email" element={<VerifyEmailPage />} />
+            <Route path="/unauthorized" element={<UnauthorizedPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
+
+            {/* PROTECTED ROUTES + ROLE */}
+            <Route
+                path="/dashboard"
                 element={
-                    <DashboardPage />
-                } 
-            > 
+                    <ProtectedRoute>
+                        <RoleGuard allowedRole={["ADMIN_ROLE"]}>
+                            <DashboardPage />
+                        </RoleGuard>
+                    </ProtectedRoute>
+                }
+            >
                 <Route path="orders" element={<Orders />} />
                 <Route path="reservations" element={<Reservations />} />
                 <Route path="employees" element={<Employees />} />
