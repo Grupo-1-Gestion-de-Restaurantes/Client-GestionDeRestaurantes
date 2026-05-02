@@ -1,14 +1,10 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useEmployeeStore } from "../store/useEmployeeStore";
 import { Spinner } from "../../../shared/components/layout/Spinner.jsx";
-import { useUIStore } from "../../../shared/components/ui/store/uiStore.js";
 import { EmployeeModal } from "./EmployeeModal.jsx";
 
 export const Employees = () => {
-
     const { employees, loading, getEmployees, deleteEmployee } = useEmployeeStore();
-    const { openConfirm } = useUIStore();
-
     const [openModal, setOpenModal] = useState(false);
     const [selectedEmployee, setSelectedEmployee] = useState(null);
 
@@ -16,18 +12,28 @@ export const Employees = () => {
         getEmployees();
     }, []);
 
-    if (loading) return <Spinner />;
+    if (loading && employees.length === 0) return <Spinner />;
+
+    const getSpecialtyStyle = (spec) => {
+        switch (spec) {
+            case 'COCINERO': return 'bg-orange-100 text-orange-800';
+            case 'BARTENDER': return 'bg-purple-100 text-purple-800';
+            case 'CAMARERO': return 'bg-blue-100 text-blue-800';
+            case 'ADMINISTRATIVO': return 'bg-gray-200 text-gray-800';
+            default: return 'bg-gray-100 text-gray-800';
+        }
+    };
 
     return (
         <div className="p-4">
 
             {/* HEADER */}
-            <div className="flex flex-col md:flex-row justify-between gap-4 mb-6">
+            <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8">
                 <div>
-                    <h1 className="text-2xl font-bold text-main-blue">
+                    <h1 className="text-3xl font-bold text-[var(--text-primary)]">
                         Gestión de Empleados
                     </h1>
-                    <p className="text-gray-500 text-sm">
+                    <p className="text-[var(--text-muted)] text-sm mt-1">
                         Administra los empleados del restaurante
                     </p>
                 </div>
@@ -37,60 +43,79 @@ export const Employees = () => {
                         setOpenModal(true);
                         setSelectedEmployee(null);
                     }}
-                    className="bg-main-blue text-white px-4 py-2 rounded"
+                    className="px-4 py-2 rounded-lg font-medium transition-all duration-300 shadow bg-[var(--color-brand-dark)] text-white hover:bg-[var(--color-brand-red)] dark:bg-[var(--bg-surface-alt)] dark:text-[var(--text-primary)] dark:border dark:border-[var(--border-color)] dark:hover:bg-[var(--color-brand-yellow)] dark:hover:text-[var(--color-brand-dark)]"
                 >
                     + Agregar Empleado
                 </button>
             </div>
 
-            {/* LISTA */}
-            <div className="grid gap-4">
+            {/* TABLA */}
+            <div className="bg-[var(--bg-surface)] rounded-xl shadow-md border border-[var(--border-color)] overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                    <thead className="bg-[var(--bg-surface-alt)] text-[var(--text-secondary)] text-sm border-b border-[var(--border-color)]">
+                        <tr>
+                            <th className="px-6 py-4 font-semibold">User ID</th>
+                            <th className="px-6 py-4 font-semibold">Restaurante</th>
+                            <th className="px-6 py-4 font-semibold">Especialidad</th>
+                            <th className="px-6 py-4 font-semibold">Estado</th>
+                            <th className="px-6 py-4 font-semibold text-center">Acciones</th>
+                        </tr>
+                    </thead>
 
-                {employees.map(emp => (
-                    <div className="bg-white p-4 rounded shadow flex flex-col gap-2">
+                    <tbody className="divide-y divide-[var(--border-color)]">
+                        {employees.length > 0 ? (
+                            employees.map((emp) => (
+                                <tr key={emp._id} className="hover:bg-[var(--bg-base)] transition">
+                                    <td className="px-6 py-4 text-sm">{emp.userId}</td>
+                                    <td className="px-6 py-4 text-sm">
+                                        {emp.restaurant?._id || emp.restaurant}
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <span className={`px-3 py-1 text-xs rounded-full font-medium ${getSpecialtyStyle(emp.specialty)}`}>
+                                            {emp.specialty}
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4 text-sm">
+                                        {emp.isActive ? "Activo" : "Inactivo"}
+                                    </td>
 
-                        <h2 className="font-bold text-lg">{emp.name}</h2>
+                                    <td className="px-6 py-4 flex gap-3 justify-center">
+                                        <button
+                                            className="text-[var(--color-brand-dark)] hover:text-[var(--color-brand-yellow)]"
+                                            onClick={() => {
+                                                setSelectedEmployee(emp);
+                                                setOpenModal(true);
+                                            }}
+                                        >
+                                            ✏️ Editar
+                                        </button>
 
-                        <p className="text-sm text-gray-500">
-                            Rol: {emp.role}
-                        </p>
-
-                        <p className="text-sm text-gray-500">
-                            Restaurante: {emp.restaurant}
-                        </p>
-
-                        <div className="flex gap-2 mt-2">
-                            <button
-                                className="bg-blue-500 text-white px-3 py-1 rounded"
-                                onClick={() => {
-                                    setSelectedEmployee(emp);
-                                    setOpenModal(true);
-                                }}
-                            >
-                                Editar
-                            </button>
-
-                            <button
-                                className="bg-red-500 text-white px-3 py-1 rounded"
-                                onClick={() =>
-                                    openConfirm({
-                                        title: "Eliminar empleado",
-                                        message: `¿Eliminar ${emp.name}?`,
-                                        onConfirm: () => deleteEmployee(emp._id)
-                                    })
-                                }
-                            >
-                                Eliminar
-                            </button>
-                        </div>
-
-                    </div>
-                ))}
+                                        <button
+                                            className="text-[var(--color-brand-red)] hover:text-[var(--color-brand-red-dark)]"
+                                            onClick={() => deleteEmployee(emp._id)}
+                                        >
+                                            🗑️ Eliminar
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan="5" className="text-center py-8 text-[var(--text-muted)]">
+                                    No hay empleados registrados.
+                                </td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
             </div>
 
             <EmployeeModal
                 isOpen={openModal}
-                onClose={() => setOpenModal(false)}
+                onClose={() => {
+                    setOpenModal(false);
+                    setSelectedEmployee(null);
+                }}
                 employee={selectedEmployee}
             />
         </div>

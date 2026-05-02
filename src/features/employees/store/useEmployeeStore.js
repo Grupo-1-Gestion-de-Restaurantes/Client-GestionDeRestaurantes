@@ -1,29 +1,54 @@
 import { create } from "zustand";
-import { getEmployees, deleteEmployee } from "../../../shared/api/admin";
+import {
+    getEmployees,
+    createEmployee,
+    updateEmployee,
+    deleteEmployee
+} from "../../../shared/api";
 
-export const useEmployeeStore = create((set) => ({
+export const useEmployeeStore = create((set, get) => ({
     employees: [],
     loading: false,
     error: null,
 
     getEmployees: async () => {
-        set({ loading: true });
         try {
-            const data = await getEmployees();
-            set({ employees: data, loading: false });
+            set({ loading: true });
+            const res = await getEmployees();
+
+            set({
+                employees: res.data.data || res.data,
+                loading: false
+            });
         } catch (err) {
-            set({ error: err.message, loading: false });
+            set({ error: "Error al obtener empleados", loading: false });
         }
     },
 
+    createEmployee: async (data) => {
+        const res = await createEmployee(data);
+
+        set({
+            employees: [res.data.data || res.data, ...get().employees]
+        });
+    },
+
+    updateEmployee: async (id, data) => {
+        const res = await updateEmployee(id, data);
+        const updated = res.data.data || res.data;
+
+        set({
+            employees: get().employees.map(e =>
+                e._id === id ? updated : e
+            )
+        });
+    },
+
     deleteEmployee: async (id) => {
-        try {
-            await deleteEmployee(id);
-            set((state) => ({
-                employees: state.employees.filter(e => e._id !== id)
-            }));
-        } catch (err) {
-            set({ error: err.message });
-        }
+        await deleteEmployee(id);
+
+        set({
+            employees: get().employees.filter(e => e._id !== id)
+        });
     }
 }));
