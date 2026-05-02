@@ -16,10 +16,11 @@ export const AppRoutes = () => {
             {/* PROTECTED ROUTES + ROLE */}
             <Route
                 path="/dashboard"
-                element={   
+                element={
                     <ProtectedRoute>
                         <RoleGuard allowedRole={["ADMIN_ROLE"]}>
-
+                            <Route path="invoices" element={<Invoices />} />
+                             <Route path="reservations" element={<Reservations />} />
                         </RoleGuard>
                     </ProtectedRoute>
                 }
