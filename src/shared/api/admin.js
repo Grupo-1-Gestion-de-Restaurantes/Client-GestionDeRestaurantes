@@ -13,40 +13,41 @@ export const updateReservation = async (id, data) => {
 }
 
 export const deleteReservation = async (id) => {
-    return await axiosAdmin.put(`/reservations/${id}`);
+    return await axiosAdmin.put(`/reservations/${id}/deactivate`);
 }
-// EMPLOYEES
 
-export const getEmployees = async () => {
-    return axiosAdmin.get("/employees");
+export const getMyInvoices = async () => {
+    return axiosAdmin.get("/invoices/myInvoices");
+}
+
+export const getEmployee = async () => {
+    return axiosAdmin.get("/employees/get");
 }
 
 export const createEmployee = async (data) => {
-    return axiosAdmin.post("/employees", data);
+    return await axiosAdmin.post("/employees/create", data);
 }
 
 export const updateEmployee = async (id, data) => {
-    return axiosAdmin.put(`/employees/${id}`, data);
+    return await axiosAdmin.put(`/employees/${id}`, data);
 }
 
 export const deleteEmployee = async (id) => {
-    return axiosAdmin.delete(`/employees/${id}`);
+    return await axiosAdmin.put(`/employees/${id}/deactivate`);
 }
 
-// INVENTORY
-
-export const getInventory = async () => {
-    return axiosAdmin.get("/inventory");
+export const getInventories = async () => {
+    return axiosAdmin.get("/inventories/get");
 }
 
 export const createInventory = async (data) => {
-    return axiosAdmin.post("/inventory", data);
+    return await axiosAdmin.post("/inventories/create", data);
 }
 
 export const updateInventory = async (id, data) => {
-    return axiosAdmin.put(`/inventory/${id}`, data);
+    return await axiosAdmin.put(`/inventories/${id}`, data);
 }
 
 export const deleteInventory = async (id) => {
-    return axiosAdmin.delete(`/inventory/${id}`);
+    return await axiosAdmin.put(`/inventories/${id}/deactivate`);
 }

@@ -78,6 +78,7 @@ export const ReservationModal = ({ isOpen, onClose, reservation }) => {
                 >
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* ID del Cliente */}
+                        {/*
                         <div className="flex flex-col">
                             <label className="text-sm font-semibold text-[var(--text-secondary)] mb-1">
                                 ID Cliente
@@ -89,6 +90,7 @@ export const ReservationModal = ({ isOpen, onClose, reservation }) => {
                             />
                             {errors.client && <p className="text-[var(--color-brand-red)] text-xs mt-1">{errors.client.message}</p>}
                         </div>
+                        */}
 
                         {/* ID del Restaurante */}
                         <div className="flex flex-col">
