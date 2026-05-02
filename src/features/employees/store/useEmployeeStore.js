@@ -9,8 +9,8 @@ export const useEmployeeStore = create((set) => ({
     getEmployees: async () => {
         set({ loading: true });
         try {
-            const data = await getEmployees();
-            set({ employees: data, loading: false });
+            const res = await getEmployees();
+            set({ employees: res.data, loading: false });
         } catch (err) {
             set({ error: err.message, loading: false });
         }

@@ -1,19 +1,19 @@
 import { useEffect, useState } from "react";
-import { useEmployeeStore } from "../store/useEmployeeStore";
+import { useInventoryStore } from "../store/useInventoryStore";
 import { Spinner } from "../../../shared/components/layout/Spinner.jsx";
 import { useUIStore } from "../../../shared/components/ui/store/uiStore.js";
-import { EmployeeModal } from "./EmployeeModal.jsx";
+import { InventoryModal } from "./InventoryModal.jsx";
 
-export const Employees = () => {
+export const Inventory = () => {
 
-    const { employees, loading, getEmployees, deleteEmployee } = useEmployeeStore();
+    const { inventory, loading, getInventory, deleteInventory } = useInventoryStore();
     const { openConfirm } = useUIStore();
 
     const [openModal, setOpenModal] = useState(false);
-    const [selectedEmployee, setSelectedEmployee] = useState(null);
+    const [selectedInventory, setSelectedInventory] = useState(null);
 
     useEffect(() => {
-        getEmployees();
+        getInventory();
     }, []);
 
     if (loading) return <Spinner />;
@@ -25,45 +25,45 @@ export const Employees = () => {
             <div className="flex flex-col md:flex-row justify-between gap-4 mb-6">
                 <div>
                     <h1 className="text-2xl font-bold text-main-blue">
-                        Gestión de Empleados
+                        Gestión de Inventarios
                     </h1>
                     <p className="text-gray-500 text-sm">
-                        Administra los empleados del restaurante
+                        Administra los inventarios del restaurante
                     </p>
                 </div>
 
                 <button
                     onClick={() => {
                         setOpenModal(true);
-                        setSelectedEmployee(null);
+                        setSelectedInventory(null);
                     }}
                     className="bg-main-blue text-white px-4 py-2 rounded"
                 >
-                    + Agregar Empleado
+                    + Agregar Inventario
                 </button>
             </div>
 
             {/* LISTA */}
             <div className="grid gap-4">
 
-                {employees.map(emp => (
+                {inventory.map(emp => (
                     <div className="bg-white p-4 rounded shadow flex flex-col gap-2">
 
-                        <h2 className="font-bold text-lg">{emp.name}</h2>
+                        <h2 className="font-bold text-lg">{item.name}</h2>
 
                         <p className="text-sm text-gray-500">
-                            Especialidad: {emp.specialty}
+                            Cantidad: {item.quantity}
                         </p>
 
                         <p className="text-sm text-gray-500">
-                            Restaurante: {emp.restaurant}
+                            Unidad: {item.unit}
                         </p>
 
                         <div className="flex gap-2 mt-2">
                             <button
                                 className="bg-blue-500 text-white px-3 py-1 rounded"
                                 onClick={() => {
-                                    setSelectedEmployee(emp);
+                                    setSelectedInventory(emp);
                                     setOpenModal(true);
                                 }}
                             >
@@ -76,7 +76,7 @@ export const Employees = () => {
                                     openConfirm({
                                         title: "Eliminar empleado",
                                         message: `¿Eliminar ${emp.name}?`,
-                                        onConfirm: () => deleteEmployee(emp._id)
+                                        onConfirm: () => deleteInventory(emp._id)
                                     })
                                 }
                             >
@@ -88,10 +88,10 @@ export const Employees = () => {
                 ))}
             </div>
 
-            <EmployeeModal
+            <InventoryModal
                 isOpen={openModal}
                 onClose={() => setOpenModal(false)}
-                employee={selectedEmployee}
+                inventory={selectedInventory}
             />
         </div>
     );

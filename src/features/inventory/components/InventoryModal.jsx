@@ -3,25 +3,25 @@ import { useEffect } from "react";
 import { useSaveEmployee } from "../hooks/useSaveEmployee";
 import { Spinner } from "../../../shared/components/layout/Spinner.jsx";
 
-export const EmployeeModal = ({ isOpen, onClose, employee }) => {
+export const InventoryModal = ({ isOpen, onClose, employee }) => {
 
     const { register, handleSubmit, reset } = useForm();
-    const { saveEmployee, loading } = useSaveEmployee();
+    const { saveInventory, loading } = useSaveInventory();
 
     useEffect(() => {
-        if (employee) {
-            reset(employee);
+        if (inventory) {
+            reset(inventory);
         } else {
             reset({
                 name: "",
-                specialty: "",
+                role: "",
                 restaurant: ""
             });
         }
-    }, [employee]);
+    }, [inventory]);
 
     const onSubmit = async (data) => {
-        await saveEmployee(data, employee?._id);
+        await saveInventory(data, inventory?._id);
         onClose();
     };
 
@@ -36,7 +36,7 @@ export const EmployeeModal = ({ isOpen, onClose, employee }) => {
             >
 
                 <h2 className="text-xl font-bold">
-                    {employee ? "Editar" : "Nuevo"} Empleado
+                    {employee ? "Editar" : "Nuevo"} Inventario
                 </h2>
 
                 <input
@@ -46,14 +46,14 @@ export const EmployeeModal = ({ isOpen, onClose, employee }) => {
                 />
 
                 <input
-                    placeholder="specialty"
-                    {...register("specialty", { required: true })}
+                    placeholder="Cantidad"
+                    {...register("quantity", { required: true })}
                     className="w-full border p-2 rounded"
                 />
 
                 <input
-                    placeholder="Restaurante"
-                    {...register("restaurant", { required: true })}
+                    placeholder="Unidad"
+                    {...register("unit", { required: true })}
                     className="w-full border p-2 rounded"
                 />
 
