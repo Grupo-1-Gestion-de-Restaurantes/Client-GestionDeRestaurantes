@@ -30,7 +30,9 @@ export const Reservations = () => {
         }
     };
 
-    if (loading && reservations.length === 0) return <Spinner />;
+    const activeReservations = reservations.filter((res) => res.isActive === true);
+
+    if (loading && activeReservations.length === 0) return <Spinner />;
 
     return (
         <div className="p-4">
@@ -70,14 +72,13 @@ export const Reservations = () => {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-[var(--border-color)]">
-                        {reservations.length > 0 ? (
-                            reservations.map((res) => (
+                        {activeReservations.length > 0 ? (
+                            activeReservations.map((res) => (
                                 <tr key={res._id} className="hover:bg-[var(--bg-base)] transition-colors">
                                     <td className="px-6 py-4 text-sm text-[var(--text-primary)] whitespace-nowrap">
                                         {new Date(res.reservationDate).toLocaleString()}
                                     </td>
                                     <td className="px-6 py-4 text-sm text-[var(--text-secondary)]">
-                                        {/* Adaptar dependiendo de si backend manda objeto poblado o solo string */}
                                         {res.client?.name || res.client || "N/A"}
                                     </td>
                                     <td className="px-6 py-4 text-sm text-[var(--text-secondary)]">
