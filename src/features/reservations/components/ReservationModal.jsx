@@ -139,9 +139,9 @@ export const ReservationModal = ({ isOpen, onClose, reservation }) => {
                             <input
                                 type="number"
                                 className="w-full px-3 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--ring-color)] transition"
-                                {...register("numberOfPeople", { 
+                                {...register("numberOfPeople", {
                                     required: "Requerido",
-                                    min: { value: 1, message: "Mínimo 1 persona" } 
+                                    min: { value: 1, message: "Mínimo 1 persona" }
                                 })}
                             />
                             {errors.numberOfPeople && <p className="text-[var(--color-brand-red)] text-xs mt-1">{errors.numberOfPeople.message}</p>}
@@ -155,9 +155,9 @@ export const ReservationModal = ({ isOpen, onClose, reservation }) => {
                             <input
                                 type="number"
                                 className="w-full px-3 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--ring-color)] transition"
-                                {...register("durationInMinutes", { 
+                                {...register("durationInMinutes", {
                                     required: "Requerido",
-                                    min: { value: 15, message: "Mínimo 15 mins" } 
+                                    min: { value: 15, message: "Mínimo 15 mins" }
                                 })}
                             />
                         </div>
