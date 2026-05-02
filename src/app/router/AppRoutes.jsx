@@ -18,9 +18,9 @@ export const AppRoutes = () => {
                 <Route path="reservations" element={<Reservations />} />
                 <Route path="employees" element={<Employees />} />
                 <Route path="invoices" element={<Invoices />} />
-                <Route path="employees" element={<Employees />} />
                 <Route path="restaurants" element={<Restaurants />} />
                 <Route path="inventories" element={<Inventories />} />
+                <Route path="employees" element={<Employees />} />
             </Route>
         </Routes>
     )

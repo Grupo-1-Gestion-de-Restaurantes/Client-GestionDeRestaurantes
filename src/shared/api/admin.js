@@ -36,6 +36,7 @@ export const updateEmployee = async (id, data) => {
 
 export const deleteEmployee = async (id) => {
     return await axiosAdmin.put(`/employees/${id}/deactivate`);
+
 //Restaurantes  
 export const getRestaurants = async () => {
     return axiosAdmin.get("/restaurants");
