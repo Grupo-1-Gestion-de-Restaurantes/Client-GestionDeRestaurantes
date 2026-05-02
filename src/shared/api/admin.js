@@ -56,3 +56,19 @@ export const updateRestaurant = async (id, data) => {
 export const deleteRestaurant = async (id) => {
     return await axiosAdmin.delete(`/restaurants/${id}`)}
 }
+
+export const getInventories = async () => {
+    return axiosAdmin.get("/inventories/get");
+}
+
+export const createInventory = async (data) => {
+    return await axiosAdmin.post("/inventories/create", data);
+}
+
+export const updateInventory = async (id, data) => {
+    return await axiosAdmin.put(`/inventories/${id}`, data);
+}
+
+export const deleteInventory = async (id) => {
+    return await axiosAdmin.put(`/inventories/${id}/deactivate`);
+}
