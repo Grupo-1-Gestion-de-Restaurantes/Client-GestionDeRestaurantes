@@ -15,3 +15,7 @@ export const updateReservation = async (id, data) => {
 export const deleteReservation = async (id) => {
     return await axiosAdmin.put(`/reservations/${id}/deactivate`);
 }
+
+export const getMyInvoices = async () => {
+    return axiosAdmin.get("/invoices/myInvoices");
+}
