@@ -4,6 +4,7 @@ import { Reservations } from "../../features/reservations/components/Reservation
 import { Employees } from "../../features/employees/components/employees.jsx";
 import { Inventory } from "../../features/inventory/components/Inventory.jsx";
 import { Invoices } from "../../features/invoices/components/Invoices.jsx";
+import { Employees } from "../../features/employees/components/Employees.jsx";
 
 export const AppRoutes = () => {
     return (
@@ -18,6 +19,7 @@ export const AppRoutes = () => {
                 <Route path="employees" element={<Employees />} />
                 <Route path="inventory" element={<Inventory />} />
                 <Route path="invoices" element={<Invoices />} />
+                <Route path="employees" element={<Employees />} />
             </Route>
         </Routes>
     )
