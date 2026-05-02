@@ -1,5 +1,6 @@
 import { axiosAdmin } from "./api";
 
+//Reservaciones
 export const getReservations = async () => {
     return axiosAdmin.get("/reservations/get");
 }
@@ -16,6 +17,62 @@ export const deleteReservation = async (id) => {
     return await axiosAdmin.put(`/reservations/${id}/deactivate`);
 }
 
+//Facturas
 export const getMyInvoices = async () => {
     return axiosAdmin.get("/invoices/myInvoices");
+}
+
+//Restaurantes  
+export const getRestaurants = async () => {
+    return axiosAdmin.get("/restaurants");
+}
+
+export const createRestaurant = async (data) => {
+    return await axiosAdmin.post("/restaurants", data, {
+        headers: { "Content-Type": "multipart/form-data"}
+    })
+}
+
+export const updateRestaurant = async (id, data) => {
+    return await axiosAdmin.put(`/restaurants/${id}`, data, {
+        headers: { "Content-Type": "multipart/form-data"}
+    })
+}
+
+export const deleteRestaurant = async (id) => {
+    return await axiosAdmin.delete(`/restaurants/${id}`)
+}
+
+//Empleados
+export const getEmployees = async () => {
+    return axiosAdmin.get("/employees/get");
+}
+
+export const createEmployee = async (data) => {
+    return await axiosAdmin.post("/employees/create", data);
+}
+
+export const updateEmployee = async (id, data) => {
+    return await axiosAdmin.put(`/employees/${id}`, data);
+}
+
+export const deleteEmployee = async (id) => {
+    return await axiosAdmin.put(`/employees/${id}/deactivate`);
+}
+
+//Inventarios
+export const getInventories = async () => {
+    return axiosAdmin.get("/inventories/get");
+}
+
+export const createInventory = async (data) => {
+    return await axiosAdmin.post("/inventories/create", data);
+}
+
+export const updateInventory = async (id, data) => {
+    return await axiosAdmin.put(`/inventories/${id}`, data);
+}
+
+export const deleteInventory = async (id) => {
+    return await axiosAdmin.put(`/inventories/${id}/deactivate`);
 }

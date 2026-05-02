@@ -34,12 +34,12 @@ export const Sidebar = () => {
         { label: "Pedidos", to: "/dashboard/orders", icon: <ShoppingBag size={20} /> },
         { label: "Promociones", to: "/dashboard/promotions", icon: <TicketPercent size={20} /> },
         { label: "Reservaciones", to: "/dashboard/reservations", icon: <BookCheck size={20} /> },
-        { label: "Restaurantes", to: "/dashboard/restaurantes", icon: <Store size={20} /> },
-        { label: "Mesas", to: "/dashboard/tables", icon: <Table size={20} /> }
+        { label: "Mesas", to: "/dashboard/tables", icon: <Table size={20} /> },
+        { label: "Restaurantes", to: "/dashboard/restaurants", icon: <Store size={20} /> },
     ];
     return (
-        <aside className="sidebar-container w-60 h-screen fixed left-0 top-0 flex flex-col">
-            <nav className="flex-1 px-4 overflow-y-auto custom-scrollbar">
+        <aside className="sidebar-container w-60 h-full flex flex-col flex-shrink-0">
+            <nav className="flex-1 px-4 overflow-y-auto">
                 <ul className="space-y-2 pb-10">
                     {items.map((item) => {
                         const active = location.pathname === item.to;

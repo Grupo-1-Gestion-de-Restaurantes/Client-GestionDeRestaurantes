@@ -4,7 +4,7 @@ import {
     createReservation as createReservationRequest,
     updateReservation as updateReservationRequest,
     deleteReservation as deleteReservationRequest
-} from "../../../shared/api";
+} from "../../../shared/api/";
 
 export const useReservationStore = create((set, get) => ({
     reservations: [],
@@ -33,6 +33,7 @@ export const useReservationStore = create((set, get) => ({
         try {
             set({ loading: true, error: null });
             const response = await createReservationRequest(data);
+            console.log(response.data)
 
             set({
                 reservations: [response.data.data || response.data, ...get().reservations],
