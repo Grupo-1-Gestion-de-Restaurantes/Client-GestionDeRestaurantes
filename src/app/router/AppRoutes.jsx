@@ -3,6 +3,7 @@ import { DashboardPage } from "../layouts/DashboardPage.jsx"
 import { Reservations } from "../../features/reservations/components/Reservations.jsx";
 import { Invoices } from "../../features/invoices/components/Invoices.jsx";
 import { Employees } from "../../features/employees/components/Employees.jsx";
+import { Restaurants } from "../../features/restaurants/components/Restaurants.jsx";
 
 export const AppRoutes = () => {
     return (
@@ -16,6 +17,7 @@ export const AppRoutes = () => {
                 <Route path="reservations" element={<Reservations />} />
                 <Route path="invoices" element={<Invoices />} />
                 <Route path="employees" element={<Employees />} />
+                <Route path="restaurants" element={<Employees />} />
             </Route>
         </Routes>
     )
