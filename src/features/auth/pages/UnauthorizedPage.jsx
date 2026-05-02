@@ -2,7 +2,7 @@ import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuthStore } from '../store/useAuthStore'
-import ExpressDark from "../../../assets/img/express-ligth-2.png"
+import ExpressDark from '../../../assets/img/Express-ligth-2.png'
 import { Icon } from '../../../shared/components/ui/Icons'
 
 export const UnauthorizedPage = () => {

@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import AuthImage from "../../../assets/img/auth-image.jpeg"
-import ExpressDark from "../../../assets/img/express-ligth-2.png"
+import ExpressDark from '../../../assets/img/Express-ligth-2.png'
 import { LoginForm } from '../components/LoginForm'
 import { RegisterForm } from '../components/RegisterForm'
 import { ForgotPasswordForm } from '../components/ForgotPasswordForm'
