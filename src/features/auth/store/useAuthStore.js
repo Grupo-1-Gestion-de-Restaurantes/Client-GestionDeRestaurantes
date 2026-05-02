@@ -3,7 +3,8 @@ import { persist } from "zustand/middleware";
 import {
     forgotPassword,
     login as loginRequest,
-    register as registerRequest
+    register as registerRequest,
+    resetPassword as resetPasswordRequest
 } from "../../../shared/api"
 import { showError } from "../../../shared/utils/toast";
 
@@ -125,6 +126,18 @@ export const useAuthStore = create(
                     return { success: true, data }
                 } catch (err) {
                     const message = err.response?.data?.message || "Error al solicitar restablecimiento de contraseña";
+                    set({ error: message, loading: false });
+                    return { success: false, error: message }
+                }
+            },
+            resetPassword: async (token, newPassword) => {
+                try {
+                    set({ loading: true, error: null });
+                    const { data } = await resetPasswordRequest(token, newPassword);
+                    set({ loading: false });
+                    return { success: true, data }
+                } catch (err) {
+                    const message = err.response?.data?.message || "Error al restablecer la contraseña";
                     set({ error: message, loading: false });
                     return { success: false, error: message }
                 }

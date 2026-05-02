@@ -16,8 +16,7 @@ export const AppRoutes = () => {
             <Route path="/" element={<AuthPage />} />
             <Route path="/verify-email" element={<VerifyEmailPage />} />
             <Route path="/unauthorized" element={<UnauthorizedPage />} />
-            <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
-
+           <Route path="/reset-password" element={<ResetPasswordPage />} />
             {/* PROTECTED ROUTES + ROLE */}
             <Route
                 path="/dashboard"
