@@ -1,0 +1,72 @@
+import { useForm } from "react-hook-form";
+import { useEffect } from "react";
+import { useSaveEmployee } from "../hooks/useSaveEmployee";
+import { Spinner } from "../../../shared/components/layout/Spinner.jsx";
+
+export const EmployeeModal = ({ isOpen, onClose, employee }) => {
+
+    const { register, handleSubmit, reset } = useForm();
+    const { saveEmployee, loading } = useSaveEmployee();
+
+    useEffect(() => {
+        if (employee) {
+            reset(employee);
+        } else {
+            reset({
+                name: "",
+                role: "",
+                restaurant: ""
+            });
+        }
+    }, [employee]);
+
+    const onSubmit = async (data) => {
+        await saveEmployee(data, employee?._id);
+        onClose();
+    };
+
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 bg-black/40 flex justify-center items-center">
+
+            <form
+                onSubmit={handleSubmit(onSubmit)}
+                className="bg-white p-6 rounded w-full max-w-md space-y-4"
+            >
+
+                <h2 className="text-xl font-bold">
+                    {employee ? "Editar" : "Nuevo"} Empleado
+                </h2>
+
+                <input
+                    placeholder="Nombre"
+                    {...register("name", { required: true })}
+                    className="w-full border p-2 rounded"
+                />
+
+                <input
+                    placeholder="Rol"
+                    {...register("role", { required: true })}
+                    className="w-full border p-2 rounded"
+                />
+
+                <input
+                    placeholder="Restaurante"
+                    {...register("restaurant", { required: true })}
+                    className="w-full border p-2 rounded"
+                />
+
+                <div className="flex justify-end gap-2">
+                    <button type="button" onClick={onClose}>
+                        Cancelar
+                    </button>
+
+                    <button type="submit" className="bg-main-blue text-white px-4 py-2 rounded">
+                        {loading ? <Spinner /> : "Guardar"}
+                    </button>
+                </div>
+            </form>
+        </div>
+    );
+};
