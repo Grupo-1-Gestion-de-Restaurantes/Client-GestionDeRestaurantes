@@ -4,8 +4,9 @@ import { useForm } from 'react-hook-form'
 import { motion } from 'framer-motion'
 import { useAuthStore } from '../store/useAuthStore'
 import { showSuccess, showError } from '../../../shared/utils/toast'
-import ExpressDark from "../../../assets/img/express-ligth-2.png"
+import ExpressDark from '../../../assets/img/Express-ligth-2.png'
 import { Icon } from '../../../shared/components/ui/Icons'
+
 
 export const ResetPasswordPage = () => {
   const { token } = useParams()

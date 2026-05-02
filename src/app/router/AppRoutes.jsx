@@ -12,7 +12,7 @@ import { Reservations } from "../../features/reservations/components/Reservation
 import { Employees } from "../../features/employees/components/Employees.jsx"
 import { Invoices } from "../../features/invoices/components/Invoices.jsx"
 import { Restaurants } from "../../features/restaurants/components/Restaurants.jsx"
-import { Inventories } from "../../features/inventory/components/Inventories.jsx"
+import { Inventories  } from "../../features/inventories/components/Inventories.jsx";
 
 export const AppRoutes = () => {
     return (
