@@ -9,6 +9,7 @@ import { Invoices } from "../../features/invoices/components/Invoices.jsx"
 import { Reservations } from "../../features/reservations/components/Reservations.jsx"
 import { DashboardPage } from "../layouts/DashboardPage.jsx"
 import { Dishes } from "../../features/dishes/components/Dishes.jsx"
+
 export const AppRoutes = () => {
     return (
         <Routes>
