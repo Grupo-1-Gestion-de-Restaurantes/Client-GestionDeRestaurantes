@@ -17,6 +17,7 @@ import { Employees } from "../../features/employees/components/Employees.jsx"
 import { Invoices } from "../../features/invoices/components/Invoices.jsx"
 import { Dishes } from "../../features/dishes/components/Dishes.jsx"
 import { Promotions } from "../../features/promotions/components/Promotions.jsx"
+import { Restaurants } from "../../features/restaurants/components/Restaurants.jsx"
 
 export const AppRoutes = () => {
     return (
@@ -44,6 +45,7 @@ export const AppRoutes = () => {
                 <Route path="invoices" element={<Invoices />} />
                 <Route path="dishes" element={<Dishes />} />
                 <Route path="promotions" element={<Promotions />} />
+                <Route path="restaurants" element={<Restaurants />} />
             </Route>
         </Routes>
     )
