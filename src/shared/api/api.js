@@ -1,6 +1,24 @@
 import axios from "axios";
 import { useAuthStore } from "../../features/auth/store/useAuthStore";
 
+const AUTH_STORAGE_KEY = "auth-storage";
+
+const getTokenFromStorage = () => {
+    const persisted = localStorage.getItem(AUTH_STORAGE_KEY);
+    if (!persisted) {
+        return null;
+    }
+
+    try {
+        const parsed = JSON.parse(persisted);
+        return parsed?.state?.token ?? null;
+    } catch {
+        return null;
+    }
+};
+
+const getRequestToken = () => useAuthStore.getState().token || getTokenFromStorage();
+
 const axiosAuth = axios.create({
     baseURL: import.meta.env.VITE_AUTH_URL,
     timeout: 8000,
@@ -19,20 +37,22 @@ const axiosAdmin = axios.create({
 
 
 axiosAuth.interceptors.request.use((config) => {
-    //config._axiosClient = "auth"
-    const token = useAuthStore.getState().token;
+    config._axiosClient = "auth";
+    const token = getRequestToken();
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
+        config.headers['x-token'] = token;
     }
 
     return config;
 })
 
 axiosAdmin.interceptors.request.use((config) => {
-    //config._axiosClient = "auth"
-    const token = useAuthStore.getState().token;
+    config._axiosClient = "admin";
+    const token = getRequestToken();
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
+        config.headers['x-token'] = token;
     }
 
     return config;

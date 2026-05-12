@@ -24,11 +24,11 @@ export const getMyInvoices = async () => {
 
 //Restaurantes  
 export const getRestaurants = async () => {
-    return axiosAdmin.get("/restaurants");
+    return axiosAdmin.get("/restaurants/get");
 }
 
 export const createRestaurant = async (data) => {
-    return await axiosAdmin.post("/restaurants", data, {
+    return await axiosAdmin.post("/restaurants/create", data, {
         headers: { "Content-Type": "multipart/form-data" }
     })
 }
