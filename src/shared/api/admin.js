@@ -23,24 +23,27 @@ export const getMyInvoices = async () => {
 }
 
 //Restaurantes  
-export const getRestaurants = async () => {
-    return axiosAdmin.get("/restaurants/get");
+export const getRestaurants = async (params = {}) => {
+    return axiosAdmin.get("/restaurants/get", { params });
 }
 
 export const createRestaurant = async (data) => {
-    return await axiosAdmin.post("/restaurants/create", data, {
-        headers: { "Content-Type": "multipart/form-data" }
-    })
+    // Do not set Content-Type manually when sending FormData.
+    // Let the browser/axios set the proper boundary header.
+    return await axiosAdmin.post("/restaurants/create", data)
 }
 
 export const updateRestaurant = async (id, data) => {
-    return await axiosAdmin.put(`/restaurants/${id}`, data, {
-        headers: { "Content-Type": "multipart/form-data" }
-    })
+    // Do not set Content-Type manually when sending FormData.
+    return await axiosAdmin.put(`/restaurants/${id}`, data)
 }
 
-export const deleteRestaurant = async (id) => {
-    return await axiosAdmin.delete(`/restaurants/${id}`)
+export const deactivateRestaurant = async (id) => {
+    return await axiosAdmin.put(`/restaurants/${id}/deactivate`)
+}
+
+export const activateRestaurant = async (id) => {
+    return await axiosAdmin.put(`/restaurants/${id}/activate`)
 }
 
 //Empleados
