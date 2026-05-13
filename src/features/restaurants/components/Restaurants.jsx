@@ -5,16 +5,50 @@ import { useEffect as useToastEffect } from "react";
 import { showError } from "../../../shared/utils/toast.js";
 import { RestaurantModal } from "./RestaurantModal.jsx";
 import { useUIStore } from "../../../shared/components/ui/store/uiStore.js";
+import {
+    Search,
+    Filter,
+    Plus,
+    MapPin,
+    Clock3,
+    Users,
+    Phone,
+    Star,
+    PencilLine,
+    Ban,
+    CircleCheckBig,
+    UtensilsCrossed,
+    ImageOff,
+    Trash2,
+    BadgeCheck
+} from "lucide-react";
+import { LucideMotionIcon } from "../../../shared/components/ui/LucideMotionIcon.jsx";
 
 export const Restaurants = () => {
-    const { restaurants, loading, error, getRestaurants, deleteRestaurant } = useRestaurantStore();
+    const {
+        restaurants,
+        loading,
+        error,
+        getRestaurants,
+        deactivateRestaurant,
+        activateRestaurant,
+    } = useRestaurantStore();
     const [openModal, setOpenModal] = useState(false);
     const [selectedRestaurant, setSelectedRestaurant] = useState(null);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [activeFilter, setActiveFilter] = useState("active");
     const { openConfirm } = useUIStore();
 
     useEffect(() => {
-        getRestaurants();
-    }, [getRestaurants]);
+        const timeoutId = setTimeout(() => {
+            getRestaurants({
+                activeFilter,
+                search: searchTerm.trim(),
+            });
+        }, 250);
+
+        return () => clearTimeout(timeoutId);
+    }, [getRestaurants, activeFilter, searchTerm]);
 
     useToastEffect(() => {
         if (error) showError(error);
@@ -36,6 +70,26 @@ export const Restaurants = () => {
             default:        return "bg-gray-100 text-gray-800";
         }
     };
+
+    const renderRating = (ratingValue) => {
+        const ratingNumber = Math.max(0, Math.min(5, Number(ratingValue) || 0));
+        return Array.from({ length: 5 }, (_, index) => {
+            const filled = index < ratingNumber;
+            return (
+                <span
+                    key={index}
+                    className={filled ? "text-yellow-500" : "text-gray-400"}
+                    aria-hidden
+                >
+                    {filled ? '★' : '☆'}
+                </span>
+            );
+        });
+    };
+
+    const emptyMessage = searchTerm.trim() || activeFilter !== "active"
+        ? "No hay restaurantes con esos filtros."
+        : "No hay restaurantes registrados.";
 
     if (loading && restaurants.length === 0) return <Spinner />;
 
@@ -59,8 +113,68 @@ export const Restaurants = () => {
                     }}
                     className="px-4 py-2 rounded-lg font-medium transition-all duration-300 shadow bg-[var(--color-brand-dark)] text-white border border-transparent hover:bg-[var(--color-brand-red)] dark:bg-[var(--bg-surface-alt)] dark:text-[var(--text-primary)] dark:border-[var(--border-color)] dark:hover:bg-[var(--color-brand-yellow)] dark:hover:text-[var(--color-brand-dark)] dark:hover:border-transparent"
                 >
-                    + Agregar Restaurante
+                    <span className="inline-flex items-center gap-2">
+                        <LucideMotionIcon icon={Plus} className="!w-4 !h-4 md:!w-5 md:!h-5 text-white dark:text-[var(--text-primary)]" />
+                        Agregar Restaurante
+                    </span>
                 </button>
+            </div>
+
+            {/* BUSCADOR Y FILTROS */}
+            <div className="mb-6 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-4 shadow-sm">
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                    <div className="flex-1">
+                        <label className="block text-sm font-semibold text-[var(--text-primary)] mb-2">
+                            <span className="inline-flex items-center gap-2">
+                                <LucideMotionIcon icon={Search} />
+                                Buscar restaurantes
+                            </span>
+                        </label>
+                        <div className="relative">
+                            <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-[var(--text-muted)]">
+                                <LucideMotionIcon icon={Search} className="!w-4 !h-4 md:!w-5 md:!h-5 text-[var(--text-muted)] dark:text-[var(--text-muted)] hover:translate-y-0 hover:scale-100 group-hover:translate-y-0 group-hover:scale-100" />
+                            </span>
+                            <input
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                placeholder="Buscar por nombre, dirección, categoría o estado"
+                                className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-base)] pl-10 pr-4 py-2.5 text-sm text-[var(--text-primary)] outline-none transition focus:border-[var(--color-brand-dark)] placeholder:text-[var(--text-muted)]"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="w-full lg:w-64">
+                        <label className="block text-sm font-semibold text-[var(--text-primary)] mb-2">
+                            <span className="inline-flex items-center gap-2">
+                                <LucideMotionIcon icon={Filter} />
+                                Mostrar
+                            </span>
+                        </label>
+                        <select
+                            value={activeFilter}
+                            onChange={(e) => setActiveFilter(e.target.value)}
+                            className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-base)] px-4 py-2.5 text-sm text-[var(--text-primary)] outline-none transition focus:border-[var(--color-brand-dark)]"
+                        >
+                            <option value="active">Activos</option>
+                            <option value="inactive">Inactivos</option>
+                            <option value="all">Todos</option>
+                        </select>
+                    </div>
+
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setSearchTerm("");
+                            setActiveFilter("active");
+                        }}
+                        className="rounded-xl border border-[var(--border-color)] px-4 py-2.5 text-sm font-medium text-[var(--text-secondary)] transition hover:bg-[var(--bg-base)]"
+                    >
+                        <span className="inline-flex items-center gap-2">
+                            <LucideMotionIcon icon={BadgeCheck} className="!w-4 !h-4 md:!w-5 md:!h-5 text-[var(--text-secondary)] dark:text-[var(--text-secondary)]" />
+                            Limpiar
+                        </span>
+                    </button>
+                </div>
             </div>
 
             {/* TABLA */}
@@ -98,8 +212,8 @@ export const Restaurants = () => {
                                                     className="w-10 h-10 rounded-lg object-cover border border-[var(--border-color)] shrink-0"
                                                 />
                                             ) : (
-                                                <div className="w-10 h-10 rounded-lg bg-[var(--bg-surface-alt)] border border-[var(--border-color)] flex items-center justify-center text-lg shrink-0">
-                                                    🍽️
+                                                <div className="w-10 h-10 rounded-lg bg-[var(--bg-surface-alt)] border border-[var(--border-color)] flex items-center justify-center shrink-0 text-[var(--text-muted)]">
+                                                    <LucideMotionIcon icon={UtensilsCrossed} className="!w-4 !h-4 md:!w-5 md:!h-5 hover:translate-y-0 hover:scale-100 group-hover:translate-y-0 group-hover:scale-100 text-[var(--text-muted)] dark:text-[var(--text-muted)]" />
                                                 </div>
                                             )}
                                             <div>
@@ -107,7 +221,10 @@ export const Restaurants = () => {
                                                     {restaurant.name}
                                                 </p>
                                                 <p className="text-xs text-[var(--text-muted)] truncate max-w-[180px]">
-                                                    📍 {restaurant.address}
+                                                    <span className="inline-flex items-center gap-1">
+                                                        <LucideMotionIcon icon={MapPin} className="!w-3.5 !h-3.5 md:!w-4 md:!h-4 hover:translate-y-0 hover:scale-100 text-[var(--text-muted)] dark:text-[var(--text-muted)]" />
+                                                        {restaurant.address}
+                                                    </span>
                                                 </p>
                                             </div>
                                         </div>
@@ -122,7 +239,10 @@ export const Restaurants = () => {
 
                                     {/* Horario */}
                                     <td className="px-6 py-4 text-sm text-[var(--text-secondary)] whitespace-nowrap">
-                                        🕐 {restaurant.openingTime} – {restaurant.closingTime}
+                                        <span className="inline-flex items-center gap-1.5">
+                                            <LucideMotionIcon icon={Clock3} className="!w-4 !h-4 md:!w-5 md:!h-5 hover:translate-y-0 hover:scale-100 text-[var(--text-secondary)] dark:text-[var(--text-secondary)]" />
+                                            {restaurant.openingTime} – {restaurant.closingTime}
+                                        </span>
                                     </td>
 
                                     {/* Precio promedio */}
@@ -132,17 +252,27 @@ export const Restaurants = () => {
 
                                     {/* Capacidad */}
                                     <td className="px-6 py-4 text-sm text-[var(--text-secondary)] whitespace-nowrap">
-                                        👥 {restaurant.capacity} personas
+                                        <span className="inline-flex items-center gap-1.5">
+                                            <LucideMotionIcon icon={Users} className="!w-4 !h-4 md:!w-5 md:!h-5 hover:translate-y-0 hover:scale-100 text-[var(--text-secondary)] dark:text-[var(--text-secondary)]" />
+                                            {restaurant.capacity} personas
+                                        </span>
                                     </td>
 
                                     {/* Teléfono */}
                                     <td className="px-6 py-4 text-sm text-[var(--text-secondary)] whitespace-nowrap">
-                                        📞 {restaurant.phone}
+                                        <span className="inline-flex items-center gap-1.5">
+                                            <LucideMotionIcon icon={Phone} className="!w-4 !h-4 md:!w-5 md:!h-5 hover:translate-y-0 hover:scale-100 text-[var(--text-secondary)] dark:text-[var(--text-secondary)]" />
+                                            {restaurant.phone}
+                                        </span>
                                     </td>
 
                                     {/* Rating */}
                                     <td className="px-6 py-4 text-sm text-[var(--text-secondary)] whitespace-nowrap">
-                                        {"⭐".repeat(restaurant.rating)} {restaurant.rating}/5
+                                        <span className="inline-flex items-center gap-1">
+                                            <LucideMotionIcon icon={Star} className="!w-4 !h-4 md:!w-5 md:!h-5 text-yellow-500 dark:text-[#F1D302] hover:translate-y-0 hover:scale-100" />
+                                            {renderRating(restaurant.rating)}
+                                        </span>
+                                        <span className="ml-2 align-middle">{restaurant.rating}/5</span>
                                     </td>
 
                                     {/* Estado */}
@@ -173,20 +303,44 @@ export const Restaurants = () => {
                                                     setOpenModal(true);
                                                 }}
                                             >
-                                                ✏️ Editar
+                                                <span className="inline-flex items-center gap-2">
+                                                    <LucideMotionIcon icon={PencilLine} className="!w-4 !h-4 md:!w-5 md:!h-5 text-[var(--color-brand-dark)] dark:text-[#F1D302]" />
+                                                    Editar
+                                                </span>
                                             </button>
-                                            <button
-                                                className="text-[var(--color-brand-red)] hover:opacity-70 font-medium transition"
-                                                onClick={() =>
-                                                    openConfirm({
-                                                        title: "Eliminar Restaurante",
-                                                        message: `¿Estás seguro de eliminar "${restaurant.name}"?`,
-                                                        onConfirm: () => deleteRestaurant(restaurant._id),
-                                                    })
-                                                }
-                                            >
-                                                🗑️ Eliminar
-                                            </button>
+                                            {restaurant.isActive ? (
+                                                <button
+                                                    className="text-[var(--color-brand-red)] hover:opacity-70 font-medium transition"
+                                                    onClick={() =>
+                                                        openConfirm({
+                                                            title: "Cerrar Restaurante",
+                                                            message: `¿Estás seguro de cerrar "${restaurant.name}"?`,
+                                                            onConfirm: () => deactivateRestaurant(restaurant._id),
+                                                        })
+                                                    }
+                                                >
+                                                    <span className="inline-flex items-center gap-2">
+                                                        <LucideMotionIcon icon={Ban} className="!w-4 !h-4 md:!w-5 md:!h-5 text-[var(--color-brand-red)] dark:text-[#F1D302]" />
+                                                        Cerrar
+                                                    </span>
+                                                </button>
+                                            ) : (
+                                                <button
+                                                    className="text-green-700 hover:opacity-70 font-medium transition"
+                                                    onClick={() =>
+                                                        openConfirm({
+                                                            title: "Activar Restaurante",
+                                                            message: `¿Estás seguro de activar "${restaurant.name}"?`,
+                                                            onConfirm: () => activateRestaurant(restaurant._id),
+                                                        })
+                                                    }
+                                                >
+                                                    <span className="inline-flex items-center gap-2">
+                                                        <LucideMotionIcon icon={CircleCheckBig} className="!w-4 !h-4 md:!w-5 md:!h-5 text-green-700 dark:text-[#F1D302]" />
+                                                        Activar
+                                                    </span>
+                                                </button>
+                                            )}
                                         </div>
                                     </td>
                                 </tr>
@@ -197,7 +351,7 @@ export const Restaurants = () => {
                                     colSpan="10"
                                     className="text-center py-8 text-[var(--text-muted)]"
                                 >
-                                    No hay restaurantes registrados.
+                                    {emptyMessage}
                                 </td>
                             </tr>
                         )}

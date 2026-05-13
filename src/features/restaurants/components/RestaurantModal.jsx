@@ -3,6 +3,8 @@ import { useForm } from "react-hook-form";
 import { useSaveRestaurant } from "../hooks/UseSaveRestaurant.jsx";
 import { useRestaurantStore } from "../store/useRestaurantStore.js";
 import { Spinner } from "../../../shared/components/layout/Spinner.jsx";
+import { ImageOff, Info } from "lucide-react";
+import { LucideMotionIcon } from "../../../shared/components/ui/LucideMotionIcon.jsx";
 
 export const RestaurantModal = ({ isOpen, onClose, restaurant }) => {
     const {
@@ -18,6 +20,8 @@ export const RestaurantModal = ({ isOpen, onClose, restaurant }) => {
     const loading = useRestaurantStore((state) => state.loading);
 
     const photoFile = watch("photo");
+    const selectedStatus = watch("status");
+    const isInactiveStatus = selectedStatus === "Cerrado" || selectedStatus === "En Mantenimiento";
 
     useEffect(() => {
         if (isOpen) {
@@ -75,7 +79,7 @@ export const RestaurantModal = ({ isOpen, onClose, restaurant }) => {
     return (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50 px-3 sm:px-4">
             {/* CONTENEDOR */}
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg md:max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+            <div className="bg-[var(--bg-surface)] text-[var(--text-primary)] rounded-2xl shadow-2xl w-full max-w-lg md:max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
                 {/* HEADER */}
                 <div
                     className="p-4 sm:p-5 text-white sticky top-0 z-10"
@@ -99,7 +103,7 @@ export const RestaurantModal = ({ isOpen, onClose, restaurant }) => {
                 >
                     {/* PREVIEW */}
                     <div className="flex justify-center">
-                        <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-2xl bg-gray-100 border flex items-center justify-center overflow-hidden shadow-inner">
+                        <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-2xl bg-[var(--bg-base)] border flex items-center justify-center overflow-hidden shadow-inner">
                             {preview ? (
                                 <img
                                     src={preview}
@@ -107,9 +111,10 @@ export const RestaurantModal = ({ isOpen, onClose, restaurant }) => {
                                     alt="preview"
                                 />
                             ) : (
-                                <span className="text-gray-400 text-xs sm:text-sm">
-                                    Sin imagen
-                                </span>
+                                <div className="flex flex-col items-center gap-2 text-[var(--text-muted)]">
+                                    <LucideMotionIcon icon={ImageOff} className="!w-5 !h-5 md:!w-6 md:!h-6 hover:translate-y-0 hover:scale-100 text-[var(--text-muted)] dark:text-[var(--text-muted)]" />
+                                    <span className="text-xs sm:text-sm">Sin imagen</span>
+                                </div>
                             )}
                         </div>
                     </div>
@@ -119,12 +124,12 @@ export const RestaurantModal = ({ isOpen, onClose, restaurant }) => {
 
                         {/* Nombre */}
                         <div className="flex flex-col md:col-span-2">
-                            <label className="text-sm font-semibold text-gray-700 mb-1">
+                            <label className="text-sm font-semibold text-[var(--text-primary)] mb-1">
                                 Nombre del restaurante
                             </label>
                             <input
-                                className="w-full px-3 py-2 rounded-lg border-2 border-gray-300 bg-gray-50 shadow-sm 
-                                           focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition"
+                                className="w-full px-3 py-2 rounded-lg border-2 border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] shadow-sm 
+                                           focus:outline-none focus:border-[var(--color-brand-dark)] focus:ring-2 focus:ring-[var(--color-brand-dark)] transition"
                                 placeholder="Ej. La Buena Mesa"
                                 {...register("name", {
                                     required: "El nombre es obligatorio",
@@ -145,15 +150,23 @@ export const RestaurantModal = ({ isOpen, onClose, restaurant }) => {
 
                         {/* Dirección */}
                         <div className="flex flex-col md:col-span-2">
-                            <label className="text-sm font-semibold text-gray-700 mb-1">
+                            <label className="text-sm font-semibold text-[var(--text-primary)] mb-1">
                                 Dirección
                             </label>
                             <input
-                                className="w-full px-3 py-2 rounded-lg border-2 border-gray-300 bg-gray-50 shadow-sm 
-                                           focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition"
+                                className="w-full px-3 py-2 rounded-lg border-2 border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] shadow-sm 
+                                           focus:outline-none focus:border-[var(--color-brand-dark)] focus:ring-2 focus:ring-[var(--color-brand-dark)] transition"
                                 placeholder="Ej. 5a Avenida, Zona 1"
                                 {...register("address", {
                                     required: "La dirección es obligatoria",
+                                    minLength: {
+                                        value: 5,
+                                        message: "La dirección debe tener entre 5 y 100 caracteres"
+                                    },
+                                    maxLength: {
+                                        value: 100,
+                                        message: "La dirección debe tener entre 5 y 100 caracteres"
+                                    }
                                 })}
                             />
                             {errors.address && (
@@ -163,12 +176,12 @@ export const RestaurantModal = ({ isOpen, onClose, restaurant }) => {
 
                         {/* Categoría */}
                         <div className="flex flex-col">
-                            <label className="text-sm font-semibold text-gray-700 mb-1">
+                            <label className="text-sm font-semibold text-[var(--text-primary)] mb-1">
                                 Categoría
                             </label>
                             <select
-                                className="w-full px-3 py-2 rounded-lg border-2 border-gray-300 bg-gray-50 shadow-sm 
-                                           focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition"
+                                className="w-full px-3 py-2 rounded-lg border-2 border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] shadow-sm 
+                                           focus:outline-none focus:border-[var(--color-brand-dark)] focus:ring-2 focus:ring-[var(--color-brand-dark)] transition"
                                 {...register("categories", {
                                     required: "La categoría es obligatoria",
                                 })}
@@ -184,12 +197,12 @@ export const RestaurantModal = ({ isOpen, onClose, restaurant }) => {
 
                         {/* Estado */}
                         <div className="flex flex-col">
-                            <label className="text-sm font-semibold text-gray-700 mb-1">
+                            <label className="text-sm font-semibold text-[var(--text-primary)] mb-1">
                                 Estado
                             </label>
                             <select
-                                className="w-full px-3 py-2 rounded-lg border-2 border-gray-300 bg-gray-50 shadow-sm 
-                                           focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition"
+                                className="w-full px-3 py-2 rounded-lg border-2 border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] shadow-sm 
+                                           focus:outline-none focus:border-[var(--color-brand-dark)] focus:ring-2 focus:ring-[var(--color-brand-dark)] transition"
                                 {...register("status", {
                                     required: "El estado es obligatorio",
                                 })}
@@ -202,17 +215,31 @@ export const RestaurantModal = ({ isOpen, onClose, restaurant }) => {
                             {errors.status && (
                                 <p className="text-red-600 text-xs mt-1">{errors.status.message}</p>
                             )}
+                            <div className="mt-2 rounded-lg border border-dashed border-[var(--border-color)] bg-[var(--bg-base)] px-3 py-2 text-xs text-[var(--text-muted)]">
+                                <span className={`inline-flex items-center gap-2 rounded-full px-2.5 py-1 font-semibold ${isInactiveStatus ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"}`}>
+                                    <LucideMotionIcon
+                                        icon={Info}
+                                        className={isInactiveStatus ? "!w-4 !h-4 md:!w-5 md:!h-5 text-red-700 dark:text-[#F1D302]" : "!w-4 !h-4 md:!w-5 md:!h-5 text-green-700 dark:text-[#F1D302]"}
+                                    />
+                                    {isInactiveStatus ? "Inactivo" : "Activo"}
+                                </span>
+                                <p className="mt-2">
+                                    {isInactiveStatus
+                                        ? "Al guardar, el restaurante quedará inactivo y se mostrará como cerrado o en mantenimiento."
+                                        : "Al guardar, el restaurante permanecerá activo."}
+                                </p>
+                            </div>
                         </div>
 
                         {/* Hora de apertura */}
                         <div className="flex flex-col">
-                            <label className="text-sm font-semibold text-gray-700 mb-1">
+                            <label className="text-sm font-semibold text-[var(--text-primary)] mb-1">
                                 Hora de apertura
                             </label>
                             <input
                                 type="time"
-                                className="w-full px-3 py-2 rounded-lg border-2 border-gray-300 bg-gray-50 shadow-sm 
-                                           focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition"
+                                className="w-full px-3 py-2 rounded-lg border-2 border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] shadow-sm 
+                                           focus:outline-none focus:border-[var(--color-brand-dark)] focus:ring-2 focus:ring-[var(--color-brand-dark)] transition"
                                 {...register("openingTime", {
                                     required: "La hora de apertura es obligatoria",
                                 })}
@@ -224,13 +251,13 @@ export const RestaurantModal = ({ isOpen, onClose, restaurant }) => {
 
                         {/* Hora de cierre */}
                         <div className="flex flex-col">
-                            <label className="text-sm font-semibold text-gray-700 mb-1">
+                            <label className="text-sm font-semibold text-[var(--text-primary)] mb-1">
                                 Hora de cierre
                             </label>
                             <input
                                 type="time"
-                                className="w-full px-3 py-2 rounded-lg border-2 border-gray-300 bg-gray-50 shadow-sm 
-                                           focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition"
+                                className="w-full px-3 py-2 rounded-lg border-2 border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] shadow-sm 
+                                           focus:outline-none focus:border-[var(--color-brand-dark)] focus:ring-2 focus:ring-[var(--color-brand-dark)] transition"
                                 {...register("closingTime", {
                                     required: "La hora de cierre es obligatoria",
                                 })}
@@ -242,13 +269,13 @@ export const RestaurantModal = ({ isOpen, onClose, restaurant }) => {
 
                         {/* Precio promedio */}
                         <div className="flex flex-col">
-                            <label className="text-sm font-semibold text-gray-700 mb-1">
+                            <label className="text-sm font-semibold text-[var(--text-primary)] mb-1">
                                 Precio promedio (Q)
                             </label>
                             <input
                                 type="number"
-                                className="w-full px-3 py-2 rounded-lg border-2 border-gray-300 bg-gray-50 shadow-sm 
-                                           focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition"
+                                className="w-full px-3 py-2 rounded-lg border-2 border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] shadow-sm 
+                                           focus:outline-none focus:border-[var(--color-brand-dark)] focus:ring-2 focus:ring-[var(--color-brand-dark)] transition"
                                 placeholder="Ej. 150"
                                 {...register("averagePrice", {
                                     required: "El precio promedio es obligatorio",
@@ -262,13 +289,13 @@ export const RestaurantModal = ({ isOpen, onClose, restaurant }) => {
 
                         {/* Teléfono */}
                         <div className="flex flex-col">
-                            <label className="text-sm font-semibold text-gray-700 mb-1">
+                            <label className="text-sm font-semibold text-[var(--text-primary)] mb-1">
                                 Teléfono
                             </label>
                             <input
                                 type="tel"
-                                className="w-full px-3 py-2 rounded-lg border-2 border-gray-300 bg-gray-50 shadow-sm 
-                                           focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition"
+                                className="w-full px-3 py-2 rounded-lg border-2 border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] shadow-sm 
+                                           focus:outline-none focus:border-[var(--color-brand-dark)] focus:ring-2 focus:ring-[var(--color-brand-dark)] transition"
                                 placeholder="Ej. 22345678"
                                 {...register("phone", {
                                     required: "El teléfono es obligatorio",
@@ -285,13 +312,13 @@ export const RestaurantModal = ({ isOpen, onClose, restaurant }) => {
 
                         {/* Capacidad */}
                         <div className="flex flex-col">
-                            <label className="text-sm font-semibold text-gray-700 mb-1">
+                            <label className="text-sm font-semibold text-[var(--text-primary)] mb-1">
                                 Capacidad (personas)
                             </label>
                             <input
                                 type="number"
-                                className="w-full px-3 py-2 rounded-lg border-2 border-gray-300 bg-gray-50 shadow-sm 
-                                           focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition"
+                                className="w-full px-3 py-2 rounded-lg border-2 border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] shadow-sm 
+                                           focus:outline-none focus:border-[var(--color-brand-dark)] focus:ring-2 focus:ring-[var(--color-brand-dark)] transition"
                                 placeholder="Ej. 50"
                                 {...register("capacity", {
                                     required: "La capacidad es obligatoria",
@@ -305,13 +332,13 @@ export const RestaurantModal = ({ isOpen, onClose, restaurant }) => {
 
                         {/* Rating */}
                         <div className="flex flex-col">
-                            <label className="text-sm font-semibold text-gray-700 mb-1">
+                            <label className="text-sm font-semibold text-[var(--text-primary)] mb-1">
                                 Rating (1-5)
                             </label>
                             <input
                                 type="number"
-                                className="w-full px-3 py-2 rounded-lg border-2 border-gray-300 bg-gray-50 shadow-sm 
-                                           focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition"
+                                className="w-full px-3 py-2 rounded-lg border-2 border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] shadow-sm 
+                                           focus:outline-none focus:border-[var(--color-brand-dark)] focus:ring-2 focus:ring-[var(--color-brand-dark)] transition"
                                 placeholder="Ej. 4"
                                 {...register("rating", {
                                     required: "El rating es obligatorio",
@@ -326,12 +353,12 @@ export const RestaurantModal = ({ isOpen, onClose, restaurant }) => {
 
                         {/* Descripción */}
                         <div className="flex flex-col md:col-span-2">
-                            <label className="text-sm font-semibold text-gray-700 mb-1">
+                            <label className="text-sm font-semibold text-[var(--text-primary)] mb-1">
                                 Descripción
                             </label>
                             <textarea
-                                className="w-full px-3 py-2 rounded-lg border-2 border-gray-300 bg-gray-50 shadow-sm 
-                                           focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition"
+                                className="w-full px-3 py-2 rounded-lg border-2 border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] shadow-sm 
+                                           focus:outline-none focus:border-[var(--color-brand-dark)] focus:ring-2 focus:ring-[var(--color-brand-dark)] transition"
                                 placeholder="Detalles del restaurante..."
                                 rows={3}
                                 {...register("description", {
@@ -348,13 +375,13 @@ export const RestaurantModal = ({ isOpen, onClose, restaurant }) => {
 
                         {/* Imagen */}
                         <div className="flex flex-col md:col-span-2">
-                            <label className="text-sm font-semibold text-gray-700 mb-1">
+                            <label className="text-sm font-semibold text-[var(--text-primary)] mb-1">
                                 Imagen del restaurante
                             </label>
                             <input
                                 type="file"
-                                className="w-full px-3 py-2 rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 
-                                           hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200 transition cursor-pointer"
+                                className="w-full px-3 py-2 rounded-lg border-2 border-dashed border-[var(--border-color)] bg-[var(--bg-base)] 
+                                           hover:border-[var(--color-brand-dark)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-dark)] transition cursor-pointer text-[var(--text-primary)]"
                                 accept="image/*"
                                 {...register("photo")}
                             />
