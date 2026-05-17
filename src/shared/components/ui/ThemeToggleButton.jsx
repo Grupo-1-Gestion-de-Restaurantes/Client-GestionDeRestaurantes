@@ -8,7 +8,7 @@ export const ThemeToggleButton = () => {
     return (
         <button
             onClick={toggle}
-            className="liquid-glass group relative px-5 py-2.5 rounded-full flex items-center gap-3 overflow-hidden"
+            className="liquid-glass group relative px-5 py-2.5 rounded-full flex items-center gap-3 overflow-hidden cursor-pointer transition-colors duration-300"
         >
             <div className="relative z-10 flex items-center justify-center">
                 {isDark ? (
