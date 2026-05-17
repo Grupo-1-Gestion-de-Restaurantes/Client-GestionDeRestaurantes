@@ -22,6 +22,15 @@ export const getMyInvoices = async () => {
     return axiosAdmin.get("/invoices/myInvoices");
 }
 
+// Comentarios
+export const getComments = async () => {
+    return axiosAdmin.get("/comments/");
+}
+
+export const deleteComment = async (id) => {
+    return await axiosAdmin.put(`/comments/desactivate/${id}`);
+}
+
 //Restaurantes  
 export const getRestaurants = async () => {
     return axiosAdmin.get("/restaurants/get");
