@@ -101,25 +101,20 @@ export const getDishes = async () => {
     return axiosAdmin.get("/dishes/");
 }
 
-export const createDish = async (data) => {
-    return await axiosAdmin.post("/dishes/", data, {
+export const createDish = async (formData) => {
+    return await axiosAdmin.post("/dishes/", formData, {
         headers: { "Content-Type": "multipart/form-data" }
     });
 }
 
-export const updateDish = async (id, data) => {
-    return await axiosAdmin.put(`/dishes/${id}`, data, {
+export const updateDish = async (id, formData) => {
+    return await axiosAdmin.put(`/dishes/${id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" }
     });
 }
 
 export const deleteDish = async (id) => {
-    console.log("🛠️ [API] Intentando eliminar platillo con ID:", id);
-
-    const response = await axiosAdmin.patch(`/dishes/${id}`, { isActive: false });
-
-    console.log("✅ [API] Respuesta del servidor al eliminar:", response.data);
-    return response;
+    return await axiosAdmin.put(`/dishes/${id}`);
 }
 // Promociones
 export const getPromotions = async () => {
