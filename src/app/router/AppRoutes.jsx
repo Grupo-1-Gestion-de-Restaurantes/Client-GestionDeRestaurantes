@@ -18,7 +18,6 @@ import { Invoices } from "../../features/invoices/components/Invoices.jsx"
 import { Dishes } from "../../features/dishes/components/Dishes.jsx"
 import { Promotions } from "../../features/promotions/components/Promotions.jsx"
 import { Restaurants } from "../../features/restaurants/components/Restaurants.jsx"
-import { Comments } from "../../features/comments/components/Comments.jsx"
 import { Clients } from "../../features/clients/components/Clients.jsx"
 
 export const AppRoutes = () => {
@@ -49,7 +48,6 @@ export const AppRoutes = () => {
                 <Route path="clients" element={<Clients />} />
                 <Route path="promotions" element={<Promotions />} />
                 <Route path="restaurants" element={<Restaurants />} />
-                <Route path="comments" element={<Comments />} />
             </Route>
         </Routes>
     )
