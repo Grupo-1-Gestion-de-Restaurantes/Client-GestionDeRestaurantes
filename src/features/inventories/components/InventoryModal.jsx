@@ -1,10 +1,10 @@
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { useSaveInventory } from "../hooks/useSaveInventory";
+import { useSaveInventory } from "../hooks/UseSaveInventory";
 import { useInventoryStore } from "../store/useInventoryStore";
-import { Spinner } from "../../../shared/components/layout/Spinner.jsx";
+import { useRestaurantStore } from "../../restaurants/store/useRestaurantStore.js";
 
-export const InventoryModal = ({ isOpen, onClose, inventory }) => {
+export const InventoryModal = ({ isOpen, onClose, item }) => {
     const {
         register,
         handleSubmit,
@@ -14,34 +14,39 @@ export const InventoryModal = ({ isOpen, onClose, inventory }) => {
 
     const { saveInventory } = useSaveInventory();
     const loading = useInventoryStore((state) => state.loading);
+    const { restaurants, getRestaurants } = useRestaurantStore();
+
+    useEffect(() => {
+        if (isOpen && getRestaurants) {
+            getRestaurants();
+        }
+    }, [isOpen, getRestaurants]);
 
     useEffect(() => {
         if (isOpen) {
-            if (inventory) {
+            if (item) {
                 reset({
-                    name: inventory.name,
-                    quantity: inventory.quantity,
-                    unit: inventory.unit,
-                    minStock: inventory.minStock,
-                    restaurant: inventory.restaurant?._id || inventory.restaurant,
-                    isActive: inventory.isActive,
+                    name: item.name || "",
+                    quantity: item.quantity ?? 0,
+                    unit: item.unit || "UNIDAD",
+                    minStock: item.minStock ?? 5,
+                    restaurant: item.restaurant?._id || item.restaurant || "",
                 });
             } else {
                 reset({
                     name: "",
-                    quantity: 0,
+                    quantity: "",
                     unit: "UNIDAD",
                     minStock: 5,
                     restaurant: "",
-                    isActive: true,
                 });
             }
         }
-    }, [isOpen, inventory, reset]);
+    }, [isOpen, item, reset]);
 
     const onSubmit = async (data) => {
         try {
-            await saveInventory(data, inventory?._id);
+            await saveInventory(data, item?._id);
             reset();
             onClose();
         } catch (error) {
@@ -53,98 +58,104 @@ export const InventoryModal = ({ isOpen, onClose, inventory }) => {
 
     return (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50 px-3 sm:px-4">
-            <div className="bg-[var(--bg-surface)] rounded-2xl shadow-2xl w-full max-w-lg md:max-w-2xl max-h-[90vh] flex flex-col overflow-hidden border border-[var(--border-color)]">
-
+            <div className="bg-[var(--bg-surface)] rounded-2xl shadow-2xl w-full max-w-lg border border-[var(--border-color)] transition-colors duration-300">
                 {/* HEADER */}
-                <div className="p-4 sm:p-5 bg-[var(--bg-surface-alt)] border-b border-[var(--border-color)]">
-                    <h2 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)]">
-                        {inventory ? "Editar Inventario" : "Nuevo Item"}
+                <div className="p-4 sm:p-5 bg-[var(--bg-surface-alt)] text-[var(--text-primary)] border-b border-[var(--border-color)] rounded-t-2xl transition-colors duration-300">
+                    <h2 className="text-xl sm:text-2xl font-bold">
+                        {item ? "Editar Insumo" : "Nuevo Insumo de Almacén"}
                     </h2>
-                    <p className="text-xs sm:text-sm text-[var(--text-secondary)]">
-                        Gestiona los productos del inventario
+                    <p className="text-xs sm:text-sm opacity-80">
+                        Administra el abastecimiento y stock crítico de materias primas
                     </p>
                 </div>
 
                 {/* FORM */}
-                <form onSubmit={handleSubmit(onSubmit)} className="p-4 sm:p-6 space-y-5 overflow-y-auto">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <form onSubmit={handleSubmit(onSubmit)} className="p-4 sm:p-6 space-y-4">
+                    {/* Nombre del Insumo */}
+                    <div className="flex flex-col">
+                        <label className="text-sm font-semibold text-[var(--text-secondary)] mb-1">Nombre de la Materia Prima</label>
+                        <input
+                            className="w-full px-3 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--ring-color)] transition"
+                            placeholder="Ej. Tomates frescos, Queso Mozzarella"
+                            {...register("name", { required: "El nombre es obligatorio", maxLength: 100 })}
+                        />
+                        {errors.name && <p className="text-[var(--color-brand-red)] text-xs mt-1">{errors.name.message}</p>}
+                    </div>
 
-                        {/* NAME */}
-                        <div className="flex flex-col">
-                            <label className="label">Nombre</label>
-                            <input
-                                className="input"
-                                placeholder="Ej. Tomates"
-                                {...register("name", { required: "El nombre es obligatorio" })}
-                            />
-                            {errors.name && <p className="error">{errors.name.message}</p>}
-                        </div>
+                    {/* Restaurante Desplegable */}
+                    <div className="flex flex-col">
+                        <label className="text-sm font-semibold text-[var(--text-secondary)] mb-1">Sucursal / Restaurante Destino</label>
+                        <select
+                            className="w-full px-3 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--ring-color)] transition"
+                            {...register("restaurant", { required: "El restaurante es obligatorio" })}
+                        >
+                            <option value="">Selecciona una sucursal...</option>
+                            {restaurants?.map((r) => (
+                                <option key={r._id} value={r._id}>
+                                    {r.name}
+                                </option>
+                            ))}
+                        </select>
+                        {errors.restaurant && <p className="text-[var(--color-brand-red)] text-xs mt-1">{errors.restaurant.message}</p>}
+                    </div>
 
-                        {/* RESTAURANT */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        {/* Cantidad */}
                         <div className="flex flex-col">
-                            <label className="label">Restaurante</label>
-                            <input
-                                className="input"
-                                placeholder="ID Restaurante"
-                                {...register("restaurant", { required: "Requerido" })}
-                            />
-                        </div>
-
-                        {/* QUANTITY */}
-                        <div className="flex flex-col">
-                            <label className="label">Cantidad</label>
+                            <label className="text-sm font-semibold text-[var(--text-secondary)] mb-1">Stock Actual</label>
                             <input
                                 type="number"
-                                className="input"
-                                {...register("quantity", {
-                                    required: "Requerido",
-                                    min: { value: 0, message: "No negativo" }
-                                })}
+                                step="any"
+                                className="w-full px-3 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--ring-color)] transition"
+                                placeholder="0"
+                                {...register("quantity", { required: "Requerido", min: { value: 0, message: "Mínimo 0" } })}
                             />
+                            {errors.quantity && <p className="text-[var(--color-brand-red)] text-xs mt-1">{errors.quantity.message}</p>}
                         </div>
 
-                        {/* UNIT */}
+                        {/* Unidad Select (Enum de tu Mongoose) */}
                         <div className="flex flex-col">
-                            <label className="label">Unidad</label>
-                            <select className="input" {...register("unit")}>
-                                <option value="KG">KG</option>
-                                <option value="LITRO">Litro</option>
-                                <option value="UNIDAD">Unidad</option>
-                                <option value="GRAMO">Gramo</option>
-                                <option value="MILILITRO">Mililitro</option>
+                            <label className="text-sm font-semibold text-[var(--text-secondary)] mb-1">Unidad Medida</label>
+                            <select
+                                className="w-full px-3 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--ring-color)] transition"
+                                {...register("unit", { required: "Obligatorio" })}
+                            >
+                                <option value="UNIDAD">Unidades</option>
+                                <option value="KG">Kilogramos (Kg)</option>
+                                <option value="GRAMO">Gramos (g)</option>
+                                <option value="LITRO">Litros (L)</option>
+                                <option value="MILILITRO">Mililitros (mL)</option>
                             </select>
                         </div>
 
-                        {/* MIN STOCK */}
+                        {/* Stock Mínimo (Alerta) */}
                         <div className="flex flex-col">
-                            <label className="label">Stock mínimo</label>
+                            <label className="text-sm font-semibold text-[var(--text-secondary)] mb-1">Stock Mínimo</label>
                             <input
                                 type="number"
-                                className="input"
-                                {...register("minStock", {
-                                    min: { value: 1, message: "Mínimo 1" }
-                                })}
+                                className="w-full px-3 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--ring-color)] transition"
+                                {...register("minStock", { required: "Requerido", min: { value: 1, message: "Mínimo 1" } })}
                             />
+                            {errors.minStock && <p className="text-[var(--color-brand-red)] text-xs mt-1">{errors.minStock.message}</p>}
                         </div>
-
-                        {/* ACTIVE */}
-                        <div className="flex items-center gap-3">
-                            <input type="checkbox" {...register("isActive")} />
-                            <label className="text-sm text-[var(--text-secondary)]">
-                                Activo
-                            </label>
-                        </div>
-
                     </div>
 
                     {/* BOTONES */}
                     <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4 border-t border-[var(--border-color)]">
-                        <button type="button" onClick={onClose} className="btn-secondary">
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="w-full sm:w-auto px-4 py-2 rounded-lg bg-[var(--bg-surface-alt)] text-[var(--text-primary)] hover:opacity-80 transition"
+                        >
                             Cancelar
                         </button>
 
-                        <button type="submit" className="btn-primary">
-                            {loading ? <Spinner /> : inventory ? "Guardar Cambios" : "Crear Item"}
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="w-full sm:w-auto px-5 py-2 rounded-lg font-medium transition-all duration-300 shadow bg-[var(--color-brand-dark)] text-white border border-transparent hover:bg-[var(--color-brand-red)] dark:bg-[var(--bg-surface-alt)] dark:text-[var(--text-primary)] dark:border-[var(--border-color)] dark:hover:bg-[var(--color-brand-yellow)] dark:hover:text-[var(--color-brand-dark)] dark:hover:border-transparent disabled:opacity-60 disabled:cursor-not-allowed"
+                        >
+                            {loading ? "Guardando..." : item ? "Guardar Cambios" : "Crear Insumo"}
                         </button>
                     </div>
                 </form>

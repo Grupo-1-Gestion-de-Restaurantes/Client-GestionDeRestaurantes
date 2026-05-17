@@ -141,7 +141,7 @@ export const Dishes = () => {
                                     {/* Restaurante */}
                                     <td className="px-6 py-4 text-sm whitespace-nowrap">
                                         <span className="bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 px-2.5 py-1 rounded-md text-xs font-medium border border-blue-100 dark:border-blue-800/30">
-                                            🏪 {getRestaurantName(dishItem.restaurant)}
+                                            {getRestaurantName(dishItem.restaurant)}
                                         </span>
                                     </td>
 
@@ -160,7 +160,7 @@ export const Dishes = () => {
                                     {/* Acciones */}
                                     <td className="px-6 py-4 flex gap-3 justify-center items-center h-full pt-7 whitespace-nowrap">
                                         <button
-                                            className="text-[var(--color-brand-dark)] hover:text-[var(--color-brand-yellow)] font-medium text-sm transition"
+                                            className="hover:text-[var(--color-brand-yellow)] font-medium text-sm transition cursor-pointer"
                                             onClick={() => {
                                                 setSelectedDish(dishItem);
                                                 setOpenModal(true);
@@ -169,7 +169,7 @@ export const Dishes = () => {
                                             ✏️ Editar
                                         </button>
                                         <button
-                                            className="text-[var(--color-brand-red)] hover:text-[var(--color-brand-red-dark)] font-medium text-sm transition"
+                                            className="text-[var(--color-brand-red)] hover:text-[var(--color-brand-red-dark)] font-medium text-sm transition cursor-pointer"
                                             onClick={() =>
                                                 openConfirm({
                                                     title: "Eliminar Platillo",

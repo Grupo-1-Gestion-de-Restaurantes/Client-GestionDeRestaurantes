@@ -1,10 +1,10 @@
 import { create } from "zustand";
 import {
-    getInventories,
-    createInventory,
-    updateInventory,
-    deleteInventory
-} from "../../../shared/api";
+    getInventories as getInventoriesRequest,
+    createInventory as createInventoryRequest,
+    updateInventory as updateInventoryRequest,
+    deleteInventory as deleteInventoryRequest
+} from "../../../shared/api/";
 
 export const useInventoryStore = create((set, get) => ({
     inventories: [],
@@ -12,36 +12,76 @@ export const useInventoryStore = create((set, get) => ({
     error: null,
 
     getInventories: async () => {
-        set({ loading: true });
-        const res = await getInventories();
-        set({
-            inventories: res.data.data || res.data,
-            loading: false
-        });
+        try {
+            set({ loading: true, error: null });
+            const response = await getInventoriesRequest();
+
+            set({
+                inventories: response.data.data || response.data,
+                loading: false
+            });
+        } catch (error) {
+            set({
+                error: error.response?.data?.message || "Error al obtener el inventario",
+                loading: false
+            });
+        }
     },
 
     createInventory: async (data) => {
-        const res = await createInventory(data);
-        set({
-            inventories: [res.data.data || res.data, ...get().inventories]
-        });
+        try {
+            set({ loading: true, error: null });
+            const response = await createInventoryRequest(data);
+
+            set({
+                inventories: [response.data.data || response.data, ...get().inventories],
+                loading: false
+            });
+        } catch (error) {
+            set({
+                loading: false,
+                error: error.response?.data?.message || "Error al crear insumo."
+            });
+            throw error;
+        }
     },
 
     updateInventory: async (id, data) => {
-        const res = await updateInventory(id, data);
-        const updated = res.data.data || res.data;
+        try {
+            set({ loading: true, error: null });
+            const response = await updateInventoryRequest(id, data);
+            const updated = response.data.data || response.data;
 
-        set({
-            inventories: get().inventories.map(i =>
-                i._id === id ? updated : i
-            )
-        });
+            set({
+                inventories: get().inventories.map((i) =>
+                    i._id === id ? updated : i
+                ),
+                loading: false
+            });
+        } catch (error) {
+            set({
+                loading: false,
+                error: error.response?.data?.message || "Error al actualizar el insumo."
+            });
+            throw error;
+        }
     },
 
     deleteInventory: async (id) => {
-        await deleteInventory(id);
-        set({
-            inventories: get().inventories.filter(i => i._id !== id)
-        });
+        try {
+            set({ loading: true, error: null });
+            await deleteInventoryRequest(id);
+
+            set({
+                inventories: get().inventories.filter(i => i._id !== id),
+                loading: false
+            });
+        } catch (error) {
+            set({
+                loading: false,
+                error: error.response?.data?.message || "Error al eliminar el inventario."
+            });
+            throw error;
+        }
     }
 }));
