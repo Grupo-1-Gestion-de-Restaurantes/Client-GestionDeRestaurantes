@@ -40,7 +40,7 @@ export const useInventoryStore = create((set, get) => ({
         } catch (error) {
             set({
                 loading: false,
-                error: error.response?.data?.message || "Error al crear insumo."
+                error: error.response?.data?.message || "Error al crear el inventario."
             });
             throw error;
         }
@@ -61,7 +61,7 @@ export const useInventoryStore = create((set, get) => ({
         } catch (error) {
             set({
                 loading: false,
-                error: error.response?.data?.message || "Error al actualizar el insumo."
+                error: error.response?.data?.message || "Error al actualizar el ingrediente."
             });
             throw error;
         }

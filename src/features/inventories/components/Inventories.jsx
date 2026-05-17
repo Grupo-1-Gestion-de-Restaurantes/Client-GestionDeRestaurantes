@@ -65,7 +65,7 @@ export const Inventories = () => {
                 <table className="w-full text-left border-collapse">
                     <thead className="bg-[var(--bg-surface-alt)] text-[var(--text-secondary)] text-sm border-b border-[var(--border-color)]">
                         <tr>
-                            <th className="px-6 py-4 font-semibold">Nombre del Insumo</th>
+                            <th className="px-6 py-4 font-semibold">Nombre del Ingrediente</th>
                             <th className="px-6 py-4 font-semibold">Sucursal / Restaurante</th>
                             <th className="px-6 py-4 font-semibold">Stock Actual</th>
                             <th className="px-6 py-4 font-semibold">Estado de Alerta</th>
@@ -116,8 +116,8 @@ export const Inventories = () => {
                                                 className="text-[var(--color-brand-red)] hover:text-[var(--color-brand-red-dark)] font-medium transition cursor-pointer"
                                                 onClick={() =>
                                                     openConfirm({
-                                                        title: "Eliminar Insumo",
-                                                        message: `¿Estás seguro de eliminar el insumo "${item.name}" del inventario?`,
+                                                        title: "Eliminar Ingrediente",
+                                                        message: `¿Estás seguro de eliminar el ingrediente "${item.name}" del inventario?`,
                                                         onConfirm: () => deleteInventory(item._id)
                                                     })
                                                 }
@@ -131,7 +131,7 @@ export const Inventories = () => {
                         ) : (
                             <tr>
                                 <td colSpan="5" className="text-center py-8 text-[var(--text-muted)]">
-                                    No hay insumos registrados en el almacén.
+                                    No hay ingredientes registrados en el almacén.
                                 </td>
                             </tr>
                         )}

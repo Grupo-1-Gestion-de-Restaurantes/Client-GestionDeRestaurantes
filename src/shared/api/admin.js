@@ -125,7 +125,7 @@ export const updateDish = async (id, formData) => {
 }
 
 export const deleteDish = async (id) => {
-    return await axiosAdmin.put(`/dishes/${id}`);
+    return await axiosAdmin.put(`/dishes/${id}`, { isActive: false });
 }
 // Promociones
 export const getPromotions = async () => {

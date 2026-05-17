@@ -62,7 +62,7 @@ export const InventoryModal = ({ isOpen, onClose, item }) => {
                 {/* HEADER */}
                 <div className="p-4 sm:p-5 bg-[var(--bg-surface-alt)] text-[var(--text-primary)] border-b border-[var(--border-color)] rounded-t-2xl transition-colors duration-300">
                     <h2 className="text-xl sm:text-2xl font-bold">
-                        {item ? "Editar Insumo" : "Nuevo Insumo de Almacén"}
+                        {item ? "Editar Ingrediente" : "Nuevo Ingrediente de Almacén"}
                     </h2>
                     <p className="text-xs sm:text-sm opacity-80">
                         Administra el abastecimiento y stock crítico de materias primas
@@ -71,7 +71,7 @@ export const InventoryModal = ({ isOpen, onClose, item }) => {
 
                 {/* FORM */}
                 <form onSubmit={handleSubmit(onSubmit)} className="p-4 sm:p-6 space-y-4">
-                    {/* Nombre del Insumo */}
+                    {/* Nombre del Ingrediente */}
                     <div className="flex flex-col">
                         <label className="text-sm font-semibold text-[var(--text-secondary)] mb-1">Nombre de la Materia Prima</label>
                         <input
@@ -155,7 +155,7 @@ export const InventoryModal = ({ isOpen, onClose, item }) => {
                             disabled={loading}
                             className="w-full sm:w-auto px-5 py-2 rounded-lg font-medium transition-all duration-300 shadow bg-[var(--color-brand-dark)] text-white border border-transparent hover:bg-[var(--color-brand-red)] dark:bg-[var(--bg-surface-alt)] dark:text-[var(--text-primary)] dark:border-[var(--border-color)] dark:hover:bg-[var(--color-brand-yellow)] dark:hover:text-[var(--color-brand-dark)] dark:hover:border-transparent disabled:opacity-60 disabled:cursor-not-allowed"
                         >
-                            {loading ? "Guardando..." : item ? "Guardar Cambios" : "Crear Insumo"}
+                            {loading ? "Guardando..." : item ? "Guardar Cambios" : "Crear Ingrediente"}
                         </button>
                     </div>
                 </form>

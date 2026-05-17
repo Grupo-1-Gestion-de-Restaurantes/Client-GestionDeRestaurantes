@@ -17,11 +17,7 @@ export const useSaveDish = () => {
         }
 
         if (data.ingredients && data.ingredients.length > 0) {
-            const formattedIngredients = data.ingredients.map(ing => ({
-                inventoryItem: ing.inventoryItem,
-                quantityUsed: Number(ing.quantityUsed)
-            }));
-            formData.append("ingredients", JSON.stringify(formattedIngredients));
+            formData.append("ingredients", JSON.stringify(data.ingredients));
         } else {
             formData.append("ingredients", JSON.stringify([]));
         }
