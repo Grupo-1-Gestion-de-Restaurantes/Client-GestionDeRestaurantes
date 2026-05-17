@@ -1,5 +1,6 @@
 import { useThemeStore } from '../../store/useThemeStore';
 import { Sun, MoonStar } from 'lucide-react';
+import { LucideMotionIcon } from './LucideMotionIcon.jsx';
 
 
 export const ThemeToggleButton = () => {
@@ -12,17 +13,9 @@ export const ThemeToggleButton = () => {
         >
             <div className="relative z-10 flex items-center justify-center">
                 {isDark ? (
-                    <Sun
-                        size={20}
-                        strokeWidth={1.75}
-                        className="text-brand-yellow animate-fadeIn transition-transform group-hover:rotate-45"
-                    />
+                    <LucideMotionIcon icon={Sun} className="animate-fadeIn" />
                 ) : (
-                    <MoonStar
-                        size={20}
-                        strokeWidth={1.75}
-                        className="text-brand-dark-40 animate-fadeIn transition-transform group-hover:-rotate-12"
-                    />
+                    <LucideMotionIcon icon={MoonStar} className="animate-fadeIn" />
                 )}
             </div>
 

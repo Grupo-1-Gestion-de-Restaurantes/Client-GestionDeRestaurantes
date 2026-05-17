@@ -7,6 +7,7 @@ export const useSaveRestaurant = () => {
 
     const saveRestaurant = async (data, restaurantId = null) => {
         const formData = new FormData();
+        const isActive = data.status === "Abierto";
 
         formData.append("name", data.name);
         formData.append("address", data.address);
@@ -16,7 +17,9 @@ export const useSaveRestaurant = () => {
         formData.append("closingTime", data.closingTime);
         formData.append("averagePrice", data.averagePrice);
         formData.append("phone", data.phone);
-        formData.append("status", data.status);
+        // Do not send "status" field. Backend uses "isActive" for restaurant status.
+        // formData.append("status", data.status);
+        formData.append("isActive", String(isActive));
         formData.append("capacity", data.capacity);
         formData.append("rating", data.rating);
 

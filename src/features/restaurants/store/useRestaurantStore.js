@@ -3,7 +3,8 @@ import {
     getRestaurants as getRestaurantsRequest,
     createRestaurant as createRestaurantRequest,
     updateRestaurant as updateRestaurantRequest,
-    deleteRestaurant as deleteRestaurantRequest
+    deactivateRestaurant as deactivateRestaurantRequest,
+    activateRestaurant as activateRestaurantRequest
 } from "../../../shared/api";
 
 export const useRestaurantStore = create((set, get) => ({
@@ -11,10 +12,10 @@ export const useRestaurantStore = create((set, get) => ({
     loading: false,
     error: null,
 
-    getRestaurants: async () => {
+    getRestaurants: async (filters = {}) => {
         try {
             set({ loading: true, error: null });
-            const response = await getRestaurantsRequest();
+            const response = await getRestaurantsRequest(filters);
 
             set({
                 restaurants: response.data.data || response.data || [],
@@ -66,19 +67,42 @@ export const useRestaurantStore = create((set, get) => ({
         }
     },
 
-    deleteRestaurant: async (id) => {
+    deactivateRestaurant: async (id) => {
         try {
             set({ loading: true, error: null });
-            await deleteRestaurantRequest(id);
+            const response = await deactivateRestaurantRequest(id);
+            const updatedRestaurant = response.data.data || response.data;
 
             set({
-                restaurants: get().restaurants.filter((r) => r._id !== id),
+                restaurants: get().restaurants.map((restaurant) =>
+                    restaurant._id === id ? updatedRestaurant : restaurant
+                ),
                 loading: false
             });
         } catch (error) {
             set({
                 loading: false,
-                error: error.response?.data?.message || "Error al eliminar restaurante."
+                error: error.response?.data?.message || "Error al cerrar restaurante."
+            });
+        }
+    },
+
+    activateRestaurant: async (id) => {
+        try {
+            set({ loading: true, error: null });
+            const response = await activateRestaurantRequest(id);
+            const updatedRestaurant = response.data.data || response.data;
+
+            set({
+                restaurants: get().restaurants.map((restaurant) =>
+                    restaurant._id === id ? updatedRestaurant : restaurant
+                ),
+                loading: false
+            });
+        } catch (error) {
+            set({
+                loading: false,
+                error: error.response?.data?.message || "Error al activar restaurante."
             });
         }
     }

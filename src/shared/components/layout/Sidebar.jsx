@@ -17,25 +17,25 @@ import {
 } from "lucide-react";
 import imgLogo from "../../../assets/img/logoExpress.png"
 
-import { UtensilsCrossed } from "lucide-react";
+import { LucideMotionIcon } from "../../../shared/components/ui/LucideMotionIcon.jsx";
 
 export const Sidebar = () => {
     const location = useLocation();
 
     const items = [
-        { label: "Clientes", to: "/dashboard/clients", icon: <Users size={20} /> },
-        { label: "Comentarios", to: "/dashboard/comments", icon: <MessageSquare size={20} /> },
-        { label: "Platillos", to: "/dashboard/dishes", icon: <Utensils size={20} /> },
-        { label: "Empleados", to: "/dashboard/employees", icon: <UserCog size={20} /> },
-        { label: "Eventos", to: "/dashboard/events", icon: <CalendarDays size={20} /> },
-        { label: "Inventarios", to: "/dashboard/inventories", icon: <ClipboardList size={20} /> },
-        { label: "Facturas", to: "/dashboard/invoices", icon: <Receipt size={20} /> },
-        { label: "Notificaciones", to: "/dashboard/notifications", icon: <Bell size={20} /> },
-        { label: "Pedidos", to: "/dashboard/orders", icon: <ShoppingBag size={20} /> },
-        { label: "Promociones", to: "/dashboard/promotions", icon: <TicketPercent size={20} /> },
-        { label: "Reservaciones", to: "/dashboard/reservations", icon: <BookCheck size={20} /> },
-        { label: "Mesas", to: "/dashboard/tables", icon: <Table size={20} /> },
-        { label: "Restaurantes", to: "/dashboard/restaurants", icon: <Store size={20} /> },
+        { label: "Clientes", to: "/dashboard/clients", icon: Users },
+        { label: "Comentarios", to: "/dashboard/comments", icon: MessageSquare },
+        { label: "Platillos", to: "/dashboard/dishes", icon: Utensils },
+        { label: "Empleados", to: "/dashboard/employees", icon: UserCog },
+        { label: "Eventos", to: "/dashboard/events", icon: CalendarDays },
+        { label: "Inventarios", to: "/dashboard/inventories", icon: ClipboardList },
+        { label: "Facturas", to: "/dashboard/invoices", icon: Receipt },
+        { label: "Notificaciones", to: "/dashboard/notifications", icon: Bell },
+        { label: "Pedidos", to: "/dashboard/orders", icon: ShoppingBag },
+        { label: "Promociones", to: "/dashboard/promotions", icon: TicketPercent },
+        { label: "Reservaciones", to: "/dashboard/reservations", icon: BookCheck },
+        { label: "Mesas", to: "/dashboard/tables", icon: Table },
+        { label: "Restaurantes", to: "/dashboard/restaurants", icon: Store },
     ];
     return (
         <aside className="sidebar-container w-60 h-full flex flex-col flex-shrink-0">
@@ -50,10 +50,9 @@ export const Sidebar = () => {
                                     className={`flex items-center gap-3 px-4 py-2.5 rounded-xl font-medium transition-all duration-300 sidebar-link group ${active ? "active text-brand-red scale-[1.02]" : "text-secondary hover:bg-surface-alt/50"
                                         }`}
                                 >
-                                    {/* Renderizamos el icono aquí */}
-                                    <span className={`${active ? "text-brand-red" : "text-muted group-hover:text-primary"} transition-colors`}>
-                                        {item.icon}
-                                    </span>
+                                        <span className={`${active ? "text-brand-red" : "text-muted group-hover:text-primary"} transition-colors`}>
+                                            <LucideMotionIcon icon={item.icon} className={active ? "text-brand-red dark:text-[#F1D302]" : ""} />
+                                        </span>
 
                                     <span className="text-sm tracking-tight">
                                         {item.label}
