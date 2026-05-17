@@ -17,6 +17,23 @@ export const deleteReservation = async (id) => {
     return await axiosAdmin.put(`/reservations/${id}/deactivate`);
 }
 
+//Clientes
+export const getClients = async () => {
+    return axiosAdmin.get("/clients/get");
+}
+
+export const createClient = async (data) => {
+    return await axiosAdmin.post("/clients/create", data);
+}
+
+export const updateClient = async (data) => {
+    return await axiosAdmin.put("/clients/update", data);
+}
+
+export const deleteClient = async (id) => {
+    return await axiosAdmin.put(`/clients/${id}/deactivate`);
+}
+
 //Facturas
 export const getMyInvoices = async () => {
     return axiosAdmin.get("/invoices/myInvoices");
