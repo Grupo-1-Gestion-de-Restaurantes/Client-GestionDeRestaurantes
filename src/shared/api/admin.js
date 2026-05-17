@@ -39,6 +39,16 @@ export const getMyInvoices = async () => {
     return axiosAdmin.get("/invoices/myInvoices");
 }
 
+// Comentarios
+export const getComments = async () => {
+    return axiosAdmin.get("/comments/");
+}
+
+export const deleteComment = async (id) => {
+    return await axiosAdmin.put(`/comments/desactivate/${id}`);
+}
+
+
 //Restaurantes  
 export const getRestaurants = async (params = {}) => {
     return axiosAdmin.get("/restaurants/get", { params });
@@ -82,11 +92,11 @@ export const deleteEmployee = async (id) => {
 
 //Inventarios
 export const getInventories = async () => {
-    return axiosAdmin.get("/inventories/get");
+    return axiosAdmin.get("/inventories/");
 }
 
 export const createInventory = async (data) => {
-    return await axiosAdmin.post("/inventories/create", data);
+    return await axiosAdmin.post("/inventories/", data);
 }
 
 export const updateInventory = async (id, data) => {
@@ -94,8 +104,9 @@ export const updateInventory = async (id, data) => {
 }
 
 export const deleteInventory = async (id) => {
-    return await axiosAdmin.put(`/inventories/${id}/deactivate`);
+    return await axiosAdmin.put(`/inventories/${id}/status`, { isActive: false });
 }
+
 // Platillos
 export const getDishes = async () => {
     return axiosAdmin.get("/dishes/");
@@ -114,7 +125,7 @@ export const updateDish = async (id, formData) => {
 }
 
 export const deleteDish = async (id) => {
-    return await axiosAdmin.put(`/dishes/${id}`);
+    return await axiosAdmin.put(`/dishes/${id}`, { isActive: false });
 }
 // Promociones
 export const getPromotions = async () => {

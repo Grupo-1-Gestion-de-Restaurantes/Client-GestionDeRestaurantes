@@ -68,8 +68,7 @@ export const DishModal = ({ isOpen, onClose, dish }) => {
         }
     }, [isOpen, dish, reset]);
 
-    // 🛠️ Filtramos los insumos del inventario que pertenecen al restaurante seleccionado
-    // Soporta si tu backend lo llama "restaurant", "restaurantId" o "restaurant._id"
+
     const filteredInventories = inventories?.filter(item => {
         const itemRestId = item.restaurant?._id || item.restaurant || item.restaurantId;
         return String(itemRestId) === String(selectedRestaurant);
@@ -180,7 +179,7 @@ export const DishModal = ({ isOpen, onClose, dish }) => {
                                     </h3>
                                     {!selectedRestaurant && (
                                         <p className="text-[var(--color-brand-red)] text-xs font-semibold mt-0.5">
-                                            ⚠️ Selecciona una sucursal arriba para poder cargar los insumos correspondientes.
+                                            ⚠️ Selecciona una sucursal arriba para poder cargar los ingredientes correspondientes.
                                         </p>
                                     )}
                                 </div>

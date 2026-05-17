@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useDishStore } from "../store/useDishStore.js";
 import { useRestaurantStore } from "../../restaurants/store/useRestaurantStore.js";
-import { useInventoryStore } from "../../inventories/store/useInventoryStore.js"; // 💡 Importamos inventario para traducir los IDs
+import { useInventoryStore } from "../../inventories/store/useInventoryStore.js"; 
 import { Spinner } from "../../../shared/components/layout/Spinner.jsx";
 import { useEffect as useToastEffect } from "react";
 import { showError } from "../../../shared/utils/toast.js";
@@ -11,7 +11,7 @@ import { useUIStore } from "../../../shared/components/ui/store/uiStore.js";
 export const Dishes = () => {
     const { dishes, loading, error, getDishes, deleteDish } = useDishStore();
     const { restaurants, getRestaurants } = useRestaurantStore();
-    const { inventories, getInventories } = useInventoryStore(); // Catálogo de insumos
+    const { inventories, getInventories } = useInventoryStore(); 
     const [openModal, setOpenModal] = useState(false);
     const [selectedDish, setSelectedDish] = useState(null);
     const { openConfirm } = useUIStore();
@@ -28,7 +28,6 @@ export const Dishes = () => {
 
     const activeDishes = dishes.filter((d) => d.isActive === true);
 
-    // 🏪 Resuelve el nombre del restaurante
     const getRestaurantName = (restaurantField) => {
         if (!restaurantField) return "N/A";
         if (typeof restaurantField === "object" && restaurantField.name) {
@@ -39,19 +38,19 @@ export const Dishes = () => {
     };
 
     const getInventoryItemName = (itemField) => {
-        if (!itemField) return "Insumo desconocido";
+        if (!itemField) return "Inventario desconocido";
 
         if (typeof itemField === "object") {
-            return itemField.name || itemField.itemName || itemField.ingredientName || "Insumo";
+            return itemField.name || itemField.itemName || itemField.ingredientName || "Inventario";
         }
 
         const found = inventories?.find((i) => String(i._id) === String(itemField));
 
         if (found) {
-            return found.name || found.itemName || found.ingredientName || "Insumo sin nombre";
+            return found.name || found.itemName || found.ingredientName || "Inventario sin nombre";
         }
 
-        return `Insumo (${String(itemField).substring(0, 5)}...)`;
+        return `Inventario (${String(itemField).substring(0, 5)}...)`;
     };
 
     if (loading && activeDishes.length === 0) return <Spinner />;
@@ -141,7 +140,7 @@ export const Dishes = () => {
                                     {/* Restaurante */}
                                     <td className="px-6 py-4 text-sm whitespace-nowrap">
                                         <span className="bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 px-2.5 py-1 rounded-md text-xs font-medium border border-blue-100 dark:border-blue-800/30">
-                                            🏪 {getRestaurantName(dishItem.restaurant)}
+                                            {getRestaurantName(dishItem.restaurant)}
                                         </span>
                                     </td>
 
@@ -158,28 +157,30 @@ export const Dishes = () => {
                                     </td>
 
                                     {/* Acciones */}
-                                    <td className="px-6 py-4 flex gap-3 justify-center items-center h-full pt-7 whitespace-nowrap">
-                                        <button
-                                            className="text-[var(--color-brand-dark)] hover:text-[var(--color-brand-yellow)] font-medium text-sm transition"
-                                            onClick={() => {
-                                                setSelectedDish(dishItem);
-                                                setOpenModal(true);
-                                            }}
-                                        >
-                                            ✏️ Editar
-                                        </button>
-                                        <button
-                                            className="text-[var(--color-brand-red)] hover:text-[var(--color-brand-red-dark)] font-medium text-sm transition"
-                                            onClick={() =>
-                                                openConfirm({
-                                                    title: "Eliminar Platillo",
-                                                    message: `¿Estás seguro de eliminar el platillo "${dishItem.name}" de la carta?`,
-                                                    onConfirm: () => deleteDish(dishItem._id)
-                                                })
-                                            }
-                                        >
-                                            🗑️ Eliminar
-                                        </button>
+                                    <td className="px-6 py-4 text-center whitespace-nowrap">
+                                        <div className="flex items-center justify-center gap-4">
+                                            <button
+                                                className="hover:text-[var(--color-brand-yellow)] font-medium text-sm flex items-center gap-1 transition cursor-pointer"
+                                                onClick={() => {
+                                                    setSelectedDish(dishItem);
+                                                    setOpenModal(true);
+                                                }}
+                                            >
+                                                ✏️ Editar
+                                            </button>
+                                            <button
+                                                className="text-[var(--color-brand-red)] hover:text-[var(--color-brand-red-dark)] font-medium text-sm flex items-center gap-1 transition cursor-pointer"
+                                                onClick={() =>
+                                                    openConfirm({
+                                                        title: "Eliminar Platillo",
+                                                        message: `¿Estás seguro de eliminar el platillo "${dishItem.name}" de la carta?`,
+                                                        onConfirm: () => deleteDish(dishItem._id)
+                                                    })
+                                                }
+                                            >
+                                                🗑️ Eliminar
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))
