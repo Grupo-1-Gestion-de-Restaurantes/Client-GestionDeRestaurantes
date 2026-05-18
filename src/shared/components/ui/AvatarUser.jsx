@@ -4,6 +4,7 @@ import { useAuthStore } from "../../../features/auth/store/useAuthStore";
 import defaultAvatarImg from "../../../assets/img/avatarDefault.png";
 import { useUIStore } from "./store/uiStore"; 
 import { Spinner } from "../layout/Spinner"; 
+import { ThemeToggleButton } from "./ThemeToggleButton.jsx";
 
 export const AvatarUser = () => {
     const store = useAuthStore ? useAuthStore() : {};
@@ -63,7 +64,7 @@ export const AvatarUser = () => {
                 </div>
             )}
 
-            <div className="relative" ref={dropdownRef}>
+            <div className="relative flex-shrink-0" ref={dropdownRef}>
                 <img
                     onClick={toggleMenu}
                     src={avatarSrc}
@@ -76,13 +77,17 @@ export const AvatarUser = () => {
                 />
 
                 {open && (
-                    <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 w-48 bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-lg shadow-xl animate-fadeIn z-50">
+                    <div className="absolute right-0 top-full mt-2 w-64 max-w-[calc(100vw-1rem)] overflow-hidden rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] shadow-xl animate-fadeIn z-50 sm:w-72">
                         <div className="px-4 py-3 border-b border-[var(--border-color)]">
                             <p className="font-semibold text-[var(--text-primary)]">{user?.username || "User"}</p>
                             <p className="text-sm text-[var(--text-secondary)] truncate">{user?.email || "user@email.com"}</p>
                         </div>
 
                         <ul className="p-2 text-sm text-[var(--text-primary)] font-medium">
+                            <li className="p-2">
+                                <ThemeToggleButton />
+                            </li>
+
                             <li>
                                 <Link
                                     to="/dashboard"

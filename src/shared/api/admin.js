@@ -17,6 +17,27 @@ export const deleteReservation = async (id) => {
     return await axiosAdmin.put(`/reservations/${id}/deactivate`);
 }
 
+// Mesas
+export const getTables = async (params = {}) => {
+    return axiosAdmin.get("/tables/get", { params });
+}
+
+export const createTable = async (data) => {
+    return await axiosAdmin.post("/tables/create", data);
+}
+
+export const updateTable = async (id, data) => {
+    return await axiosAdmin.put(`/tables/${id}`, data);
+}
+
+export const deactivateTable = async (id) => {
+    return await axiosAdmin.put(`/tables/${id}/deactivate`);
+}
+
+export const activateTable = async (id) => {
+    return await axiosAdmin.put(`/tables/${id}/activate`);
+}
+
 //Clientes
 export const getClients = async () => {
     return axiosAdmin.get("/clients/get");
@@ -136,8 +157,8 @@ export const deleteDish = async (id) => {
     return await axiosAdmin.put(`/dishes/${id}`, { isActive: false });
 }
 // Promociones
-export const getPromotions = async () => {
-    return axiosAdmin.get("/promotions/get");
+export const getPromotions = async (params = {}) => {
+    return axiosAdmin.get("/promotions/get", { params });
 }
 
 export const createPromotion = async (data) => {
@@ -148,6 +169,27 @@ export const updatePromotion = async (id, data) => {
     return await axiosAdmin.put(`/promotions/${id}`, data);
 }
 
+export const activatePromotion = async (id) => {
+    return await axiosAdmin.put(`/promotions/${id}/activate`);
+}
+
 export const deletePromotion = async (id) => {
     return await axiosAdmin.put(`/promotions/${id}/desactivate`); // Desactivado lógico
+}
+
+// Notificaciones
+export const getNotifications = async () => {
+    return axiosAdmin.get("/notifications/");
+}
+
+export const markNotificationAsRead = async (id) => {
+    return axiosAdmin.put(`/notifications/${id}/read`);
+}
+
+export const markAllNotificationsAsRead = async () => {
+    return axiosAdmin.put("/notifications/read-all");
+}
+
+export const deleteNotification = async (id) => {
+    return axiosAdmin.delete(`/notifications/${id}`);
 }

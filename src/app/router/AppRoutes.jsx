@@ -17,6 +17,8 @@ import { Employees } from "../../features/employees/components/Employees.jsx"
 import { Invoices } from "../../features/invoices/components/Invoices.jsx"
 import { Dishes } from "../../features/dishes/components/Dishes.jsx"
 import { Promotions } from "../../features/promotions/components/Promotions.jsx"
+import { Tables } from "../../features/tables/components/Tables.jsx"
+import { Notifications } from "../../features/notifications/components/Notifications.jsx"
 import { Restaurants } from "../../features/restaurants/components/Restaurants.jsx"
 import { Clients } from "../../features/clients/components/Clients.jsx"
 import { Comments } from "../../features/comments/components/Comments.jsx"
@@ -51,7 +53,10 @@ export const AppRoutes = () => {
                 <Route path="clients" element={<Clients />} />
                 <Route path="inventories" element={<Inventories />} />
                 <Route path="promotions" element={<Promotions />} />
+                <Route path="tables" element={<Tables />} />
                 <Route path="restaurants" element={<Restaurants />} />
+                <Route path="comments" element={<Comments />} />
+                <Route path="notifications" element={<Notifications />} />
             </Route>
         </Routes>
     )

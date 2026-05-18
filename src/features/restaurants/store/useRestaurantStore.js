@@ -3,8 +3,6 @@ import {
     getRestaurants as getRestaurantsRequest,
     createRestaurant as createRestaurantRequest,
     updateRestaurant as updateRestaurantRequest,
-    deactivateRestaurant as deactivateRestaurantRequest,
-    activateRestaurant as activateRestaurantRequest
 } from "../../../shared/api";
 
 export const useRestaurantStore = create((set, get) => ({
@@ -70,7 +68,10 @@ export const useRestaurantStore = create((set, get) => ({
     deactivateRestaurant: async (id) => {
         try {
             set({ loading: true, error: null });
-            const response = await deactivateRestaurantRequest(id);
+            const response = await updateRestaurantRequest(id, {
+                isActive: false,
+                status: "Cerrado",
+            });
             const updatedRestaurant = response.data.data || response.data;
 
             set({
@@ -90,7 +91,10 @@ export const useRestaurantStore = create((set, get) => ({
     activateRestaurant: async (id) => {
         try {
             set({ loading: true, error: null });
-            const response = await activateRestaurantRequest(id);
+            const response = await updateRestaurantRequest(id, {
+                isActive: true,
+                status: "Abierto",
+            });
             const updatedRestaurant = response.data.data || response.data;
 
             set({
