@@ -193,3 +193,20 @@ export const markAllNotificationsAsRead = async () => {
 export const deleteNotification = async (id) => {
     return axiosAdmin.delete(`/notifications/${id}`);
 }
+
+//Eventos
+export const getEvents = async () => {
+    return axiosAdmin.get("/events/");
+};
+
+export const createEvent = async (data) => {
+    return await axiosAdmin.post("/events/", data); 
+};
+
+export const updateEvent = async (id, data) => {
+    return await axiosAdmin.put(`/events/${id}`, data);
+};
+
+export const deleteEvent = async (id) => {
+    return await axiosAdmin.patch(`/events/${id}`, { isActive: false });
+};
