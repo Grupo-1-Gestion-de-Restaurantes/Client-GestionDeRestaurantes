@@ -41,10 +41,13 @@ export const Restaurants = () => {
 
     useEffect(() => {
         const timeoutId = setTimeout(() => {
-            getRestaurants({
-                activeFilter,
-                search: searchTerm.trim(),
-            });
+            const filters = { search: searchTerm.trim() };
+
+            if (activeFilter !== "all") {
+                filters.isActive = activeFilter === "active";
+            }
+
+            getRestaurants(filters);
         }, 250);
 
         return () => clearTimeout(timeoutId);
@@ -277,7 +280,10 @@ export const Restaurants = () => {
 
                                     {/* Estado */}
                                     <td className="px-6 py-4">
-                                        <span className={`px-3 py-1 text-xs rounded-full font-medium ${getStatusStyle(restaurant.status)}`}>
+                                        <span
+                                            className={`block w-full min-w-[7.5rem] px-3 py-1 text-xs rounded-full font-medium text-center whitespace-normal ${getStatusStyle(restaurant.status)}`}
+                                            style={{ wordBreak: 'break-word' }}
+                                        >
                                             {restaurant.status}
                                         </span>
                                     </td>
