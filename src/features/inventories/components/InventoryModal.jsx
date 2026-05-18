@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { useSaveInventory } from "../hooks/UseSaveInventory";
+import { useSaveInventory } from "../hooks/useSaveInventory.jsx";
 import { useInventoryStore } from "../store/useInventoryStore";
 import { useRestaurantStore } from "../../restaurants/store/useRestaurantStore.js";
 
@@ -60,7 +60,7 @@ export const InventoryModal = ({ isOpen, onClose, item }) => {
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50 px-3 sm:px-4">
             <div className="bg-[var(--bg-surface)] rounded-2xl shadow-2xl w-full max-w-lg border border-[var(--border-color)] transition-colors duration-300">
                 {/* HEADER */}
-                <div className="p-4 sm:p-5 bg-[var(--bg-surface-alt)] text-[var(--text-primary)] border-b border-[var(--border-color)] rounded-t-2xl transition-colors duration-300">
+                <div className="p-4 sm:p-5 bg-[linear-gradient(90deg,var(--main-blue)_0%,#1956a3_100%)] text-white border-b border-[var(--border-color)] rounded-t-2xl transition-colors duration-300">
                     <h2 className="text-xl sm:text-2xl font-bold">
                         {item ? "Editar Ingrediente" : "Nuevo Ingrediente de Almacén"}
                     </h2>
@@ -77,7 +77,7 @@ export const InventoryModal = ({ isOpen, onClose, item }) => {
                         <input
                             className="w-full px-3 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--ring-color)] transition"
                             placeholder="Ej. Tomates frescos, Queso Mozzarella"
-                            {...register("name", { required: "El nombre es obligatorio", maxLength: 100 })}
+                            {...register("name", { required: "El nombre es obligatorio", maxLength: { value: 100, message: "Máximo 100 caracteres" } })}
                         />
                         {errors.name && <p className="text-[var(--color-brand-red)] text-xs mt-1">{errors.name.message}</p>}
                     </div>
@@ -108,7 +108,7 @@ export const InventoryModal = ({ isOpen, onClose, item }) => {
                                 step="any"
                                 className="w-full px-3 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--ring-color)] transition"
                                 placeholder="0"
-                                {...register("quantity", { required: "Requerido", min: { value: 0, message: "Mínimo 0" } })}
+                                {...register("quantity", { required: "Requerido", valueAsNumber: true, min: { value: 0, message: "Mínimo 0" } })}
                             />
                             {errors.quantity && <p className="text-[var(--color-brand-red)] text-xs mt-1">{errors.quantity.message}</p>}
                         </div>
@@ -134,7 +134,7 @@ export const InventoryModal = ({ isOpen, onClose, item }) => {
                             <input
                                 type="number"
                                 className="w-full px-3 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--ring-color)] transition"
-                                {...register("minStock", { required: "Requerido", min: { value: 1, message: "Mínimo 1" } })}
+                                {...register("minStock", { required: "Requerido", valueAsNumber: true, min: { value: 1, message: "Mínimo 1" } })}
                             />
                             {errors.minStock && <p className="text-[var(--color-brand-red)] text-xs mt-1">{errors.minStock.message}</p>}
                         </div>

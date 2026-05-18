@@ -3,6 +3,9 @@ import { useForm } from "react-hook-form";
 import { useSaveEvent } from "../hooks/useSaveEvents.jsx";
 import { useEventStore } from "../store/useEventsStore.js";
 import { useRestaurantStore } from "../../restaurants/store/useRestaurantStore.js";
+import { useTableStore } from "../../tables/store/useTableStore.js";
+import { useDishStore } from "../../dishes/store/useDishStore.js";
+import { useEmployeeStore } from "../../employees/store/useEmployeeStore.js";
 import { showError } from "../../../shared/utils/toast.js";
 
 export const EventModal = ({ isOpen, onClose, eventItem }) => {
@@ -10,16 +13,27 @@ export const EventModal = ({ isOpen, onClose, eventItem }) => {
         register,
         handleSubmit,
         reset,
+        watch,
         formState: { errors },
     } = useForm();
 
     const { saveEvent } = useSaveEvent();
     const loading = useEventStore((state) => state.loading);
     const { restaurants, getRestaurants } = useRestaurantStore();
+    const { tables, getTables } = useTableStore();
+    const { dishes, getDishes } = useDishStore();
+    const { employees, getEmployees } = useEmployeeStore();
+
+    const selectedRestaurant = watch("restaurant");
 
     useEffect(() => {
-        if (isOpen && getRestaurants) getRestaurants();
-    }, [isOpen, getRestaurants]);
+        if (isOpen) {
+            if (getRestaurants) getRestaurants();
+            if (getTables) getTables({ isActive: true });
+            if (getDishes) getDishes();
+            if (getEmployees) getEmployees();
+        }
+    }, [isOpen, getRestaurants, getTables, getDishes, getEmployees]);
 
     useEffect(() => {
         if (isOpen) {
@@ -34,7 +48,10 @@ export const EventModal = ({ isOpen, onClose, eventItem }) => {
                     price: eventItem.price || "",
                     restaurant: eventItem.restaurant?._id || eventItem.restaurant || "",
                     dateTime: localDate,
-                    additionalServices: eventItem.additionalServices || []
+                    additionalServices: eventItem.additionalServices || [],
+                    assignedTables: eventItem.assignedTables?.map(t => t._id || t) || [],
+                    specialDishes: eventItem.specialDishes?.map(d => d._id || d) || [],
+                    assignedEmployees: eventItem.assignedEmployees?.map(e => e._id || e) || []
                 });
             } else {
                 reset({
@@ -45,11 +62,18 @@ export const EventModal = ({ isOpen, onClose, eventItem }) => {
                     price: "",
                     restaurant: "",
                     dateTime: "",
-                    additionalServices: []
+                    additionalServices: [],
+                    assignedTables: [],
+                    specialDishes: [],
+                    assignedEmployees: []
                 });
             }
         }
     }, [isOpen, eventItem, reset]);
+
+    const filteredTables = tables.filter(t => t.restaurant?._id === selectedRestaurant || t.restaurant === selectedRestaurant);
+    const filteredDishes = dishes.filter(d => d.restaurant?._id === selectedRestaurant || d.restaurant === selectedRestaurant);
+    const filteredEmployees = employees.filter(e => e.restaurant?._id === selectedRestaurant || e.restaurant === selectedRestaurant);
 
     const onSubmit = async (data) => {
         try {
@@ -192,6 +216,71 @@ export const EventModal = ({ isOpen, onClose, eventItem }) => {
                                 Otro Servicio
                             </label>
                         </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Mesas Asignadas */}
+                        <div className="bg-[var(--bg-surface-alt)] p-3 rounded-xl border border-[var(--border-color)]">
+                            <label className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider block mb-2">
+                                Mesas Reservadas
+                            </label>
+                            {!selectedRestaurant ? (
+                                <p className="text-[10px] italic text-[var(--text-muted)]">Selecciona un restaurante...</p>
+                            ) : filteredTables.length === 0 ? (
+                                <p className="text-[10px] italic text-[var(--text-muted)]">No hay mesas en esta sede.</p>
+                            ) : (
+                                <div className="max-h-32 overflow-y-auto space-y-1 pr-1">
+                                    {filteredTables.map(t => (
+                                        <label key={t._id} className="flex items-center gap-2 text-xs cursor-pointer hover:bg-[var(--bg-base)] p-1 rounded">
+                                            <input type="checkbox" value={t._id} {...register("assignedTables")} className="rounded border-[var(--border-color)]" />
+                                            Mesa {t.tableNumber} (Cap. {t.capacity})
+                                        </label>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Platos Especiales */}
+                        <div className="bg-[var(--bg-surface-alt)] p-3 rounded-xl border border-[var(--border-color)]">
+                            <label className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider block mb-2">
+                                Menú Especial
+                            </label>
+                            {!selectedRestaurant ? (
+                                <p className="text-[10px] italic text-[var(--text-muted)]">Selecciona un restaurante...</p>
+                            ) : filteredDishes.length === 0 ? (
+                                <p className="text-[10px] italic text-[var(--text-muted)]">No hay platos en esta sede.</p>
+                            ) : (
+                                <div className="max-h-32 overflow-y-auto space-y-1 pr-1">
+                                    {filteredDishes.map(d => (
+                                        <label key={d._id} className="flex items-center gap-2 text-xs cursor-pointer hover:bg-[var(--bg-base)] p-1 rounded">
+                                            <input type="checkbox" value={d._id} {...register("specialDishes")} className="rounded border-[var(--border-color)]" />
+                                            {d.name} (Q {Number(d.price).toFixed(2)})
+                                        </label>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Empleados Asignados */}
+                    <div className="bg-[var(--bg-surface-alt)] p-3 rounded-xl border border-[var(--border-color)]">
+                        <label className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider block mb-2">
+                            Personal Asignado (Staff)
+                        </label>
+                        {!selectedRestaurant ? (
+                            <p className="text-[10px] italic text-[var(--text-muted)]">Selecciona un restaurante...</p>
+                        ) : filteredEmployees.length === 0 ? (
+                            <p className="text-[10px] italic text-[var(--text-muted)]">No hay personal en esta sede.</p>
+                        ) : (
+                            <div className="max-h-32 overflow-y-auto grid grid-cols-2 gap-1 pr-1">
+                                {filteredEmployees.map(e => (
+                                    <label key={e._id} className="flex items-center gap-2 text-xs cursor-pointer hover:bg-[var(--bg-base)] p-1 rounded">
+                                        <input type="checkbox" value={e._id} {...register("assignedEmployees")} className="rounded border-[var(--border-color)]" />
+                                        {e.name} ({e.role})
+                                    </label>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     {/* BOTONES */}

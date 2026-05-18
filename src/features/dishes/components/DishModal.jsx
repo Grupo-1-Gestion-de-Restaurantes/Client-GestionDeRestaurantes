@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
-import { useSaveDish } from "../hooks/useSaveDish";
+import { useSaveDish } from "../hooks/UseSaveDish.jsx";
 import { useDishStore } from "../store/useDishStore";
 import { useRestaurantStore } from "../../restaurants/store/useRestaurantStore.js"; 
 import { useInventoryStore } from "../../inventories/store/useInventoryStore.js"; 
@@ -96,7 +96,7 @@ export const DishModal = ({ isOpen, onClose, dish }) => {
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50 px-3 sm:px-4">
             <div className="bg-[var(--bg-surface)] rounded-2xl shadow-2xl w-full max-w-lg md:max-w-2xl max-h-[90vh] flex flex-col overflow-hidden border border-[var(--border-color)] transition-colors duration-300">
                 {/* HEADER */}
-                <div className="p-4 sm:p-5 bg-[var(--bg-surface-alt)] text-[var(--text-primary)] border-b border-[var(--border-color)] sticky top-0 z-10 transition-colors duration-300">
+                <div className="p-4 sm:p-5 bg-[linear-gradient(90deg,var(--main-blue)_0%,#1956a3_100%)] text-white sticky top-0 z-10 transition-colors duration-300">
                     <h2 className="text-xl sm:text-2xl font-bold">
                         {dish ? "Editar Platillo" : "Nuevo Platillo"}
                     </h2>
@@ -138,7 +138,7 @@ export const DishModal = ({ isOpen, onClose, dish }) => {
                             <input
                                 className="w-full px-3 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--ring-color)] transition"
                                 placeholder="Ej. Hamburguesa Doble"
-                                {...register("name", { required: "El nombre es obligatorio", maxLength: 50 })}
+                                {...register("name", { required: "El nombre es obligatorio", maxLength: { value: 50, message: "Máximo 50 caracteres" } })}
                             />
                             {errors.name && <p className="text-[var(--color-brand-red)] text-xs mt-1">{errors.name.message}</p>}
                         </div>
@@ -151,7 +151,7 @@ export const DishModal = ({ isOpen, onClose, dish }) => {
                                 step="0.01"
                                 className="w-full px-3 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--ring-color)] transition"
                                 placeholder="0.00"
-                                {...register("price", { required: "El precio es obligatorio", min: 0 })}
+                                {...register("price", { required: "El precio es obligatorio", min: { value: 0, message: "El precio no puede ser negativo" } })}
                             />
                             {errors.price && <p className="text-[var(--color-brand-red)] text-xs mt-1">{errors.price.message}</p>}
                         </div>
@@ -163,11 +163,12 @@ export const DishModal = ({ isOpen, onClose, dish }) => {
                                 className="w-full px-3 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--ring-color)] transition"
                                 {...register("dishType", { required: "El tipo es obligatorio" })}
                             >
-                                <option value="ENTRADA">Entrada</option>
-                                <option value="PLATO_FUERTE">Plato Fuerte</option>
-                                <option value="POSTRE">Postre</option>
-                                <option value="BEBIDA">Bebida</option>
+                                <option value="ENTRADA">ENTRADA</option>
+                                <option value="PLATO_FUERTE">PLATO_FUERTE</option>
+                                <option value="POSTRE">POSTRE</option>
+                                <option value="BEBIDA">BEBIDA</option>
                             </select>
+                            {errors.dishType && <p className="text-[var(--color-brand-red)] text-xs mt-1">{errors.dishType.message}</p>}
                         </div>
 
                         {/* SECCIÓN DINÁMICA DE INGREDIENTES FILTRADOS */}
@@ -259,7 +260,7 @@ export const DishModal = ({ isOpen, onClose, dish }) => {
                             <textarea
                                 className="w-full px-3 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--ring-color)] transition min-h-[60px]"
                                 placeholder="Escribe los detalles o presentación del platillo..."
-                                {...register("description", { required: "La descripción es obligatoria", maxLength: 500 })}
+                                {...register("description", { required: "La descripción es obligatoria", maxLength: { value: 500, message: "Máximo 500 caracteres" } })}
                             />
                             {errors.description && <p className="text-[var(--color-brand-red)] text-xs mt-1">{errors.description.message}</p>}
                         </div>
