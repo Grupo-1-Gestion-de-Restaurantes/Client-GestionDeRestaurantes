@@ -1,4 +1,4 @@
-import { axiosAdmin } from "./api";
+import { axiosAdmin, axiosAuth } from "./api";
 
 //Reservaciones
 export const getReservations = async () => {
@@ -78,8 +78,16 @@ export const getEmployees = async () => {
     return axiosAdmin.get("/employees/");
 }
 
-export const createEmployee = async (data) => {
-    return await axiosAdmin.post("/employees/", data);
+export const createEmployee = async (formData) => {
+    return await axiosAdmin.post("/employees/", formData, {
+        headers: { "Content-Type": "multipart/form-data" }
+    });
+}
+
+export const registerEmployeeInAuth = async (formData) => {
+    return await axiosAuth.post("/auth/register-employee", formData, {
+        headers: { "Content-Type": "multipart/form-data" }
+    });
 }
 
 export const updateEmployee = async (id, data) => {
@@ -87,7 +95,7 @@ export const updateEmployee = async (id, data) => {
 }
 
 export const deleteEmployee = async (id) => {
-    return await axiosAdmin.put(`/employees/${id}/deactivate`);
+    return await axiosAdmin.put(`/employees/${id}/status`, { isActive: false });
 }
 
 //Inventarios
