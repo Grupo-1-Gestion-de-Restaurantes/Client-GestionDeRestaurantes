@@ -31,12 +31,10 @@ export const useEmployeeStore = create((set, get) => ({
     createEmployee: async (formData) => {
         try {
             set({ loading: true, error: null });
-            const response = await createEmployeeRequest(formData);
+            await createEmployeeRequest(formData);
 
-            set({
-                employees: [response.data.data || response.data, ...get().employees],
-                loading: false
-            });
+            // Refrescar la lista de empleados tras crear uno nuevo
+            await get().getEmployees();
         } catch (error) {
             set({
                 loading: false,
@@ -49,15 +47,10 @@ export const useEmployeeStore = create((set, get) => ({
     updateEmployee: async (id, data) => {
         try {
             set({ loading: true, error: null });
-            const response = await updateEmployeeRequest(id, data);
-            const updated = response.data.data || response.data;
+            await updateEmployeeRequest(id, data);
 
-            set({
-                employees: get().employees.map((e) =>
-                    e._id === id ? updated : e
-                ),
-                loading: false
-            });
+            // Refrescar la lista de empleados tras actualizar uno
+            await get().getEmployees();
         } catch (error) {
             set({
                 loading: false,
@@ -72,10 +65,8 @@ export const useEmployeeStore = create((set, get) => ({
             set({ loading: true, error: null });
             await deleteEmployeeRequest(id);
 
-            set({
-                employees: get().employees.filter(e => e._id !== id),
-                loading: false
-            });
+            // Refrescar la lista de empleados tras eliminar uno
+            await get().getEmployees();
         } catch (error) {
             set({
                 loading: false,

@@ -30,11 +30,10 @@ export const useEventStore = create((set, get) => ({
     createEvent: async (eventData) => {
         try {
             set({ loading: true, error: null });
-            const response = await createEventRequest(eventData);
-            set({
-                events: [response.data.data || response.data, ...get().events],
-                loading: false
-            });
+            await createEventRequest(eventData);
+
+            // Refrescar la lista de eventos tras crear uno nuevo
+            await get().getEvents();
         } catch (error) {
             set({
                 loading: false,
@@ -47,12 +46,10 @@ export const useEventStore = create((set, get) => ({
     updateEvent: async (id, eventData) => {
         try {
             set({ loading: true, error: null });
-            const response = await updateEventRequest(id, eventData);
-            const updated = response.data.data || response.data;
-            set({
-                events: get().events.map((e) => (e._id === id ? updated : e)),
-                loading: false
-            });
+            await updateEventRequest(id, eventData);
+
+            // Refrescar la lista de eventos tras actualizar uno
+            await get().getEvents();
         } catch (error) {
             set({
                 loading: false,
@@ -66,10 +63,9 @@ export const useEventStore = create((set, get) => ({
         try {
             set({ loading: true, error: null });
             await deleteEventRequest(id);
-            set({
-                events: get().events.filter((e) => e._id !== id),
-                loading: false
-            });
+
+            // Refrescar la lista de eventos tras eliminar uno
+            await get().getEvents();
         } catch (error) {
             set({
                 loading: false,

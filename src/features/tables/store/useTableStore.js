@@ -32,13 +32,10 @@ export const useTableStore = create((set, get) => ({
 	createTable: async (data) => {
 		try {
 			set({ loading: true, error: null });
-			const response = await createTableRequest(data);
-			const newTable = response.data.data || response.data;
+			await createTableRequest(data);
 
-			set({
-				tables: [newTable, ...get().tables],
-				loading: false,
-			});
+			// Refrescar la lista de mesas tras crear una nueva
+			await get().getTables();
 		} catch (error) {
 			set({
 				loading: false,
@@ -50,15 +47,10 @@ export const useTableStore = create((set, get) => ({
 	updateTable: async (id, data) => {
 		try {
 			set({ loading: true, error: null });
-			const response = await updateTableRequest(id, data);
-			const updatedTable = response.data.data || response.data;
+			await updateTableRequest(id, data);
 
-			set({
-				tables: get().tables.map((table) =>
-					table._id === id ? updatedTable : table
-				),
-				loading: false,
-			});
+			// Refrescar la lista de mesas tras actualizar una
+			await get().getTables();
 		} catch (error) {
 			set({
 				loading: false,
@@ -70,15 +62,10 @@ export const useTableStore = create((set, get) => ({
 	deactivateTable: async (id) => {
 		try {
 			set({ loading: true, error: null });
-			const response = await deactivateTableRequest(id);
-			const updatedTable = response.data.data || response.data;
+			await deactivateTableRequest(id);
 
-			set({
-				tables: get().tables.map((table) =>
-					table._id === id ? updatedTable : table
-				),
-				loading: false,
-			});
+			// Refrescar la lista de mesas tras desactivar una
+			await get().getTables();
 		} catch (error) {
 			set({
 				loading: false,
@@ -90,15 +77,10 @@ export const useTableStore = create((set, get) => ({
 	activateTable: async (id) => {
 		try {
 			set({ loading: true, error: null });
-			const response = await activateTableRequest(id);
-			const updatedTable = response.data.data || response.data;
+			await activateTableRequest(id);
 
-			set({
-				tables: get().tables.map((table) =>
-					table._id === id ? updatedTable : table
-				),
-				loading: false,
-			});
+			// Refrescar la lista de mesas tras activar una
+			await get().getTables();
 		} catch (error) {
 			set({
 				loading: false,
