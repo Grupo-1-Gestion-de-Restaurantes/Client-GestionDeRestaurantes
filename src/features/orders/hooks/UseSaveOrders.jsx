@@ -9,6 +9,7 @@ export const useSaveOrder = () => {
             clientId: data.clientId,
             restaurantId: data.restaurantId,
             paymentMethod: data.paymentMethod,
+            deliveryType: data.deliveryType || "DOMICILIO",
             deliveryAddress: {
                 alias: data.deliveryAddress?.alias,
                 addressLine: data.deliveryAddress?.addressLine

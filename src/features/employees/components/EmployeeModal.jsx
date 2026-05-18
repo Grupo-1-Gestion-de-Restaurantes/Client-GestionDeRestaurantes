@@ -74,7 +74,7 @@ export const EmployeeModal = ({ isOpen, onClose, employeeItem }) => {
             <div className="bg-[var(--bg-surface)] rounded-2xl shadow-2xl w-full max-w-lg md:max-w-xl max-h-[90vh] flex flex-col overflow-hidden border border-[var(--border-color)] transition-colors duration-300">
 
                 {/* HEADER */}
-                <div className="p-4 sm:p-5 bg-[var(--bg-surface-alt)] text-[var(--text-primary)] border-b border-[var(--border-color)]">
+                <div className="p-4 sm:p-5 bg-[linear-gradient(90deg,var(--main-blue)_0%,#1956a3_100%)] text-white">
                     <h2 className="text-xl sm:text-2xl font-bold">
                         {employeeItem ? "Editar Puesto de Personal" : "Contratación de Personal"}
                     </h2>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useEmployeeStore } from "../store/useEmployeeStore.js";
 import { useRestaurantStore } from "../../restaurants/store/useRestaurantStore.js";
 import { Spinner } from "../../../shared/components/layout/Spinner.jsx";
@@ -6,12 +6,16 @@ import { useEffect as useToastEffect } from "react";
 import { showError } from "../../../shared/utils/toast.js";
 import { EmployeeModal } from "./EmployeeModal.jsx";
 import { useUIStore } from "../../../shared/components/ui/store/uiStore.js";
+import { PencilLine, Trash2, Search, Filter, BadgeCheck } from "lucide-react";
+import { LucideMotionIcon } from "../../../shared/components/ui/LucideMotionIcon.jsx";
 
 export const Employees = () => {
     const { employees, loading, error, getEmployees, deleteEmployee } = useEmployeeStore();
     const { restaurants, getRestaurants } = useRestaurantStore();
     const [openModal, setOpenModal] = useState(false);
     const [selectedEmployee, setSelectedEmployee] = useState(null);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [restaurantFilter, setRestaurantFilter] = useState("all");
     const { openConfirm } = useUIStore();
 
     useEffect(() => {
@@ -23,7 +27,19 @@ export const Employees = () => {
         if (error) showError(error);
     }, [error]);
 
-    const activeEmployees = employees.filter((e) => e.isActive === true);
+    const filteredEmployees = useMemo(() => {
+        return employees.filter((emp) => {
+            if (!emp.isActive) return false;
+
+            const matchesSearch = (emp.fullName || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                 (emp.specialty || "").toLowerCase().includes(searchTerm.toLowerCase());
+            
+            const restaurantId = typeof emp.restaurant === "object" ? emp.restaurant?._id : emp.restaurant;
+            const matchesRestaurant = restaurantFilter === "all" || restaurantId === restaurantFilter;
+
+            return matchesSearch && matchesRestaurant;
+        });
+    }, [employees, searchTerm, restaurantFilter]);
 
     const getRestaurantName = (restaurantField) => {
         if (!restaurantField) return "Sin asignar";
@@ -34,7 +50,7 @@ export const Employees = () => {
         return found ? found.name : "Cargando sucursal...";
     };
 
-    if (loading && activeEmployees.length === 0) return <Spinner />;
+    if (loading && filteredEmployees.length === 0) return <Spinner />;
 
     return (
         <div className="p-4">
@@ -60,6 +76,64 @@ export const Employees = () => {
                 </button>
             </div>
 
+            {/* BUSCADOR Y FILTROS */}
+            <div className="mb-6 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-4 shadow-sm">
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                    <div className="flex-1">
+                        <label className="block text-sm font-semibold text-[var(--text-primary)] mb-2">
+                            <span className="inline-flex items-center gap-2">
+                                <LucideMotionIcon icon={Search} />
+                                Buscar personal
+                            </span>
+                        </label>
+                        <div className="relative">
+                            <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-[var(--text-muted)]">
+                                <LucideMotionIcon icon={Search} className="!w-4 !h-4 md:!w-5 md:!h-5 text-[var(--text-muted)]" />
+                            </span>
+                            <input
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                placeholder="Buscar por nombre o especialidad..."
+                                className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-base)] pl-10 pr-4 py-2.5 text-sm text-[var(--text-primary)] outline-none transition focus:border-[var(--color-brand-dark)] placeholder:text-[var(--text-muted)]"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="w-full lg:w-64">
+                        <label className="block text-sm font-semibold text-[var(--text-primary)] mb-2">
+                            <span className="inline-flex items-center gap-2">
+                                <LucideMotionIcon icon={Filter} />
+                                Restaurante
+                            </span>
+                        </label>
+                        <select
+                            value={restaurantFilter}
+                            onChange={(e) => setRestaurantFilter(e.target.value)}
+                            className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-base)] px-4 py-2.5 text-sm text-[var(--text-primary)] outline-none transition focus:border-[var(--color-brand-dark)]"
+                        >
+                            <option value="all">Todos los restaurantes</option>
+                            {restaurants?.map((r) => (
+                                <option key={r._id} value={r._id}>{r.name}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setSearchTerm("");
+                            setRestaurantFilter("all");
+                        }}
+                        className="rounded-xl border border-[var(--border-color)] px-4 py-2.5 text-sm font-medium text-[var(--text-secondary)] transition hover:bg-[var(--bg-base)]"
+                    >
+                        <span className="inline-flex items-center gap-2">
+                            <LucideMotionIcon icon={BadgeCheck} className="!w-4 !h-4 md:!w-5 md:!h-5 text-[var(--text-secondary)]" />
+                            Limpiar
+                        </span>
+                    </button>
+                </div>
+            </div>
+
             {/* TABLA RESPONSIVE CARD */}
             <div className="bg-[var(--bg-surface)] rounded-xl shadow-md border border-[var(--border-color)] overflow-x-auto">
                 <table className="w-full text-left border-collapse">
@@ -72,8 +146,8 @@ export const Employees = () => {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-[var(--border-color)]">
-                        {activeEmployees.length > 0 ? (
-                            activeEmployees.map((emp) => (
+                        {filteredEmployees.length > 0 ? (
+                            filteredEmployees.map((emp) => (
                                 <tr key={emp._id} className="hover:bg-[var(--bg-base)] transition-colors align-middle">
 
                                     {/* Nombre Completo extraído directo de MongoDB */}
@@ -99,16 +173,17 @@ export const Employees = () => {
                                     <td className="px-6 py-4 text-center whitespace-nowrap">
                                         <div className="flex items-center justify-center gap-4">
                                             <button
-                                                className=" hover:text-[var(--color-brand-yellow)] font-medium text-sm flex items-center gap-1.5 transition cursor-pointer"
+                                                className="inline-flex items-center gap-2 text-[var(--color-brand-yellow)] hover:opacity-75 font-medium text-sm transition cursor-pointer"
                                                 onClick={() => {
                                                     setSelectedEmployee(emp);
                                                     setOpenModal(true);
                                                 }}
                                             >
-                                                ✏️ <span>Editar</span>
+                                                <LucideMotionIcon icon={PencilLine} className="!w-4 !h-4 text-[var(--color-brand-yellow)]" />
+                                                <span>Editar</span>
                                             </button>
                                             <button
-                                                className="text-[var(--color-brand-red)] hover:text-[var(--color-brand-red-dark)] font-medium text-sm flex items-center gap-1.5 transition cursor-pointer"
+                                                className="inline-flex items-center gap-2 text-[var(--color-brand-red)] hover:text-[var(--color-brand-red-dark)] font-medium text-sm transition cursor-pointer"
                                                 onClick={() =>
                                                     openConfirm({
                                                         title: "Dar de Baja Empleado",
@@ -117,7 +192,8 @@ export const Employees = () => {
                                                     })
                                                 }
                                             >
-                                                🗑️ <span>Eliminar</span>
+                                                <LucideMotionIcon icon={Trash2} className="!w-4 !h-4 text-[var(--color-brand-red)]" />
+                                                <span>Eliminar</span>
                                             </button>
                                         </div>
                                     </td>

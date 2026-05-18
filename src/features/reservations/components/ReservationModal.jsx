@@ -2,6 +2,9 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useSaveReservation } from "../hooks/UseSaveReservation";
 import { useReservationStore } from "../store/useReservationStore";
+import { useClientStore } from "../../clients/store/useClientStore.js";
+import { useRestaurantStore } from "../../restaurants/store/useRestaurantStore.js";
+import { useTableStore } from "../../tables/store/useTableStore.js";
 import { Spinner } from "../../../shared/components/layout/Spinner.jsx";
 
 export const ReservationModal = ({ isOpen, onClose, reservation }) => {
@@ -14,9 +17,16 @@ export const ReservationModal = ({ isOpen, onClose, reservation }) => {
 
     const { saveReservation } = useSaveReservation();
     const loading = useReservationStore((state) => state.loading);
+    const { clients, getClients } = useClientStore();
+    const { restaurants, getRestaurants } = useRestaurantStore();
+    const { tables, getTables } = useTableStore();
 
     useEffect(() => {
         if (isOpen) {
+            getClients();
+            getRestaurants({ isActive: true, limit: 100 });
+            getTables({ isActive: true, limit: 100 });
+
             if (reservation) {
                 const dateObj = new Date(reservation.reservationDate);
                 const formattedDate = dateObj.toISOString().slice(0, 16);
@@ -44,7 +54,7 @@ export const ReservationModal = ({ isOpen, onClose, reservation }) => {
                 });
             }
         }
-    }, [isOpen, reservation, reset]);
+    }, [isOpen, reservation, reset, getClients, getRestaurants, getTables]);
 
     const onSubmit = async (data) => {
         try {
@@ -60,9 +70,9 @@ export const ReservationModal = ({ isOpen, onClose, reservation }) => {
 
     return (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50 px-3 sm:px-4">
-            <div className="bg-[var(--bg-surface)] rounded-2xl shadow-2xl w-full max-w-lg md:max-w-2xl max-h-[90vh] flex flex-col overflow-hidden border border-[var(--border-color)] transition-colors duration-300">
+            <div className="w-full max-w-lg md:max-w-2xl overflow-hidden rounded-2xl bg-[var(--bg-surface)] text-[var(--text-primary)] shadow-2xl transition-colors duration-300">
                 {/* HEADER */}
-                <div className="p-4 sm:p-5 bg-[var(--bg-surface-alt)] text-[var(--text-primary)] border-b border-[var(--border-color)] sticky top-0 z-10 transition-colors duration-300">
+                <div className="bg-[linear-gradient(90deg,var(--main-blue)_0%,#1956a3_100%)] p-4 sm:p-5 text-white sticky top-0 z-10 transition-colors duration-300">
                     <h2 className="text-xl sm:text-2xl font-bold">
                         {reservation ? "Editar Reservación" : "Nueva Reservación"}
                     </h2>
@@ -77,44 +87,51 @@ export const ReservationModal = ({ isOpen, onClose, reservation }) => {
                     className="p-4 sm:p-6 space-y-5 overflow-y-auto"
                 >
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {/* ID del Cliente */}
-                        {/*
                         <div className="flex flex-col">
-                            <label className="text-sm font-semibold text-[var(--text-secondary)] mb-1">
-                                ID Cliente
-                            </label>
-                            <input
+                            <label className="text-sm font-semibold text-[var(--text-secondary)] mb-1">Cliente</label>
+                            <select
                                 className="w-full px-3 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--ring-color)] transition"
-                                placeholder="Ej. usr_J4RUy..."
-                                {...register("client", { required: "El cliente es obligatorio" })}
-                            />
+                                {...register("client", { required: "El cliente es requerido" })}
+                            >
+                                <option value="">Seleccione un cliente</option>
+                                {clients.map((client) => (
+                                    <option key={client._id} value={client._id}>
+                                        {client.name || client.username || client.email}
+                                    </option>
+                                ))}
+                            </select>
                             {errors.client && <p className="text-[var(--color-brand-red)] text-xs mt-1">{errors.client.message}</p>}
                         </div>
-                        */}
 
-                        {/* ID del Restaurante */}
                         <div className="flex flex-col">
-                            <label className="text-sm font-semibold text-[var(--text-secondary)] mb-1">
-                                ID Restaurante
-                            </label>
-                            <input
+                            <label className="text-sm font-semibold text-[var(--text-secondary)] mb-1">Restaurante</label>
+                            <select
                                 className="w-full px-3 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--ring-color)] transition"
-                                placeholder="Ej. 69a4ebb..."
-                                {...register("restaurant", { required: "El restaurante es obligatorio" })}
-                            />
+                                {...register("restaurant", { required: "El restaurante es requerido" })}
+                            >
+                                <option value="">Seleccione un restaurante</option>
+                                {restaurants.map((restaurant) => (
+                                    <option key={restaurant._id} value={restaurant._id}>
+                                        {restaurant.name}
+                                    </option>
+                                ))}
+                            </select>
                             {errors.restaurant && <p className="text-[var(--color-brand-red)] text-xs mt-1">{errors.restaurant.message}</p>}
                         </div>
 
-                        {/* ID de la Mesa */}
                         <div className="flex flex-col">
-                            <label className="text-sm font-semibold text-[var(--text-secondary)] mb-1">
-                                ID Mesa
-                            </label>
-                            <input
+                            <label className="text-sm font-semibold text-[var(--text-secondary)] mb-1">Mesa</label>
+                            <select
                                 className="w-full px-3 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--ring-color)] transition"
-                                placeholder="Ej. 69a4ebf..."
                                 {...register("table", { required: "La mesa es requerida" })}
-                            />
+                            >
+                                <option value="">Seleccione una mesa</option>
+                                {tables.map((table) => (
+                                    <option key={table._id} value={table._id}>
+                                        Mesa {table.tableNumber} {table.restaurant?.name ? `- ${table.restaurant.name}` : ""}
+                                    </option>
+                                ))}
+                            </select>
                             {errors.table && <p className="text-[var(--color-brand-red)] text-xs mt-1">{errors.table.message}</p>}
                         </div>
 
@@ -126,7 +143,10 @@ export const ReservationModal = ({ isOpen, onClose, reservation }) => {
                             <input
                                 type="datetime-local"
                                 className="w-full px-3 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--ring-color)] transition"
-                                {...register("reservationDate", { required: "La fecha y hora son obligatorias" })}
+                                {...register("reservationDate", {
+                                    required: "La fecha y hora son requeridas",
+                                    validate: value => new Date(value) > new Date() || "La fecha de reservación no puede ser en el pasado"
+                                })}
                             />
                             {errors.reservationDate && <p className="text-[var(--color-brand-red)] text-xs mt-1">{errors.reservationDate.message}</p>}
                         </div>
@@ -140,8 +160,10 @@ export const ReservationModal = ({ isOpen, onClose, reservation }) => {
                                 type="number"
                                 className="w-full px-3 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--ring-color)] transition"
                                 {...register("numberOfPeople", {
-                                    required: "Requerido",
-                                    min: { value: 1, message: "Mínimo 1 persona" }
+                                    required: "El número de personas es requerido",
+                                    valueAsNumber: true,
+                                    min: { value: 1, message: "El número de personas debe ser entre 1 y 20" },
+                                    max: { value: 20, message: "El número de personas debe ser entre 1 y 20" }
                                 })}
                             />
                             {errors.numberOfPeople && <p className="text-[var(--color-brand-red)] text-xs mt-1">{errors.numberOfPeople.message}</p>}
@@ -156,10 +178,12 @@ export const ReservationModal = ({ isOpen, onClose, reservation }) => {
                                 type="number"
                                 className="w-full px-3 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--ring-color)] transition"
                                 {...register("durationInMinutes", {
-                                    required: "Requerido",
-                                    min: { value: 15, message: "Mínimo 15 mins" }
+                                    required: "La duración es requerida",
+                                    valueAsNumber: true,
+                                    min: { value: 15, message: "Mínimo 15 minutos" }
                                 })}
                             />
+                            {errors.durationInMinutes && <p className="text-[var(--color-brand-red)] text-xs mt-1">{errors.durationInMinutes.message}</p>}
                         </div>
 
                         {/* Estado */}

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useInventoryStore } from "../store/useInventoryStore.js";
 import { useRestaurantStore } from "../../restaurants/store/useRestaurantStore.js";
 import { Spinner } from "../../../shared/components/layout/Spinner.jsx";
@@ -6,12 +6,16 @@ import { useEffect as useToastEffect } from "react";
 import { showError } from "../../../shared/utils/toast.js";
 import { InventoryModal } from "./InventoryModal.jsx";
 import { useUIStore } from "../../../shared/components/ui/store/uiStore.js";
+import { PencilLine, Trash2, Search, Filter, BadgeCheck } from "lucide-react";
+import { LucideMotionIcon } from "../../../shared/components/ui/LucideMotionIcon.jsx";
 
 export const Inventories = () => {
     const { inventories, loading, error, getInventories, deleteInventory } = useInventoryStore();
     const { restaurants, getRestaurants } = useRestaurantStore();
     const [openModal, setOpenModal] = useState(false);
     const [selectedItem, setSelectedItem] = useState(null);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [restaurantFilter, setRestaurantFilter] = useState("all");
     const { openConfirm } = useUIStore();
 
     useEffect(() => {
@@ -23,7 +27,18 @@ export const Inventories = () => {
         if (error) showError(error);
     }, [error]);
 
-    const activeItems = inventories.filter((i) => i.isActive === true);
+    const filteredItems = useMemo(() => {
+        return inventories.filter((item) => {
+            if (!item.isActive) return false;
+
+            const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
+            
+            const restaurantId = typeof item.restaurant === "object" ? item.restaurant?._id : item.restaurant;
+            const matchesRestaurant = restaurantFilter === "all" || restaurantId === restaurantFilter;
+
+            return matchesSearch && matchesRestaurant;
+        });
+    }, [inventories, searchTerm, restaurantFilter]);
 
     const getRestaurantName = (restaurantField) => {
         if (!restaurantField) return "N/A";
@@ -34,7 +49,7 @@ export const Inventories = () => {
         return found ? found.name : "Cargando...";
     };
 
-    if (loading && activeItems.length === 0) return <Spinner />;
+    if (loading && inventories.length === 0) return <Spinner />;
 
     return (
         <div className="p-4">
@@ -60,6 +75,64 @@ export const Inventories = () => {
                 </button>
             </div>
 
+            {/* BUSCADOR Y FILTROS */}
+            <div className="mb-6 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-4 shadow-sm">
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                    <div className="flex-1">
+                        <label className="block text-sm font-semibold text-[var(--text-primary)] mb-2">
+                            <span className="inline-flex items-center gap-2">
+                                <LucideMotionIcon icon={Search} />
+                                Buscar en inventario
+                            </span>
+                        </label>
+                        <div className="relative">
+                            <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-[var(--text-muted)]">
+                                <LucideMotionIcon icon={Search} className="!w-4 !h-4 md:!w-5 md:!h-5 text-[var(--text-muted)]" />
+                            </span>
+                            <input
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                placeholder="Buscar por nombre de producto..."
+                                className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-base)] pl-10 pr-4 py-2.5 text-sm text-[var(--text-primary)] outline-none transition focus:border-[var(--color-brand-dark)] placeholder:text-[var(--text-muted)]"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="w-full lg:w-64">
+                        <label className="block text-sm font-semibold text-[var(--text-primary)] mb-2">
+                            <span className="inline-flex items-center gap-2">
+                                <LucideMotionIcon icon={Filter} />
+                                Restaurante
+                            </span>
+                        </label>
+                        <select
+                            value={restaurantFilter}
+                            onChange={(e) => setRestaurantFilter(e.target.value)}
+                            className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-base)] px-4 py-2.5 text-sm text-[var(--text-primary)] outline-none transition focus:border-[var(--color-brand-dark)]"
+                        >
+                            <option value="all">Todos los restaurantes</option>
+                            {restaurants?.map((r) => (
+                                <option key={r._id} value={r._id}>{r.name}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setSearchTerm("");
+                            setRestaurantFilter("all");
+                        }}
+                        className="rounded-xl border border-[var(--border-color)] px-4 py-2.5 text-sm font-medium text-[var(--text-secondary)] transition hover:bg-[var(--bg-base)]"
+                    >
+                        <span className="inline-flex items-center gap-2">
+                            <LucideMotionIcon icon={BadgeCheck} className="!w-4 !h-4 md:!w-5 md:!h-5 text-[var(--text-secondary)]" />
+                            Limpiar
+                        </span>
+                    </button>
+                </div>
+            </div>
+
             {/* TABLA RESPONSIVE */}
             <div className="bg-[var(--bg-surface)] rounded-xl shadow-md border border-[var(--border-color)] overflow-x-auto">
                 <table className="w-full text-left border-collapse">
@@ -73,8 +146,8 @@ export const Inventories = () => {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-[var(--border-color)]">
-                        {activeItems.length > 0 ? (
-                            activeItems.map((item) => {
+                        {filteredItems.length > 0 ? (
+                            filteredItems.map((item) => {
                                 // 🚨 Lógica de Alerta de Stock Bajo
                                 const isLowStock = item.quantity <= (item.minStock || 5);
 
@@ -104,16 +177,17 @@ export const Inventories = () => {
                                         </td>
                                         <td className="px-6 py-4 flex gap-3 justify-center">
                                             <button
-                                                className=" hover:text-[var(--color-brand-yellow)] font-medium transition cursor-pointer"
+                                                className="inline-flex items-center gap-2 text-[var(--color-brand-yellow)] hover:opacity-75 font-medium transition cursor-pointer"
                                                 onClick={() => {
                                                     setSelectedItem(item);
                                                     setOpenModal(true);
                                                 }}
                                             >
-                                                ✏️ Editar
+                                                <LucideMotionIcon icon={PencilLine} className="!w-4 !h-4 text-[var(--color-brand-yellow)]" />
+                                                Editar
                                             </button>
                                             <button
-                                                className="text-[var(--color-brand-red)] hover:text-[var(--color-brand-red-dark)] font-medium transition cursor-pointer"
+                                                className="inline-flex items-center gap-2 text-[var(--color-brand-red)] hover:text-[var(--color-brand-red-dark)] font-medium transition cursor-pointer"
                                                 onClick={() =>
                                                     openConfirm({
                                                         title: "Eliminar Ingrediente",
@@ -122,7 +196,8 @@ export const Inventories = () => {
                                                     })
                                                 }
                                             >
-                                                🗑️ Eliminar
+                                                <LucideMotionIcon icon={Trash2} className="!w-4 !h-4 text-[var(--color-brand-red)]" />
+                                                Eliminar
                                             </button>
                                         </td>
                                     </tr>

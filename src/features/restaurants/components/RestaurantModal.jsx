@@ -216,10 +216,10 @@ export const RestaurantModal = ({ isOpen, onClose, restaurant }) => {
                                 <p className="text-red-600 text-xs mt-1">{errors.status.message}</p>
                             )}
                             <div className="mt-2 rounded-lg border border-dashed border-[var(--border-color)] bg-[var(--bg-base)] px-3 py-2 text-xs text-[var(--text-muted)]">
-                                <span className={`inline-flex items-center gap-2 rounded-full px-2.5 py-1 font-semibold ${isInactiveStatus ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"}`}>
+                                <span className={`inline-flex items-center gap-2 rounded-full px-2.5 py-1 font-semibold ${isInactiveStatus ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400" : "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"}`}>
                                     <LucideMotionIcon
                                         icon={Info}
-                                        className={isInactiveStatus ? "!w-4 !h-4 md:!w-5 md:!h-5 text-red-700 dark:text-[#F1D302]" : "!w-4 !h-4 md:!w-5 md:!h-5 text-green-700 dark:text-[#F1D302]"}
+                                        className={isInactiveStatus ? "!w-4 !h-4 md:!w-5 md:!h-5 text-red-700 dark:text-[var(--color-brand-yellow)]" : "!w-4 !h-4 md:!w-5 md:!h-5 text-green-700 dark:text-[var(--color-brand-yellow)]"}
                                     />
                                     {isInactiveStatus ? "Inactivo" : "Activo"}
                                 </span>
@@ -393,7 +393,7 @@ export const RestaurantModal = ({ isOpen, onClose, restaurant }) => {
                         <button
                             type="button"
                             onClick={onClose}
-                            className="w-full sm:w-auto px-4 py-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition"
+                            className="w-full sm:w-auto px-4 py-2 rounded-lg bg-[var(--bg-surface-alt)] text-[var(--text-primary)] hover:opacity-80 transition"
                         >
                             Cancelar
                         </button>

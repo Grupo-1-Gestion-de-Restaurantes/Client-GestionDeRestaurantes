@@ -178,8 +178,8 @@ export const deletePromotion = async (id) => {
 }
 
 // Notificaciones
-export const getNotifications = async () => {
-    return axiosAdmin.get("/notifications/");
+export const getNotifications = async (params = {}) => {
+    return axiosAdmin.get("/notifications/", { params });
 }
 
 export const markNotificationAsRead = async (id) => {

@@ -6,6 +6,8 @@ import { showError } from "../../../shared/utils/toast.js";
 import { useUIStore } from "../../../shared/components/ui/store/uiStore.js";
 import { useRestaurantStore } from "../../restaurants/store/useRestaurantStore.js"; 
 import { useDishStore } from "../../dishes/store/useDishStore.js"; // Lo mismo para platillos
+import { Trash2 } from "lucide-react";
+import { LucideMotionIcon } from "../../../shared/components/ui/LucideMotionIcon.jsx";
 
 export const Comments = () => {
     const { comments, loading, error, getComments, deleteComment } = useCommentStore();
@@ -93,7 +95,7 @@ export const Comments = () => {
 
                                         <td className="px-6 py-4 text-sm">
                                             {restaurantName ? (
-                                                <span className="inline-flex items-center bg-blue-100 text-xs font-semibold px-2.5 py-1 rounded-md dark:bg-blue-900/30  border border-blue-200 dark:border-blue-800/50">
+                                                <span className="inline-flex items-center bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 text-xs font-semibold px-2.5 py-1 rounded-md border border-blue-200 dark:border-blue-800/50">
                                                     {restaurantName}
                                                 </span>
                                             ) : dishName ? (
@@ -113,7 +115,7 @@ export const Comments = () => {
                                         
                                         <td className="px-6 py-4 text-center whitespace-nowrap">
                                             <button
-                                                className="text-[var(--color-brand-red)] hover:text-[var(--color-brand-red)] hover:underline font-medium text-sm transition cursor-pointer"
+                                                className="inline-flex items-center gap-2 text-[var(--color-brand-red)] hover:text-[var(--color-brand-red-dark)] hover:underline font-medium text-sm transition cursor-pointer"
                                                 onClick={() =>
                                                     openConfirm({
                                                         title: "Ocultar Comentario",
@@ -122,7 +124,8 @@ export const Comments = () => {
                                                     })
                                                 }
                                             >
-                                                🗑️ Elminar
+                                                <LucideMotionIcon icon={Trash2} className="!w-4 !h-4 text-[var(--color-brand-red)]" />
+                                                Eliminar
                                             </button>
                                         </td>
                                     </tr>

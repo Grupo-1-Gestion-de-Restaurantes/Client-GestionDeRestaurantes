@@ -1,20 +1,28 @@
 import { useState, useEffect } from "react";
 import { useOrderStore } from "../store/useOrdersStore.js";
+import { useClientStore } from "../../clients/store/useClientStore.js";
+import { useRestaurantStore } from "../../restaurants/store/useRestaurantStore.js";
 import { Spinner } from "../../../shared/components/layout/Spinner.jsx";
 import { useEffect as useToastEffect } from "react";
 import { showError } from "../../../shared/utils/toast.js";
 import { OrderModal } from "../components/OrderModal.jsx";
 import { useUIStore } from "../../../shared/components/ui/store/uiStore.js";
+import { PencilLine, Trash2, Search, Plus, Filter, BadgeCheck } from "lucide-react";
+import { LucideMotionIcon } from "../../../shared/components/ui/LucideMotionIcon.jsx";
 
 export const Orders = () => {
-    const { orders, loading, error, getOrders, deleteOrder, updateOrder } = useOrderStore();
+    const { orders, loading, error, getOrders, deleteOrder, updateOrder, updateOrderStatus } = useOrderStore();
+    const { clients, getClients } = useClientStore();
+    const { restaurants, getRestaurants } = useRestaurantStore();
     const [openModal, setOpenModal] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState(null);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [activeFilter, setActiveFilter] = useState("all");
     const { openConfirm } = useUIStore();
 
     const handleStatusChange = async (orderId, newStatus) => {
         try {
-            await updateOrder(orderId, { status: newStatus });
+            await updateOrderStatus(orderId, { status: newStatus });
 
             console.log("¡Estado actualizado con éxito!");
         } catch (error) {
@@ -25,6 +33,8 @@ export const Orders = () => {
 
     useEffect(() => {
         getOrders();
+        getClients();
+        getRestaurants({ isActive: true, limit: 100 });
     }, [getOrders]);
 
     useToastEffect(() => {
@@ -33,21 +43,45 @@ export const Orders = () => {
 
     const getStatusStyle = (status) => {
         switch (status) {
-            case 'CONFIRMADO': return 'bg-green-100 text-green-800';
-            case 'EN_CAMINO': return 'bg-blue-100 text-blue-800';
-            case 'LISTO_PARA_RECOGER': return 'bg-indigo-100 text-indigo-800';
-            case 'PENDIENTE': return 'bg-yellow-100 text-yellow-800';
-            case 'CANCELADO': return 'bg-red-100 text-red-800';
-            case 'ENTREGADO': return 'bg-green-200 text-green-900';
-            case 'EN_PREPARACION': return 'bg-orange-100 text-orange-800';
-            default: return 'bg-gray-100 text-gray-800';
+            case 'CONFIRMADO': return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400';
+            case 'EN_CAMINO': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400';
+            case 'LISTO_PARA_RECOGER': return 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400';
+            case 'PENDIENTE': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400';
+            case 'CANCELADO': return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400';
+            case 'ENTREGADO': return 'bg-green-200 text-green-900 dark:bg-green-900/40 dark:text-green-300';
+            case 'EN_PREPARACION': return 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400';
+            default: return 'bg-gray-100 text-gray-800 dark:bg-zinc-800 dark:text-zinc-300';
         }
     };
 
-    // Filtramos las órdenes activas
-    const activeOrders = orders.filter((order) => order.isActive !== false);
+    const getClientName = (client) => {
+        if (client && typeof client === "object") {
+            return client.name || client.username || "N/A";
+        }
 
-    if (loading && activeOrders.length === 0) return <Spinner />;
+        const foundClient = clients.find((item) => item._id === client);
+        return foundClient?.name || foundClient?.username || "N/A";
+    };
+
+    const getRestaurantName = (restaurant) => {
+        if (restaurant && typeof restaurant === "object") {
+            return restaurant.name || "N/A";
+        }
+
+        const foundRestaurant = restaurants.find((item) => item._id === restaurant);
+        return foundRestaurant?.name || "N/A";
+    };
+
+    // Filtramos las órdenes
+    const displayedOrders = orders.filter((order) => {
+        if (order.isActive === false) return false;
+        if (activeFilter !== "all" && order.status !== activeFilter) return false;
+        
+        const clientName = getClientName(order.client).toLowerCase();
+        return clientName.includes(searchTerm.toLowerCase());
+    });
+
+    if (loading && orders.length === 0) return <Spinner />;
 
     return (
         <div className="p-4">
@@ -69,8 +103,73 @@ export const Orders = () => {
                     }}
                     className="px-4 py-2 rounded-lg font-medium transition-all duration-300 shadow bg-[var(--color-brand-dark)] text-white border border-transparent hover:bg-[var(--color-brand-red)] dark:bg-[var(--bg-surface-alt)] dark:text-[var(--text-primary)] dark:border-[var(--border-color)] dark:hover:bg-[var(--color-brand-yellow)] dark:hover:text-[var(--color-brand-dark)] dark:hover:border-transparent"
                 >
-                    + Agregar Pedido
+                    <span className="inline-flex items-center gap-2">
+                        <LucideMotionIcon icon={Plus} className="!w-4 !h-4 md:!w-5 md:!h-5 text-white dark:text-[var(--text-primary)]" />
+                        Agregar Pedido
+                    </span>
                 </button>
+            </div>
+
+            {/* BUSCADOR Y FILTROS */}
+            <div className="mb-6 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-4 shadow-sm">
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                    <div className="flex-1">
+                        <label className="block text-sm font-semibold text-[var(--text-primary)] mb-2">
+                            <span className="inline-flex items-center gap-2">
+                                <LucideMotionIcon icon={Search} />
+                                Buscar pedidos
+                            </span>
+                        </label>
+                        <div className="relative">
+                            <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-[var(--text-muted)]">
+                                <LucideMotionIcon icon={Search} className="!w-4 !h-4 md:!w-5 md:!h-5 text-[var(--text-muted)] dark:text-[var(--text-muted)] hover:translate-y-0 hover:scale-100 group-hover:translate-y-0 group-hover:scale-100" />
+                            </span>
+                            <input
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                placeholder="Buscar por nombre de cliente..."
+                                className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-base)] pl-10 pr-4 py-2.5 text-sm text-[var(--text-primary)] outline-none transition focus:border-[var(--color-brand-dark)] placeholder:text-[var(--text-muted)]"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="w-full lg:w-64">
+                        <label className="block text-sm font-semibold text-[var(--text-primary)] mb-2">
+                            <span className="inline-flex items-center gap-2">
+                                <LucideMotionIcon icon={Filter} />
+                                Estado
+                            </span>
+                        </label>
+                        <select
+                            value={activeFilter}
+                            onChange={(e) => setActiveFilter(e.target.value)}
+                            className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-base)] px-4 py-2.5 text-sm text-[var(--text-primary)] outline-none transition focus:border-[var(--color-brand-dark)]"
+                        >
+                            <option value="all">Todos los estados</option>
+                            <option value="PENDIENTE">PENDIENTE</option>
+                            <option value="CONFIRMADO">CONFIRMADO</option>
+                            <option value="EN_PREPARACION">EN PREPARACIÓN</option>
+                            <option value="LISTO_PARA_RECOGER">LISTO PARA RECOGER</option>
+                            <option value="EN_CAMINO">EN CAMINO</option>
+                            <option value="ENTREGADO">ENTREGADO</option>
+                            <option value="CANCELADO">CANCELADO</option>
+                        </select>
+                    </div>
+
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setSearchTerm("");
+                            setActiveFilter("all");
+                        }}
+                        className="rounded-xl border border-[var(--border-color)] px-4 py-2.5 text-sm font-medium text-[var(--text-secondary)] transition hover:bg-[var(--bg-base)]"
+                    >
+                        <span className="inline-flex items-center gap-2">
+                            <LucideMotionIcon icon={BadgeCheck} className="!w-4 !h-4 md:!w-5 md:!h-5 text-[var(--text-secondary)] dark:text-[var(--text-secondary)]" />
+                            Limpiar
+                        </span>
+                    </button>
+                </div>
             </div>
 
             {/* TABLA RESPONSIVE */}
@@ -80,6 +179,7 @@ export const Orders = () => {
                         <tr>
                             <th className="px-6 py-4 font-semibold">Fecha</th>
                             <th className="px-6 py-4 font-semibold">Cliente</th>
+                            <th className="px-6 py-4 font-semibold">Restaurante</th>
                             <th className="px-6 py-4 font-semibold">Tipo</th>
                             <th className="px-6 py-4 font-semibold">Total</th>
                             <th className="px-6 py-4 font-semibold">Estado</th>
@@ -87,14 +187,17 @@ export const Orders = () => {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-[var(--border-color)]">
-                        {activeOrders.length > 0 ? (
-                            activeOrders.map((order) => (
+                        {displayedOrders.length > 0 ? (
+                            displayedOrders.map((order) => (
                                 <tr key={order._id} className="hover:bg-[var(--bg-base)] transition-colors">
                                     <td className="px-6 py-4 text-sm text-[var(--text-primary)] whitespace-nowrap">
                                         {new Date(order.createdAt).toLocaleDateString()}
                                     </td>
                                     <td className="px-6 py-4 text-sm text-[var(--text-secondary)]">
-                                        {order.client?.name || order.client || "N/A"}
+                                        {getClientName(order.client)}
+                                    </td>
+                                    <td className="px-6 py-4 text-sm text-[var(--text-secondary)]">
+                                        {getRestaurantName(order.restaurant)}
                                     </td>
                                     <td className="px-6 py-4 text-sm text-[var(--text-secondary)]">
                                         <span className="text-xs font-mono bg-[var(--bg-base)] px-2 py-1 rounded">
@@ -121,7 +224,17 @@ export const Orders = () => {
                                     </td>
                                     <td className="px-6 py-4 flex gap-3 justify-center">
                                         <button
-                                            className="text-[var(--color-brand-red)] hover:text-[var(--color-brand-red-dark)] font-medium transition"
+                                            className="inline-flex items-center gap-2 text-[var(--color-brand-yellow)] hover:opacity-75 font-medium transition cursor-pointer"
+                                            onClick={() => {
+                                                setSelectedOrder(order);
+                                                setOpenModal(true);
+                                            }}
+                                        >
+                                            <LucideMotionIcon icon={PencilLine} className="!w-4 !h-4 text-[var(--color-brand-yellow)]" />
+                                            Editar
+                                        </button>
+                                        <button
+                                            className="inline-flex items-center gap-2 text-[var(--color-brand-red)] hover:text-[var(--color-brand-red-dark)] font-medium transition cursor-pointer"
                                             onClick={() =>
                                                 openConfirm({
                                                     title: "Eliminar Pedido",
@@ -130,14 +243,15 @@ export const Orders = () => {
                                                 })
                                             }
                                         >
-                                            🗑️ Eliminar
+                                            <LucideMotionIcon icon={Trash2} className="!w-4 !h-4 text-[var(--color-brand-red)]" />
+                                            Eliminar
                                         </button>
                                     </td>
                                 </tr>
                             ))
                         ) : (
                             <tr>
-                                <td colSpan="6" className="text-center py-8 text-[var(--text-muted)]">
+                                <td colSpan="7" className="text-center py-8 text-[var(--text-muted)]">
                                     No hay pedidos registrados.
                                 </td>
                             </tr>

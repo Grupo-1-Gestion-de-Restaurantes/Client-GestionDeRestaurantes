@@ -19,7 +19,7 @@ export const ThemeToggleButton = () => {
                 )}
             </div>
 
-            <span className="relative z-10 font-sans font-semibold text-xs uppercase tracking-widest text-primary opacity-80">
+            <span className="relative z-10 font-sans font-semibold text-xs uppercase tracking-widest text-[var(--text-primary)] opacity-80">
                 {isDark ? 'Light Mode' : 'Dark Mode'}
             </span>
         </button>

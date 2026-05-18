@@ -9,6 +9,10 @@ export const createOrder = async (data) => {
 }
 
 export const updateOrder = async (id, data) => {
+    return await axiosAdmin.put(`/orders/update-admin/${id}`, data);
+}
+
+export const updateOrderStatus = async (id, data) => {
     return await axiosAdmin.put(`/orders/${id}/status`, data);
 }
 

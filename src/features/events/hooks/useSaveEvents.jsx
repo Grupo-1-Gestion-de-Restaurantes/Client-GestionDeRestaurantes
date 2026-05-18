@@ -15,6 +15,9 @@ export const useSaveEvent = () => {
             dateTime: new Date(data.dateTime).toISOString(),
             // Manejo de arrays opcionales en tu esquema de Mongoose
             additionalServices: data.additionalServices || [],
+            assignedTables: data.assignedTables || [],
+            specialDishes: data.specialDishes || [],
+            assignedEmployees: data.assignedEmployees || [],
             activePromotions: data.activePromotions ? [data.activePromotions] : [] 
         };
 

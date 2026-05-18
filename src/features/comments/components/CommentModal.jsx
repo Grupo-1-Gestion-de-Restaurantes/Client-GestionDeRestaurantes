@@ -48,14 +48,14 @@ export const CommentModal = ({ isOpen, onClose, commentItem }) => {
 
     return (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50 px-3 sm:px-4">
-            <div className="bg-[var(--bg-surface)] rounded-2xl shadow-2xl w-full max-w-lg md:max-w-2xl max-h-[90vh] flex flex-col overflow-hidden border border-[var(--border-color)] transition-colors duration-300">
+            <div className="bg-[var(--bg-surface)] rounded-2xl shadow-2xl w-full max-w-lg md:max-w-xl max-h-[90vh] flex flex-col overflow-hidden border border-[var(--border-color)] transition-colors duration-300">
                 {/* HEADER */}
-                <div className="p-4 sm:p-5 bg-[var(--bg-surface-alt)] text-[var(--text-primary)] border-b border-[var(--border-color)] sticky top-0 z-10 transition-colors duration-300">
+                <div className="p-4 sm:p-5 bg-[linear-gradient(90deg,var(--main-blue)_0%,#1956a3_100%)] text-white sticky top-0 z-10 transition-colors duration-300">
                     <h2 className="text-xl sm:text-2xl font-bold">
                         {commentItem ? "Editar Comentario / Reseña" : "Nuevo Comentario / Reseña"}
                     </h2>
                     <p className="text-xs sm:text-sm opacity-80">
-                        Modifica u otorga las calificaciones del servicio o platillos
+                        Visualiza o modera los comentarios de los clientes
                     </p>
                 </div>
 
@@ -72,7 +72,7 @@ export const CommentModal = ({ isOpen, onClose, commentItem }) => {
                             </label>
                             <select
                                 className="w-full px-3 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--ring-color)] transition"
-                                {...register("review", { required: "La calificación es obligatoria" })}
+                                {...register("review", { required: "La calificación es obligatoria", valueAsNumber: true })}
                             >
                                 <option value={5}>⭐⭐⭐⭐⭐ (5) Excelente</option>
                                 <option value={4}>⭐⭐⭐⭐ (4) Bueno</option>

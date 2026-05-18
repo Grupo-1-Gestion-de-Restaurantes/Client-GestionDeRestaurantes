@@ -59,18 +59,18 @@ export const Restaurants = () => {
 
     const getStatusStyle = (status) => {
         switch (status) {
-            case "Abierto":          return "bg-green-100 text-green-800";
-            case "Cerrado":          return "bg-red-100 text-red-800";
-            case "En Mantenimiento": return "bg-yellow-100 text-yellow-800";
-            default:                 return "bg-gray-100 text-gray-800";
+            case "Abierto":          return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400";
+            case "Cerrado":          return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400";
+            case "En Mantenimiento": return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400";
+            default:                 return "bg-gray-100 text-gray-800 dark:bg-zinc-800 dark:text-zinc-300";
         }
     };
 
     const getCategoryStyle = (category) => {
         switch (category) {
-            case "Gourmet": return "bg-purple-100 text-purple-800";
-            case "Casual":  return "bg-blue-100 text-blue-800";
-            default:        return "bg-gray-100 text-gray-800";
+            case "Gourmet": return "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400";
+            case "Casual":  return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400";
+            default:        return "bg-gray-100 text-gray-800 dark:bg-zinc-800 dark:text-zinc-300";
         }
     };
 
@@ -272,7 +272,7 @@ export const Restaurants = () => {
                                     {/* Rating */}
                                     <td className="px-6 py-4 text-sm text-[var(--text-secondary)] whitespace-nowrap">
                                         <span className="inline-flex items-center gap-1">
-                                            <LucideMotionIcon icon={Star} className="!w-4 !h-4 md:!w-5 md:!h-5 text-yellow-500 dark:text-[#F1D302] hover:translate-y-0 hover:scale-100" />
+                                            <LucideMotionIcon icon={Star} className="!w-4 !h-4 md:!w-5 md:!h-5 text-yellow-500 dark:text-[var(--color-brand-yellow)] hover:translate-y-0 hover:scale-100" />
                                             {renderRating(restaurant.rating)}
                                         </span>
                                         <span className="ml-2 align-middle">{restaurant.rating}/5</span>
@@ -292,8 +292,8 @@ export const Restaurants = () => {
                                     <td className="px-6 py-4">
                                         <span className={`px-3 py-1 text-xs rounded-full font-medium ${
                                             restaurant.isActive
-                                                ? "bg-green-100 text-green-800"
-                                                : "bg-red-100 text-red-800"
+                                                ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                                                : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
                                         }`}>
                                             {restaurant.isActive ? "Activo" : "Inactivo"}
                                         </span>
@@ -310,7 +310,7 @@ export const Restaurants = () => {
                                                 }}
                                             >
                                                 <span className="inline-flex items-center gap-2">
-                                                    <LucideMotionIcon icon={PencilLine} className="!w-4 !h-4 md:!w-5 md:!h-5 text-[var(--color-brand-dark)] dark:text-[#F1D302]" />
+                                                    <LucideMotionIcon icon={PencilLine} className="!w-4 !h-4 md:!w-5 md:!h-5 text-[var(--color-brand-dark)] dark:text-[var(--color-brand-yellow)]" />
                                                     Editar
                                                 </span>
                                             </button>
@@ -326,7 +326,7 @@ export const Restaurants = () => {
                                                     }
                                                 >
                                                     <span className="inline-flex items-center gap-2">
-                                                        <LucideMotionIcon icon={Ban} className="!w-4 !h-4 md:!w-5 md:!h-5 text-[var(--color-brand-red)] dark:text-[#F1D302]" />
+                                                        <LucideMotionIcon icon={Ban} className="!w-4 !h-4 md:!w-5 md:!h-5 text-[var(--color-brand-red)] dark:text-[var(--color-brand-yellow)]" />
                                                         Cerrar
                                                     </span>
                                                 </button>
@@ -342,7 +342,7 @@ export const Restaurants = () => {
                                                     }
                                                 >
                                                     <span className="inline-flex items-center gap-2">
-                                                        <LucideMotionIcon icon={CircleCheckBig} className="!w-4 !h-4 md:!w-5 md:!h-5 text-green-700 dark:text-[#F1D302]" />
+                                                        <LucideMotionIcon icon={CircleCheckBig} className="!w-4 !h-4 md:!w-5 md:!h-5 text-green-700 dark:text-[var(--color-brand-yellow)]" />
                                                         Activar
                                                     </span>
                                                 </button>
