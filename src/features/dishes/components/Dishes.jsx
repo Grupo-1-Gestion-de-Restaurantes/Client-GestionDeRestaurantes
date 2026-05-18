@@ -7,6 +7,8 @@ import { useEffect as useToastEffect } from "react";
 import { showError } from "../../../shared/utils/toast.js";
 import { DishModal } from "./DishModal.jsx";
 import { useUIStore } from "../../../shared/components/ui/store/uiStore.js";
+import { PencilLine, Trash2 } from "lucide-react";
+import { LucideMotionIcon } from "../../../shared/components/ui/LucideMotionIcon.jsx";
 
 export const Dishes = () => {
     const { dishes, loading, error, getDishes, deleteDish } = useDishStore();
@@ -160,16 +162,17 @@ export const Dishes = () => {
                                     <td className="px-6 py-4 text-center whitespace-nowrap">
                                         <div className="flex items-center justify-center gap-4">
                                             <button
-                                                className="hover:text-[var(--color-brand-yellow)] font-medium text-sm flex items-center gap-1 transition cursor-pointer"
+                                                className="inline-flex items-center gap-2 text-[var(--color-brand-yellow)] hover:opacity-75 font-medium text-sm transition cursor-pointer"
                                                 onClick={() => {
                                                     setSelectedDish(dishItem);
                                                     setOpenModal(true);
                                                 }}
                                             >
-                                                ✏️ Editar
+                                                <LucideMotionIcon icon={PencilLine} className="!w-4 !h-4 text-[var(--color-brand-yellow)]" />
+                                                Editar
                                             </button>
                                             <button
-                                                className="text-[var(--color-brand-red)] hover:text-[var(--color-brand-red-dark)] font-medium text-sm flex items-center gap-1 transition cursor-pointer"
+                                                className="inline-flex items-center gap-2 text-[var(--color-brand-red)] hover:text-[var(--color-brand-red-dark)] font-medium text-sm transition cursor-pointer"
                                                 onClick={() =>
                                                     openConfirm({
                                                         title: "Eliminar Platillo",
@@ -178,7 +181,8 @@ export const Dishes = () => {
                                                     })
                                                 }
                                             >
-                                                🗑️ Eliminar
+                                                <LucideMotionIcon icon={Trash2} className="!w-4 !h-4 text-[var(--color-brand-red)]" />
+                                                Eliminar
                                             </button>
                                         </div>
                                     </td>
