@@ -8,11 +8,22 @@ export const useCommentStore = create((set, get) => ({
     comments: [],
     loading: false,
     error: null,
+    filters: {
+        searchTerm: "",
+        activeFilter: "all",
+        restaurantFilter: ""
+    },
 
-    getComments: async () => {
+    setFilters: (newFilters) => {
+        set((state) => ({
+            filters: { ...state.filters, ...newFilters }
+        }));
+    },
+
+    getComments: async (params = {}) => {
         try {
             set({ loading: true, error: null });
-            const response = await getCommentsRequest();  
+            const response = await getCommentsRequest(params);
             set({
                 comments: response.data.data || response.data,
                 loading: false
@@ -31,10 +42,8 @@ export const useCommentStore = create((set, get) => ({
             set({ loading: true, error: null });
             await deleteCommentRequest(id);
 
-            set({
-                comments: get().comments.filter(c => c._id !== id),
-                loading: false
-            });
+            // Recargar la lista completa usando los filtros actuales para mantener la consistencia
+            await get().getComments(get().filters);
         } catch (error) {
             set({
                 loading: false,

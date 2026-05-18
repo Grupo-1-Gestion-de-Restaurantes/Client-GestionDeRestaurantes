@@ -16,7 +16,7 @@ export const useReservationStore = create((set, get) => ({
             set({ loading: true, error: null });
             const response = await getReservationsRequest();
             console.log(response.data)
-            
+
             set({
                 reservations: response.data.data || response.data,
                 loading: false
@@ -32,17 +32,14 @@ export const useReservationStore = create((set, get) => ({
     createReservation: async (data) => {
         try {
             set({ loading: true, error: null });
-            const response = await createReservationRequest(data);
-            console.log(response.data)
+            await createReservationRequest(data);
 
-            set({
-                reservations: [response.data.data || response.data, ...get().reservations],
-                loading: false
-            });
+            // Refrescar la lista de reservaciones tras crear una nueva
+            await get().getReservations();
         } catch (error) {
             set({
                 loading: false,
-                error: error.response?.data?.message || "Error al crear reservación."
+                error: error.response?.data?.message || "Error al crear la reservación."
             });
             throw error;
         }
@@ -51,15 +48,10 @@ export const useReservationStore = create((set, get) => ({
     updateReservation: async (id, data) => {
         try {
             set({ loading: true, error: null });
-            const response = await updateReservationRequest(id, data);
-            const updated = response.data.data || response.data;
+            await updateReservationRequest(id, data);
 
-            set({
-                reservations: get().reservations.map((r) =>
-                    r._id === id ? updated : r
-                ),
-                loading: false
-            });
+            // Refrescar la lista de reservaciones tras actualizar una
+            await get().getReservations();
         } catch (error) {
             set({
                 loading: false,
@@ -74,14 +66,12 @@ export const useReservationStore = create((set, get) => ({
             set({ loading: true, error: null });
             await deleteReservationRequest(id);
 
-            set({
-                reservations: get().reservations.filter(r => r._id !== id),
-                loading: false
-            });
+            // Refrescar la lista de reservaciones tras eliminar una
+            await get().getReservations();
         } catch (error) {
             set({
                 loading: false,
-                error: error.response?.data?.message || "Error al eliminar reservación."
+                error: error.response?.data?.message || "Error al eliminar la reservación."
             });
             throw error;
         }

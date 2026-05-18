@@ -9,11 +9,21 @@ export const useRestaurantStore = create((set, get) => ({
     restaurants: [],
     loading: false,
     error: null,
+    filters: {
+        searchTerm: "",
+        activeFilter: "all"
+    },
 
-    getRestaurants: async (filters = {}) => {
+    setFilters: (newFilters) => {
+        set((state) => ({
+            filters: { ...state.filters, ...newFilters }
+        }));
+    },
+
+    getRestaurants: async (params = {}) => {
         try {
             set({ loading: true, error: null });
-            const response = await getRestaurantsRequest(filters);
+            const response = await getRestaurantsRequest(params);
 
             set({
                 restaurants: response.data.data || response.data || [],
@@ -31,12 +41,9 @@ export const useRestaurantStore = create((set, get) => ({
         try {
             set({ loading: true, error: null });
             const response = await createRestaurantRequest(formData);
-            const newRestaurant = response.data.data || response.data;
 
-            set({
-                restaurants: [newRestaurant, ...get().restaurants],
-                loading: false
-            });
+            // Recargar la lista completa usando los filtros actuales para mantener la consistencia
+            await get().getRestaurants(get().filters);
         } catch (error) {
             set({
                 loading: false,
@@ -48,15 +55,10 @@ export const useRestaurantStore = create((set, get) => ({
     updateRestaurant: async (id, data) => {
         try {
             set({ loading: true, error: null });
-            const response = await updateRestaurantRequest(id, data);
-            const updated = response.data.data || response.data;
+            await updateRestaurantRequest(id, data);
 
-            set({
-                restaurants: get().restaurants.map((r) =>
-                    r._id === id ? updated : r
-                ),
-                loading: false
-            });
+            // Recargar la lista completa usando los filtros actuales para mantener la consistencia
+            await get().getRestaurants(get().filters);
         } catch (error) {
             set({
                 loading: false,
@@ -68,18 +70,13 @@ export const useRestaurantStore = create((set, get) => ({
     deactivateRestaurant: async (id) => {
         try {
             set({ loading: true, error: null });
-            const response = await updateRestaurantRequest(id, {
+            await updateRestaurantRequest(id, {
                 isActive: false,
                 status: "Cerrado",
             });
-            const updatedRestaurant = response.data.data || response.data;
 
-            set({
-                restaurants: get().restaurants.map((restaurant) =>
-                    restaurant._id === id ? updatedRestaurant : restaurant
-                ),
-                loading: false
-            });
+            // Recargar la lista completa usando los filtros actuales para mantener la consistencia
+            await get().getRestaurants(get().filters);
         } catch (error) {
             set({
                 loading: false,

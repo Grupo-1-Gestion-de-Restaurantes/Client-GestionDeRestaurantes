@@ -10,12 +10,23 @@ export const useDishStore = create((set, get) => ({
     dishes: [],
     loading: false,
     error: null,
+    filters: {
+        searchTerm: "",
+        activeFilter: "all",
+        dishTypeFilter: ""
+    },
 
-    getDishes: async () => {
+    setFilters: (newFilters) => {
+        set((state) => ({
+            filters: { ...state.filters, ...newFilters }
+        }));
+    },
+
+    getDishes: async (params = {}) => {
         try {
             set({ loading: true, error: null });
-            const response = await getDishesRequest();
-            
+            const response = await getDishesRequest(params);
+
             set({
                 dishes: response.data.data || response.data,
                 loading: false
@@ -31,12 +42,10 @@ export const useDishStore = create((set, get) => ({
     createDish: async (formData) => {
         try {
             set({ loading: true, error: null });
-            const response = await createDishRequest(formData);
+            await createDishRequest(formData);
 
-            set({
-                dishes: [response.data.data || response.data, ...get().dishes],
-                loading: false
-            });
+            // Recargar la lista completa usando los filtros actuales
+            await get().getDishes(get().filters);
         } catch (error) {
             set({
                 loading: false,
@@ -49,15 +58,10 @@ export const useDishStore = create((set, get) => ({
     updateDish: async (id, formData) => {
         try {
             set({ loading: true, error: null });
-            const response = await updateDishRequest(id, formData);
-            const updated = response.data.data || response.data;
+            await updateDishRequest(id, formData);
 
-            set({
-                dishes: get().dishes.map((d) =>
-                    d._id === id ? updated : d
-                ),
-                loading: false
-            });
+            // Recargar la lista completa usando los filtros actuales
+            await get().getDishes(get().filters);
         } catch (error) {
             set({
                 loading: false,
@@ -72,10 +76,8 @@ export const useDishStore = create((set, get) => ({
             set({ loading: true, error: null });
             await deleteDishRequest(id);
 
-            set({
-                dishes: get().dishes.filter(d => d._id !== id),
-                loading: false
-            });
+            // Recargar la lista completa usando los filtros actuales
+            await get().getDishes(get().filters);
         } catch (error) {
             set({
                 loading: false,

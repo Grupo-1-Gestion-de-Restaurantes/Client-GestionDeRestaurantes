@@ -32,13 +32,10 @@ export const usePromotionStore = create((set, get) => ({
 	createPromotion: async (data) => {
 		try {
 			set({ loading: true, error: null });
-			const response = await createPromotionRequest(data);
-			const newPromotion = response.data.data || response.data;
+			await createPromotionRequest(data);
 
-			set({
-				promotions: [newPromotion, ...get().promotions],
-				loading: false,
-			});
+			// Refrescar la lista de promociones tras crear una nueva
+			await get().getPromotions();
 		} catch (error) {
 			set({
 				loading: false,
@@ -50,15 +47,10 @@ export const usePromotionStore = create((set, get) => ({
 	updatePromotion: async (id, data) => {
 		try {
 			set({ loading: true, error: null });
-			const response = await updatePromotionRequest(id, data);
-			const updatedPromotion = response.data.data || response.data;
+			await updatePromotionRequest(id, data);
 
-			set({
-				promotions: get().promotions.map((promotion) =>
-					promotion._id === id ? updatedPromotion : promotion
-				),
-				loading: false,
-			});
+			// Refrescar la lista de promociones tras actualizar una
+			await get().getPromotions();
 		} catch (error) {
 			set({
 				loading: false,
@@ -70,15 +62,10 @@ export const usePromotionStore = create((set, get) => ({
 	deactivatePromotion: async (id) => {
 		try {
 			set({ loading: true, error: null });
-			const response = await deletePromotionRequest(id);
-			const updatedPromotion = response.data.data || response.data;
+			await deletePromotionRequest(id);
 
-			set({
-				promotions: get().promotions.map((promotion) =>
-					promotion._id === id ? updatedPromotion : promotion
-				),
-				loading: false,
-			});
+			// Refrescar la lista de promociones tras desactivar una
+			await get().getPromotions();
 		} catch (error) {
 			set({
 				loading: false,
@@ -90,15 +77,10 @@ export const usePromotionStore = create((set, get) => ({
 	activatePromotion: async (id) => {
 		try {
 			set({ loading: true, error: null });
-			const response = await activatePromotionRequest(id);
-			const updatedPromotion = response.data.data || response.data;
+			await activatePromotionRequest(id);
 
-			set({
-				promotions: get().promotions.map((promotion) =>
-					promotion._id === id ? updatedPromotion : promotion
-				),
-				loading: false,
-			});
+			// Refrescar la lista de promociones tras activar una
+			await get().getPromotions();
 		} catch (error) {
 			set({
 				loading: false,

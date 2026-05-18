@@ -1,34 +1,49 @@
 import { useState, useEffect } from "react";
 import { useDishStore } from "../store/useDishStore.js";
 import { useRestaurantStore } from "../../restaurants/store/useRestaurantStore.js";
-import { useInventoryStore } from "../../inventories/store/useInventoryStore.js"; 
+import { useInventoryStore } from "../../inventories/store/useInventoryStore.js";
 import { Spinner } from "../../../shared/components/layout/Spinner.jsx";
 import { useEffect as useToastEffect } from "react";
 import { showError } from "../../../shared/utils/toast.js";
 import { DishModal } from "./DishModal.jsx";
 import { useUIStore } from "../../../shared/components/ui/store/uiStore.js";
-import { PencilLine, Trash2 } from "lucide-react";
+import { PencilLine, Trash2, Search, Filter, BadgeCheck, Plus } from "lucide-react";
 import { LucideMotionIcon } from "../../../shared/components/ui/LucideMotionIcon.jsx";
 
 export const Dishes = () => {
-    const { dishes, loading, error, getDishes, deleteDish } = useDishStore();
+    const { dishes, loading, error, filters, setFilters, getDishes, deleteDish } = useDishStore();
+    const { searchTerm, activeFilter, dishTypeFilter } = filters;
     const { restaurants, getRestaurants } = useRestaurantStore();
-    const { inventories, getInventories } = useInventoryStore(); 
+    const { inventories, getInventories } = useInventoryStore();
     const [openModal, setOpenModal] = useState(false);
     const [selectedDish, setSelectedDish] = useState(null);
     const { openConfirm } = useUIStore();
 
     useEffect(() => {
-        getDishes();
+        const timeoutId = setTimeout(() => {
+            const params = {
+                search: searchTerm.trim(),
+                dishType: dishTypeFilter
+            };
+
+            if (activeFilter !== "all") {
+                params.isActive = activeFilter === "active";
+            }
+
+            getDishes(params);
+        }, 250);
+
+        return () => clearTimeout(timeoutId);
+    }, [getDishes, activeFilter, searchTerm, dishTypeFilter]);
+
+    useEffect(() => {
         if (getRestaurants) getRestaurants();
         if (getInventories) getInventories();
-    }, [getDishes, getRestaurants, getInventories]);
+    }, [getRestaurants, getInventories]);
 
     useToastEffect(() => {
         if (error) showError(error);
     }, [error]);
-
-    const activeDishes = dishes.filter((d) => d.isActive === true);
 
     const getRestaurantName = (restaurantField) => {
         if (!restaurantField) return "N/A";
@@ -55,7 +70,11 @@ export const Dishes = () => {
         return `Inventario (${String(itemField).substring(0, 5)}...)`;
     };
 
-    if (loading && activeDishes.length === 0) return <Spinner />;
+    if (loading && dishes.length === 0) return <Spinner />;
+
+    const emptyMessage = searchTerm.trim() || activeFilter !== "all" || dishTypeFilter
+        ? "No hay platillos con esos filtros."
+        : "No hay platillos registrados.";
 
     return (
         <div className="p-4">
@@ -77,8 +96,87 @@ export const Dishes = () => {
                     }}
                     className="px-4 py-2 rounded-lg font-medium transition-all duration-300 shadow bg-[var(--color-brand-dark)] text-white border border-transparent hover:bg-[var(--color-brand-red)] dark:bg-[var(--bg-surface-alt)] dark:text-[var(--text-primary)] dark:border-[var(--border-color)] dark:hover:bg-[var(--color-brand-yellow)] dark:hover:text-[var(--color-brand-dark)] dark:hover:border-transparent"
                 >
-                    + Agregar Platillo
+                    <span className="inline-flex items-center gap-2">
+                        <LucideMotionIcon icon={Plus} className="!w-4 !h-4 md:!w-5 md:!h-5 text-white dark:text-[var(--text-primary)]" />
+                        Agregar Platillo
+                    </span>
                 </button>
+            </div>
+
+            {/* BUSCADOR Y FILTROS */}
+            <div className="mb-6 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-4 shadow-sm">
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                    <div className="flex-1">
+                        <label className="block text-sm font-semibold text-[var(--text-primary)] mb-2">
+                            <span className="inline-flex items-center gap-2">
+                                <LucideMotionIcon icon={Search} />
+                                Buscar platillos
+                            </span>
+                        </label>
+                        <div className="relative">
+                            <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-[var(--text-muted)]">
+                                <LucideMotionIcon icon={Search} className="!w-4 !h-4 md:!w-5 md:!h-5 text-[var(--text-muted)] dark:text-[var(--text-muted)] hover:translate-y-0 hover:scale-100 group-hover:translate-y-0 group-hover:scale-100" />
+                            </span>
+                            <input
+                                value={searchTerm}
+                                onChange={(e) => setFilters({ searchTerm: e.target.value })}
+                                placeholder="Buscar por nombre o descripción"
+                                className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-base)] pl-10 pr-4 py-2.5 text-sm text-[var(--text-primary)] outline-none transition focus:border-[var(--color-brand-dark)] placeholder:text-[var(--text-muted)]"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="w-full lg:w-48">
+                        <label className="block text-sm font-semibold text-[var(--text-primary)] mb-2">
+                            <span className="inline-flex items-center gap-2">
+                                <LucideMotionIcon icon={Filter} />
+                                Tipo
+                            </span>
+                        </label>
+                        <select
+                            value={dishTypeFilter}
+                            onChange={(e) => setFilters({ dishTypeFilter: e.target.value })}
+                            className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-base)] px-4 py-2.5 text-sm text-[var(--text-primary)] outline-none transition focus:border-[var(--color-brand-dark)]"
+                        >
+                            <option value="">Cualquier Tipo</option>
+                            <option value="ENTRADA">Entrada</option>
+                            <option value="PLATO_FUERTE">Plato Fuerte</option>
+                            <option value="POSTRE">Postre</option>
+                            <option value="BEBIDA">Bebida</option>
+                        </select>
+                    </div>
+
+                    <div className="w-full lg:w-48">
+                        <label className="block text-sm font-semibold text-[var(--text-primary)] mb-2">
+                            <span className="inline-flex items-center gap-2">
+                                <LucideMotionIcon icon={Filter} />
+                                Mostrar
+                            </span>
+                        </label>
+                        <select
+                            value={activeFilter}
+                            onChange={(e) => setFilters({ activeFilter: e.target.value })}
+                            className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-base)] px-4 py-2.5 text-sm text-[var(--text-primary)] outline-none transition focus:border-[var(--color-brand-dark)]"
+                        >
+                            <option value="active">Activos</option>
+                            <option value="inactive">Inactivos</option>
+                            <option value="all">Todos</option>
+                        </select>
+                    </div>
+
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setFilters({ searchTerm: "", activeFilter: "all", dishTypeFilter: "" });
+                        }}
+                        className="rounded-xl border border-[var(--border-color)] px-4 py-2.5 text-sm font-medium text-[var(--text-secondary)] transition hover:bg-[var(--bg-base)]"
+                    >
+                        <span className="inline-flex items-center gap-2">
+                            <LucideMotionIcon icon={BadgeCheck} className="!w-4 !h-4 md:!w-5 md:!h-5 text-[var(--text-secondary)] dark:text-[var(--text-secondary)]" />
+                            Limpiar
+                        </span>
+                    </button>
+                </div>
             </div>
 
             {/* TABLA RESPONSIVE */}
@@ -91,12 +189,13 @@ export const Dishes = () => {
                             <th className="px-6 py-4 font-semibold">Restaurante</th>
                             <th className="px-6 py-4 font-semibold">Tipo</th>
                             <th className="px-6 py-4 font-semibold">Precio</th>
+                            <th className="px-6 py-4 font-semibold">Estado</th>
                             <th className="px-6 py-4 font-semibold text-center">Acciones</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-[var(--border-color)]">
-                        {activeDishes.length > 0 ? (
-                            activeDishes.map((dishItem) => (
+                        {dishes.length > 0 ? (
+                            dishes.map((dishItem) => (
                                 <tr key={dishItem._id} className="hover:bg-[var(--bg-base)] transition-colors align-middle">
                                     {/* Imagen */}
                                     <td className="px-6 py-4 whitespace-nowrap">
@@ -158,6 +257,21 @@ export const Dishes = () => {
                                         Q {Number(dishItem.price).toFixed(2)}
                                     </td>
 
+                                    {/* Estado */}
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        {dishItem.isActive ? (
+                                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                                                <span className="w-1.5 h-1.5 rounded-full bg-green-600"></span>
+                                                Activo
+                                            </span>
+                                        ) : (
+                                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
+                                                <span className="w-1.5 h-1.5 rounded-full bg-red-600"></span>
+                                                Inactivo
+                                            </span>
+                                        )}
+                                    </td>
+
                                     {/* Acciones */}
                                     <td className="px-6 py-4 text-center whitespace-nowrap">
                                         <div className="flex items-center justify-center gap-4">
@@ -190,8 +304,8 @@ export const Dishes = () => {
                             ))
                         ) : (
                             <tr>
-                                <td colSpan="6" className="text-center py-8 text-[var(--text-muted)] italic">
-                                    No hay platillos registrados en el menú.
+                                <td colSpan="7" className="text-center py-8 text-[var(--text-muted)] italic">
+                                    {emptyMessage}
                                 </td>
                             </tr>
                         )}

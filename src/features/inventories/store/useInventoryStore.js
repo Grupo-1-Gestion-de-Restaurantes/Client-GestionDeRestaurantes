@@ -31,12 +31,10 @@ export const useInventoryStore = create((set, get) => ({
     createInventory: async (data) => {
         try {
             set({ loading: true, error: null });
-            const response = await createInventoryRequest(data);
+            await createInventoryRequest(data);
 
-            set({
-                inventories: [response.data.data || response.data, ...get().inventories],
-                loading: false
-            });
+            // Refrescar la lista de inventarios tras crear uno nuevo
+            await get().getInventories();
         } catch (error) {
             set({
                 loading: false,
@@ -49,15 +47,10 @@ export const useInventoryStore = create((set, get) => ({
     updateInventory: async (id, data) => {
         try {
             set({ loading: true, error: null });
-            const response = await updateInventoryRequest(id, data);
-            const updated = response.data.data || response.data;
+            await updateInventoryRequest(id, data);
 
-            set({
-                inventories: get().inventories.map((i) =>
-                    i._id === id ? updated : i
-                ),
-                loading: false
-            });
+            // Refrescar la lista de inventarios tras actualizar uno
+            await get().getInventories();
         } catch (error) {
             set({
                 loading: false,
@@ -72,10 +65,8 @@ export const useInventoryStore = create((set, get) => ({
             set({ loading: true, error: null });
             await deleteInventoryRequest(id);
 
-            set({
-                inventories: get().inventories.filter(i => i._id !== id),
-                loading: false
-            });
+            // Refrescar la lista de inventarios tras eliminar uno
+            await get().getInventories();
         } catch (error) {
             set({
                 loading: false,

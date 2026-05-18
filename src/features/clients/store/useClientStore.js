@@ -10,11 +10,21 @@ export const useClientStore = create((set, get) => ({
     clients: [],
     loading: false,
     error: null,
+    filters: {
+        searchTerm: "",
+        activeFilter: "all"
+    },
 
-    getClients: async () => {
+    setFilters: (newFilters) => {
+        set((state) => ({
+            filters: { ...state.filters, ...newFilters }
+        }));
+    },
+
+    getClients: async (params = {}) => {
         try {
             set({ loading: true, error: null });
-            const response = await getClientsRequest();
+            const response = await getClientsRequest(params);
 
             set({
                 clients: response.data.data || response.data,
@@ -32,15 +42,10 @@ export const useClientStore = create((set, get) => ({
     updateClient: async (data) => {
         try {
             set({ loading: true, error: null });
-            const response = await updateClientRequest(data);
-            const updated = response.data.data || response.data;
+            await updateClientRequest(data);
 
-            set({
-                clients: get().clients.map((c) =>
-                    c._id === data._id ? updated : c
-                ),
-                loading: false
-            });
+            // Recargar la lista completa usando los filtros actuales
+            await get().getClients(get().filters);
         } catch (error) {
             set({
                 loading: false,
@@ -55,10 +60,8 @@ export const useClientStore = create((set, get) => ({
             set({ loading: true, error: null });
             await deleteClientRequest(id);
 
-            set({
-                clients: get().clients.filter(c => c._id !== id),
-                loading: false
-            });
+            // Recargar la lista completa usando los filtros actuales
+            await get().getClients(get().filters);
         } catch (error) {
             set({
                 loading: false,

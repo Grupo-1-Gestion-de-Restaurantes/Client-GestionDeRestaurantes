@@ -29,25 +29,26 @@ export const Restaurants = () => {
         restaurants,
         loading,
         error,
+        filters,
+        setFilters,
         getRestaurants,
         deactivateRestaurant,
         activateRestaurant,
     } = useRestaurantStore();
+    const { searchTerm, activeFilter } = filters;
     const [openModal, setOpenModal] = useState(false);
     const [selectedRestaurant, setSelectedRestaurant] = useState(null);
-    const [searchTerm, setSearchTerm] = useState("");
-    const [activeFilter, setActiveFilter] = useState("active");
     const { openConfirm } = useUIStore();
 
     useEffect(() => {
         const timeoutId = setTimeout(() => {
-            const filters = { search: searchTerm.trim() };
+            const params = { search: searchTerm.trim() };
 
             if (activeFilter !== "all") {
-                filters.isActive = activeFilter === "active";
+                params.isActive = activeFilter === "active";
             }
 
-            getRestaurants(filters);
+            getRestaurants(params);
         }, 250);
 
         return () => clearTimeout(timeoutId);
@@ -59,18 +60,18 @@ export const Restaurants = () => {
 
     const getStatusStyle = (status) => {
         switch (status) {
-            case "Abierto":          return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400";
-            case "Cerrado":          return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400";
+            case "Abierto": return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400";
+            case "Cerrado": return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400";
             case "En Mantenimiento": return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400";
-            default:                 return "bg-gray-100 text-gray-800 dark:bg-zinc-800 dark:text-zinc-300";
+            default: return "bg-gray-100 text-gray-800 dark:bg-zinc-800 dark:text-zinc-300";
         }
     };
 
     const getCategoryStyle = (category) => {
         switch (category) {
             case "Gourmet": return "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400";
-            case "Casual":  return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400";
-            default:        return "bg-gray-100 text-gray-800 dark:bg-zinc-800 dark:text-zinc-300";
+            case "Casual": return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400";
+            default: return "bg-gray-100 text-gray-800 dark:bg-zinc-800 dark:text-zinc-300";
         }
     };
 
@@ -90,7 +91,7 @@ export const Restaurants = () => {
         });
     };
 
-    const emptyMessage = searchTerm.trim() || activeFilter !== "active"
+    const emptyMessage = searchTerm.trim() || activeFilter !== "all"
         ? "No hay restaurantes con esos filtros."
         : "No hay restaurantes registrados.";
 
@@ -139,7 +140,7 @@ export const Restaurants = () => {
                             </span>
                             <input
                                 value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
+                                onChange={(e) => setFilters({ searchTerm: e.target.value })}
                                 placeholder="Buscar por nombre, dirección, categoría o estado"
                                 className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-base)] pl-10 pr-4 py-2.5 text-sm text-[var(--text-primary)] outline-none transition focus:border-[var(--color-brand-dark)] placeholder:text-[var(--text-muted)]"
                             />
@@ -155,7 +156,7 @@ export const Restaurants = () => {
                         </label>
                         <select
                             value={activeFilter}
-                            onChange={(e) => setActiveFilter(e.target.value)}
+                            onChange={(e) => setFilters({ activeFilter: e.target.value })}
                             className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-base)] px-4 py-2.5 text-sm text-[var(--text-primary)] outline-none transition focus:border-[var(--color-brand-dark)]"
                         >
                             <option value="active">Activos</option>
@@ -167,8 +168,7 @@ export const Restaurants = () => {
                     <button
                         type="button"
                         onClick={() => {
-                            setSearchTerm("");
-                            setActiveFilter("active");
+                            setFilters({ searchTerm: "", activeFilter: "all" });
                         }}
                         className="rounded-xl border border-[var(--border-color)] px-4 py-2.5 text-sm font-medium text-[var(--text-secondary)] transition hover:bg-[var(--bg-base)]"
                     >
@@ -290,11 +290,10 @@ export const Restaurants = () => {
 
                                     {/* isActive */}
                                     <td className="px-6 py-4">
-                                        <span className={`px-3 py-1 text-xs rounded-full font-medium ${
-                                            restaurant.isActive
+                                        <span className={`px-3 py-1 text-xs rounded-full font-medium ${restaurant.isActive
                                                 ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
                                                 : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
-                                        }`}>
+                                            }`}>
                                             {restaurant.isActive ? "Activo" : "Inactivo"}
                                         </span>
                                     </td>
