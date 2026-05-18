@@ -1,12 +1,11 @@
 import { Typography } from "@material-tailwind/react";
 import imgLogo from "../../../assets/img/logoExpress.png"
-import { ThemeToggleButton } from "../../../shared/components/ui/ThemeToggleButton.jsx";
 import { AvatarUser } from '../ui/AvatarUser';
 
 export const Navbar = () => {
     return (
         <nav className=" shadow-md z-50">
-            <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div className="w-full px-6 h-16 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                     <img
                         src={imgLogo}
@@ -17,7 +16,6 @@ export const Navbar = () => {
                         Express
                     </Typography>
                 </div>
-                <ThemeToggleButton />
                 <AvatarUser />
             </div>
         </nav>
