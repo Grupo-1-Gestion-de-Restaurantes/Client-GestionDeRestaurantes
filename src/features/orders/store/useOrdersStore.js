@@ -3,7 +3,8 @@ import {
     getOrders as getOrdersRequest,
     createOrder as createOrderRequest,
     updateOrder as updateOrderRequest,
-    deleteOrder as deleteOrderRequest
+    deleteOrder as deleteOrderRequest,
+    updateOrderStatus as updateOrderStatusRequest
 } from "../../../shared/api/orders.js";
 
 export const useOrderStore = create((set, get) => ({
@@ -60,6 +61,21 @@ export const useOrderStore = create((set, get) => ({
         } catch (error) {
             console.error("Error en store:", error);
             throw error; // Lanzamos el error para que el catch del componente lo vea
+        }
+    },
+
+    updateOrderStatus: async (id, data) => {
+        try {
+            const response = await updateOrderStatusRequest(id, data);
+
+            set((state) => ({
+                orders: state.orders.map((order) =>
+                    order._id === id ? { ...order, ...response.data.order } : order
+                ),
+            }));
+        } catch (error) {
+            console.error("Error en store status:", error);
+            throw error;
         }
     },
 
