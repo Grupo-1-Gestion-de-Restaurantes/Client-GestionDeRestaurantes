@@ -138,7 +138,11 @@ export const DishModal = ({ isOpen, onClose, dish }) => {
                             <input
                                 className="w-full px-3 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--ring-color)] transition"
                                 placeholder="Ej. Hamburguesa Doble"
-                                {...register("name", { required: "El nombre es obligatorio", maxLength: { value: 50, message: "Máximo 50 caracteres" } })}
+                                {...register("name", { 
+                                    required: "El nombre es obligatorio", 
+                                    minLength: { value: 2, message: "El nombre debe tener al menos 2 caracteres" },
+                                    maxLength: { value: 50, message: "Máximo 50 caracteres" } 
+                                })}
                             />
                             {errors.name && <p className="text-[var(--color-brand-red)] text-xs mt-1">{errors.name.message}</p>}
                         </div>
@@ -260,7 +264,11 @@ export const DishModal = ({ isOpen, onClose, dish }) => {
                             <textarea
                                 className="w-full px-3 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--ring-color)] transition min-h-[60px]"
                                 placeholder="Escribe los detalles o presentación del platillo..."
-                                {...register("description", { required: "La descripción es obligatoria", maxLength: { value: 500, message: "Máximo 500 caracteres" } })}
+                                {...register("description", { 
+                                    required: "La descripción es obligatoria", 
+                                    minLength: { value: 5, message: "La descripción debe tener al menos 5 caracteres" },
+                                    maxLength: { value: 500, message: "Máximo 500 caracteres" } 
+                                })}
                             />
                             {errors.description && <p className="text-[var(--color-brand-red)] text-xs mt-1">{errors.description.message}</p>}
                         </div>

@@ -104,7 +104,13 @@ export const ClientModal = ({ isOpen, onClose, client }) => {
                                 type="email"
                                 className="w-full px-3 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--ring-color)] transition"
                                 placeholder="ejemplo@correo.com"
-                                {...register("email", { required: "El correo es obligatorio" })}
+                                {...register("email", { 
+                                    required: "El correo es obligatorio",
+                                    pattern: {
+                                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                                        message: "Dirección de correo inválida"
+                                    }
+                                })}
                             />
                             {errors.email && <p className="text-[var(--color-brand-red)] text-xs mt-1">{errors.email.message}</p>}
                         </div>

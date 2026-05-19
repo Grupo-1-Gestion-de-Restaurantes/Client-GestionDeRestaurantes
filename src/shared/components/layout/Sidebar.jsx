@@ -1,5 +1,6 @@
 import { Link, useLocation } from "react-router-dom"
 import { ThemeToggleButton } from "../../../shared/components/ui/ThemeToggleButton.jsx";
+import { useAuthStore } from "../../../features/auth/store/useAuthStore.js";
 import {
     Users,
     MessageSquare,
@@ -21,6 +22,7 @@ import { LucideMotionIcon } from "../../../shared/components/ui/LucideMotionIcon
 
 export const Sidebar = () => {
     const location = useLocation();
+    const user = useAuthStore((state) => state.user);
 
     const items = [
         { label: "Clientes", to: "/dashboard/clients", icon: Users },
@@ -35,13 +37,19 @@ export const Sidebar = () => {
         { label: "Promociones", to: "/dashboard/promotions", icon: TicketPercent },
         { label: "Reservaciones", to: "/dashboard/reservations", icon: BookCheck },
         { label: "Mesas", to: "/dashboard/tables", icon: Table },
-        { label: "Restaurantes", to: "/dashboard/restaurants", icon: Store },
+        { label: "Restaurantes", to: "/dashboard/restaurants", icon: Store, adminOnly: true },
     ];
+
+    const filteredItems = items.filter(item => {
+        if (item.adminOnly && user?.role !== "ADMIN_ROLE") return false;
+        return true;
+    });
+
     return (
         <aside className="sidebar-container w-60 h-full flex flex-col flex-shrink-0">
             <nav className="flex-1 px-4 overflow-y-auto">
                 <ul className="space-y-2 pb-10">
-                    {items.map((item) => {
+                    {filteredItems.map((item) => {
                         const active = location.pathname === item.to;
                         return (
                             <li key={item.to}>

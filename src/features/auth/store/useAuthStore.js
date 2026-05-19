@@ -24,7 +24,7 @@ export const useAuthStore = create(
                 const token = get().token;
                 const role = get().user?.role;
 
-                if (token && role && role !== "ADMIN_ROLE") {
+                if (token && role && role !== "ADMIN_ROLE" && role !== "MANAGER_ROLE") {
                     set({
                         user: null,
                         token: null,
@@ -33,14 +33,14 @@ export const useAuthStore = create(
                         isAuthenticated: false,
                         isLoadingAuth: false,
                         loading: false,
-                        error: "No tienes permisos para acceder como administrador."
+                        error: "No tienes permisos para acceder al panel administrativo."
                     })
                     return;
                 }
 
                 set({
                     isLoadingAuth: false,
-                    isAuthenticated: Boolean(token) && (!role || role === "ADMIN_ROLE")
+                    isAuthenticated: Boolean(token) && (!role || role === "ADMIN_ROLE" || role === "MANAGER_ROLE")
                 })
             },
 
@@ -79,9 +79,9 @@ export const useAuthStore = create(
 
                     const role = data?.userDetails?.role;
 
-                    if (role !== "ADMIN_ROLE") {
+                    if (role !== "ADMIN_ROLE" && role !== "MANAGER_ROLE") {
                         const message =
-                            "No tienes permisos para acceder como administrador"
+                            "No tienes permisos para acceder al panel administrativo"
                         set({
                             user: null,
                             token: null,
