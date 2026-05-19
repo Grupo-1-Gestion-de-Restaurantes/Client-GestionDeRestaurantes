@@ -123,8 +123,12 @@ export const EventModal = ({ isOpen, onClose, eventItem }) => {
                             rows={3}
                             className="w-full px-3 py-1.5 text-sm rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none resize-none"
                             placeholder="Detalla de qué trata el evento gastronómico..."
-                            {...register("description", { required: "La descripción es requerida", maxLength: 50 })}
+                            {...register("description", { 
+                                required: "La descripción es requerida", 
+                                maxLength: { value: 500, message: "Máximo 500 caracteres" } 
+                            })}
                         />
+                        {errors.description && <p className="text-[var(--color-brand-red)] text-xs mt-1">{errors.description.message}</p>}
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
