@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { verifyEmail } from '../../../shared/api/auth'
 import { showSuccess, showError } from '../../../shared/utils/toast'
-import ExpressDark from "../../../assets/img/express-ligth-2.png"
+import ExpressDark from '../../../assets/img/Express-ligth-2.png'
 import { Icon } from '../../../shared/components/ui/Icons'
 
 export const VerifyEmailPage = () => {

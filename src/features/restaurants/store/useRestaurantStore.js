@@ -1,0 +1,110 @@
+import { create } from "zustand";
+import {
+    getRestaurants as getRestaurantsRequest,
+    createRestaurant as createRestaurantRequest,
+    updateRestaurant as updateRestaurantRequest,
+} from "../../../shared/api";
+
+export const useRestaurantStore = create((set, get) => ({
+    restaurants: [],
+    loading: false,
+    error: null,
+    filters: {
+        searchTerm: "",
+        activeFilter: "all"
+    },
+
+    setFilters: (newFilters) => {
+        set((state) => ({
+            filters: { ...state.filters, ...newFilters }
+        }));
+    },
+
+    getRestaurants: async (params = {}) => {
+        try {
+            set({ loading: true, error: null });
+            const response = await getRestaurantsRequest(params);
+
+            set({
+                restaurants: response.data.data || response.data || [],
+                loading: false
+            });
+        } catch (error) {
+            set({
+                error: error.response?.data?.message || "Error al obtener restaurantes",
+                loading: false
+            });
+        }
+    },
+
+    createRestaurant: async (formData) => {
+        try {
+            set({ loading: true, error: null });
+            const response = await createRestaurantRequest(formData);
+
+            // Recargar la lista completa usando los filtros actuales para mantener la consistencia
+            await get().getRestaurants(get().filters);
+        } catch (error) {
+            set({
+                loading: false,
+                error: error.response?.data?.message || "Error al crear restaurante."
+            });
+        }
+    },
+
+    updateRestaurant: async (id, data) => {
+        try {
+            set({ loading: true, error: null });
+            await updateRestaurantRequest(id, data);
+
+            // Recargar la lista completa usando los filtros actuales para mantener la consistencia
+            await get().getRestaurants(get().filters);
+        } catch (error) {
+            set({
+                loading: false,
+                error: error.response?.data?.message || "Error al actualizar el restaurante."
+            });
+        }
+    },
+
+    deactivateRestaurant: async (id) => {
+        try {
+            set({ loading: true, error: null });
+            await updateRestaurantRequest(id, {
+                isActive: false,
+                status: "Cerrado",
+            });
+
+            // Recargar la lista completa usando los filtros actuales para mantener la consistencia
+            await get().getRestaurants(get().filters);
+        } catch (error) {
+            set({
+                loading: false,
+                error: error.response?.data?.message || "Error al cerrar restaurante."
+            });
+        }
+    },
+
+    activateRestaurant: async (id) => {
+        try {
+            set({ loading: true, error: null });
+            const response = await updateRestaurantRequest(id, {
+                isActive: true,
+                status: "Abierto",
+            });
+            const updatedRestaurant = response.data.data || response.data;
+
+            set({
+                restaurants: get().restaurants.map((restaurant) =>
+                    restaurant._id === id ? updatedRestaurant : restaurant
+                ),
+                loading: false
+            });
+        } catch (error) {
+            set({
+                loading: false,
+                error: error.response?.data?.message || "Error al activar restaurante."
+            });
+        }
+    }
+}));

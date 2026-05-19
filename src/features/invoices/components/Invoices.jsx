@@ -1,11 +1,15 @@
-import { useEffect } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useInvoiceStore } from "../store/useInvoiceStore.js";
 import { Spinner } from "../../../shared/components/layout/Spinner.jsx";
 import { useEffect as useToastEffect } from "react";
 import { showError } from "../../../shared/utils/toast.js";
+import { Search, Filter, BadgeCheck } from "lucide-react";
+import { LucideMotionIcon } from "../../../shared/components/ui/LucideMotionIcon.jsx";
 
 export const Invoices = () => {
     const { invoices, loading, error, getInvoices } = useInvoiceStore();
+    const [searchTerm, setSearchTerm] = useState("");
+    const [paymentFilter, setPaymentFilter] = useState("all");
 
     useEffect(() => {
         getInvoices();
@@ -14,6 +18,37 @@ export const Invoices = () => {
     useToastEffect(() => {
         if (error) showError(error);
     }, [error]);
+
+    const filteredInvoices = useMemo(() => {
+        return invoices.filter((inv) => {
+            const matchesSearch = 
+                inv.invoiceNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                (inv.clientName || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+                (inv.restaurantName || "").toLowerCase().includes(searchTerm.toLowerCase());
+            
+            const matchesPayment = paymentFilter === "all" || inv.paymentMethod === paymentFilter;
+
+            return matchesSearch && matchesPayment;
+        });
+    }, [invoices, searchTerm, paymentFilter]);
+
+    const getClientName = (client, clientName) => {
+        if (clientName) return clientName;
+        if (client && typeof client === "object") {
+            return client.name || client.username || "N/A";
+        }
+        return "N/A";
+    };
+
+    const getRestaurantName = (restaurant, restaurantName) => {
+        if (restaurantName) return restaurantName;
+        if (restaurant && typeof restaurant === "object") {
+            return restaurant.name || "N/A";
+        }
+        return "N/A";
+    };
+
+    const getItemName = (item) => item.name || item.dish?.name || item.product?.name || "Plato sin nombre";
 
     if (loading && invoices.length === 0) return <Spinner />;
 
@@ -28,6 +63,63 @@ export const Invoices = () => {
                     <p className="text-[var(--text-muted)] text-sm mt-1">
                         Consulta las facturas emitidas (solo lectura)
                     </p>
+                </div>
+            </div>
+
+            {/* BUSCADOR Y FILTROS */}
+            <div className="mb-6 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-4 shadow-sm">
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                    <div className="flex-1">
+                        <label className="block text-sm font-semibold text-[var(--text-primary)] mb-2">
+                            <span className="inline-flex items-center gap-2">
+                                <LucideMotionIcon icon={Search} />
+                                Buscar facturas
+                            </span>
+                        </label>
+                        <div className="relative">
+                            <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-[var(--text-muted)]">
+                                <LucideMotionIcon icon={Search} className="!w-4 !h-4 md:!w-5 md:!h-5 text-[var(--text-muted)]" />
+                            </span>
+                            <input
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                placeholder="Buscar por No. Factura, cliente o restaurante..."
+                                className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-base)] pl-10 pr-4 py-2.5 text-sm text-[var(--text-primary)] outline-none transition focus:border-[var(--color-brand-dark)] placeholder:text-[var(--text-muted)]"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="w-full lg:w-64">
+                        <label className="block text-sm font-semibold text-[var(--text-primary)] mb-2">
+                            <span className="inline-flex items-center gap-2">
+                                <LucideMotionIcon icon={Filter} />
+                                Pago
+                            </span>
+                        </label>
+                        <select
+                            value={paymentFilter}
+                            onChange={(e) => setPaymentFilter(e.target.value)}
+                            className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-base)] px-4 py-2.5 text-sm text-[var(--text-primary)] outline-none transition focus:border-[var(--color-brand-dark)]"
+                        >
+                            <option value="all">Todos</option>
+                            <option value="EFECTIVO">Efectivo</option>
+                            <option value="TARJETA">Tarjeta</option>
+                        </select>
+                    </div>
+
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setSearchTerm("");
+                            setPaymentFilter("all");
+                        }}
+                        className="rounded-xl border border-[var(--border-color)] px-4 py-2.5 text-sm font-medium text-[var(--text-secondary)] transition hover:bg-[var(--bg-base)]"
+                    >
+                        <span className="inline-flex items-center gap-2">
+                            <LucideMotionIcon icon={BadgeCheck} className="!w-4 !h-4 md:!w-5 md:!h-5 text-[var(--text-secondary)]" />
+                            Limpiar
+                        </span>
+                    </button>
                 </div>
             </div>
 
@@ -46,8 +138,8 @@ export const Invoices = () => {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-[var(--border-color)]">
-                        {invoices.length > 0 ? (
-                            invoices.map((inv) => (
+                        {filteredInvoices.length > 0 ? (
+                            filteredInvoices.map((inv) => (
                                 <tr key={inv._id} className="hover:bg-[var(--bg-base)] transition-colors">
                                     <td className="px-6 py-4 text-sm font-medium text-[var(--text-primary)] whitespace-nowrap">
                                         {inv.invoiceNumber}
@@ -56,10 +148,10 @@ export const Invoices = () => {
                                         {new Date(inv.issuedAt).toLocaleString()}
                                     </td>
                                     <td className="px-6 py-4 text-sm text-[var(--text-secondary)]">
-                                        {inv.clientName || inv.client || "Consumidor Final"}
+                                        {getClientName(inv.client, inv.clientName)}
                                     </td>
                                     <td className="px-6 py-4 text-sm text-[var(--text-secondary)]">
-                                        {inv.restaurantName || inv.restaurant || "N/A"}
+                                        {getRestaurantName(inv.restaurant, inv.restaurantName)}
                                     </td>
                                     <td className="px-6 py-4 text-sm text-[var(--text-secondary)]">
                                         {inv.items && inv.items.length > 0 ? (
@@ -69,7 +161,7 @@ export const Invoices = () => {
                                                         key={index} 
                                                         className="inline-block px-2 py-1 text-xs bg-[var(--bg-surface-alt)] border border-[var(--border-color)] rounded-md whitespace-nowrap"
                                                     >
-                                                        {item.quantity}x {item.name} (${item.price})
+                                                        {item.quantity}x {getItemName(item)} (Q{item.price.toFixed(2)})
                                                     </span>
                                                 ))}
                                             </div>
@@ -78,7 +170,7 @@ export const Invoices = () => {
                                         )}
                                     </td>
                                     <td className="px-6 py-4">
-                                        <span className="px-3 py-1 text-xs rounded-full font-medium bg-gray-100 text-gray-800 border border-gray-200">
+                                        <span className={`px-3 py-1 text-xs rounded-full font-medium border ${inv.paymentMethod === 'TARJETA' ? 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800' : 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800'}`}>
                                             {inv.paymentMethod}
                                         </span>
                                     </td>

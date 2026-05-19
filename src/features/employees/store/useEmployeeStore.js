@@ -1,0 +1,78 @@
+import { create } from "zustand";
+import {
+    getEmployees as getEmployeesRequest,
+    createEmployee as createEmployeeRequest,
+    updateEmployee as updateEmployeeRequest,
+    deleteEmployee as deleteEmployeeRequest
+} from "../../../shared/api/";
+
+export const useEmployeeStore = create((set, get) => ({
+    employees: [],
+    loading: false,
+    error: null,
+
+    getEmployees: async () => {
+        try {
+            set({ loading: true, error: null });
+            const response = await getEmployeesRequest();
+
+            set({
+                employees: response.data.data || response.data,
+                loading: false
+            });
+        } catch (error) {
+            set({
+                error: error.response?.data?.message || "Error al obtener los empleados",
+                loading: false
+            });
+        }
+    },
+
+    createEmployee: async (formData) => {
+        try {
+            set({ loading: true, error: null });
+            await createEmployeeRequest(formData);
+
+            // Refrescar la lista de empleados tras crear uno nuevo
+            await get().getEmployees();
+        } catch (error) {
+            set({
+                loading: false,
+                error: error.response?.data?.message || "Error al registrar el empleado."
+            });
+            throw error;
+        }
+    },
+
+    updateEmployee: async (id, data) => {
+        try {
+            set({ loading: true, error: null });
+            await updateEmployeeRequest(id, data);
+
+            // Refrescar la lista de empleados tras actualizar uno
+            await get().getEmployees();
+        } catch (error) {
+            set({
+                loading: false,
+                error: error.response?.data?.message || "Error al actualizar el empleado."
+            });
+            throw error;
+        }
+    },
+
+    deleteEmployee: async (id) => {
+        try {
+            set({ loading: true, error: null });
+            await deleteEmployeeRequest(id);
+
+            // Refrescar la lista de empleados tras eliminar uno
+            await get().getEmployees();
+        } catch (error) {
+            set({
+                loading: false,
+                error: error.response?.data?.message || "Error al eliminar el empleado."
+            });
+            throw error;
+        }
+    }
+}));

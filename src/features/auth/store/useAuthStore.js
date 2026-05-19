@@ -23,9 +23,8 @@ export const useAuthStore = create(
             checkAuth: () => {
                 const token = get().token;
                 const role = get().user?.role;
-                const isAdmin = role === "ADMIN_ROLE";
 
-                if (token && !isAdmin) {
+                if (token && role && role !== "ADMIN_ROLE" && role !== "MANAGER_ROLE") {
                     set({
                         user: null,
                         token: null,
@@ -34,14 +33,14 @@ export const useAuthStore = create(
                         isAuthenticated: false,
                         isLoadingAuth: false,
                         loading: false,
-                        error: "No tienes permisos para acceder como administrador."
+                        error: "No tienes permisos para acceder al panel administrativo."
                     })
                     return;
                 }
 
                 set({
                     isLoadingAuth: false,
-                    isAuthenticated: Boolean(token) && isAdmin
+                    isAuthenticated: Boolean(token) && (!role || role === "ADMIN_ROLE" || role === "MANAGER_ROLE")
                 })
             },
 
@@ -76,12 +75,13 @@ export const useAuthStore = create(
                     set({ loading: true, error: null });
 
                     const { data } = await loginRequest({ emailOrUsername, password })
+                    const accessToken = data?.token || data?.accessToken || null;
 
                     const role = data?.userDetails?.role;
 
-                    if (role !== "ADMIN_ROLE") {
+                    if (role !== "ADMIN_ROLE" && role !== "MANAGER_ROLE") {
                         const message =
-                            "No tienes permisos para acceder como administrador"
+                            "No tienes permisos para acceder al panel administrativo"
                         set({
                             user: null,
                             token: null,
@@ -97,12 +97,33 @@ export const useAuthStore = create(
                         return { success: false, error: message }
                     }
 
+                    if (!accessToken) {
+                        const message =
+                            data?.requiresTwoFactor
+                                ? "Se requiere verificación de dos factores para completar el inicio de sesión"
+                                : "La respuesta de login no incluye token de acceso";
+
+                        set({
+                            user: data?.userDetails ?? null,
+                            token: null,
+                            refreshToken: null,
+                            expiresAt: data?.expiresAt ?? null,
+                            isAuthenticated: false,
+                            isLoadingAuth: false,
+                            loading: false,
+                            error: message
+                        });
+
+                        return { success: false, error: message };
+                    }
+
                     set({
                         user: data.userDetails,
-                        token: data.accessToken,
-                        refreshToken: data.refreshToken,
+                        token: accessToken,
+                        refreshToken: data.refreshToken ?? null,
                         expiresAt: data.expiresAt,
                         loading: false,
+                        isLoadingAuth: false,
                         isAuthenticated: true
                     })
 

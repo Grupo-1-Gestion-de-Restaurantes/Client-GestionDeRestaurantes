@@ -1,6 +1,24 @@
 import axios from "axios";
 import { useAuthStore } from "../../features/auth/store/useAuthStore";
 
+const AUTH_STORAGE_KEY = "auth-storage";
+
+const getTokenFromStorage = () => {
+    const persisted = localStorage.getItem(AUTH_STORAGE_KEY);
+    if (!persisted) {
+        return null;
+    }
+
+    try {
+        const parsed = JSON.parse(persisted);
+        return parsed?.state?.token ?? null;
+    } catch {
+        return null;
+    }
+};
+
+const getRequestToken = () => useAuthStore.getState().token || getTokenFromStorage();
+
 const axiosAuth = axios.create({
     baseURL: import.meta.env.VITE_AUTH_URL,
     timeout: 8000,
@@ -13,26 +31,55 @@ const axiosAdmin = axios.create({
     baseURL: import.meta.env.VITE_ADMIN_URL,
     timeout: 10000,
     headers: {
-        "Content-Type": "application/json"
+        "Content-Type": undefined
     }
 })
 
 
 axiosAuth.interceptors.request.use((config) => {
-    //config._axiosClient = "auth"
-    const token = useAuthStore.getState().token;
+    config._axiosClient = "auth";
+    const token = getRequestToken();
+    // Debug log temporal: indicar si hay token al hacer la request
+    try {
+        // Mostrar solamente presencia y primeros 8 caracteres para seguridad
+        const short = token ? token.slice(0, 8) + '...' : null;
+        // eslint-disable-next-line no-console
+        console.log('[API][auth][request]', { url: config.url, client: config._axiosClient, hasToken: !!token, tokenPreview: short });
+    } catch (e) {}
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
+        config.headers['x-token'] = token;
     }
 
     return config;
 })
 
 axiosAdmin.interceptors.request.use((config) => {
-    //config._axiosClient = "auth"
-    const token = useAuthStore.getState().token;
+    config._axiosClient = "admin";
+    const token = getRequestToken();
+    // Debug log temporal: indicar si hay token al hacer la request
+    try {
+        const short = token ? token.slice(0, 8) + '...' : null;
+        // eslint-disable-next-line no-console
+        console.log('[API][admin][request]', { url: config.url, client: config._axiosClient, hasToken: !!token, tokenPreview: short });
+    } catch (e) {}
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
+        config.headers['x-token'] = token;
+    }
+
+    // If sending FormData, opt out of Content-Type so browser sets multipart boundary
+    if (typeof FormData !== 'undefined' && config.data instanceof FormData) {
+        // Use AxiosHeaders.delete if available
+        if (config.headers && typeof config.headers.delete === 'function') {
+            config.headers.delete('Content-Type');
+        } else {
+            delete config.headers['Content-Type'];
+        }
+        // Explicitly set to false — AxiosHeaders special value meaning "don't send this header"
+        config.headers['Content-Type'] = false;
+        // eslint-disable-next-line no-console
+        console.log('[API][admin][request] FormData detected. Content-Type set to false.');
     }
 
     return config;
