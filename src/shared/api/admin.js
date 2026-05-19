@@ -39,8 +39,8 @@ export const activateTable = async (id) => {
 }
 
 //Clientes
-export const getClients = async (params = {}) => {
-    return axiosAdmin.get("/clients/get", { params });
+export const getClients = async () => {
+    return axiosAdmin.get("/clients/get");
 }
 
 export const createClient = async (data) => {
@@ -61,8 +61,8 @@ export const getMyInvoices = async () => {
 }
 
 // Comentarios
-export const getComments = async (params = {}) => {
-    return axiosAdmin.get("/comments/", { params });
+export const getComments = async () => {
+    return axiosAdmin.get("/comments/");
 }
 
 export const deleteComment = async (id) => {
@@ -137,8 +137,8 @@ export const deleteInventory = async (id) => {
 }
 
 // Platillos
-export const getDishes = async (params = {}) => {
-    return axiosAdmin.get("/dishes/", { params });
+export const getDishes = async () => {
+    return axiosAdmin.get("/dishes/");
 }
 
 export const createDish = async (formData) => {
@@ -200,7 +200,7 @@ export const getEvents = async () => {
 };
 
 export const createEvent = async (data) => {
-    return await axiosAdmin.post("/events/", data);
+    return await axiosAdmin.post("/events/", data); 
 };
 
 export const updateEvent = async (id, data) => {

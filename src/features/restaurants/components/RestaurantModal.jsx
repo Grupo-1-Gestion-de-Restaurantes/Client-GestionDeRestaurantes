@@ -350,26 +350,6 @@ export const RestaurantModal = ({ isOpen, onClose, restaurant }) => {
                                 <p className="text-red-600 text-xs mt-1">{errors.rating.message}</p>
                             )}
                         </div>
-                        
-                        {/* Descripción (Opcional pero con límite) */}
-                        <div className="flex flex-col md:col-span-2">
-                            <label className="text-sm font-semibold text-[var(--text-primary)] mb-1">
-                                Descripción
-                            </label>
-                            <textarea
-                                className="w-full px-3 py-2 rounded-lg border-2 border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] shadow-sm 
-                                           focus:outline-none focus:border-[var(--color-brand-dark)] focus:ring-2 focus:ring-[var(--color-brand-dark)] transition"
-                                placeholder="Breve descripción del restaurante..."
-                                {...register("description", {
-                                    maxLength: { value: 200, message: "Máximo 200 caracteres" }
-                                })}
-                            />
-                            {errors.description && (
-                                <p className="text-red-600 text-xs mt-1">{errors.description.message}</p>
-                            )}
-                        </div>
-                            )}
-                        </div>
 
                         {/* Descripción */}
                         <div className="flex flex-col md:col-span-2">
