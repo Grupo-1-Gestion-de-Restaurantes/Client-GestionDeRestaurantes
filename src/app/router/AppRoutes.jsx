@@ -39,7 +39,7 @@ export const AppRoutes = () => {
                 path="/dashboard"
                 element={
                     <ProtectedRoute>
-                        <RoleGuard allowedRole={["ADMIN_ROLE"]}>
+                        <RoleGuard allowedRole={["ADMIN_ROLE", "MANAGER_ROLE"]}>
                             <DashboardPage />
                         </RoleGuard>
                     </ProtectedRoute>
