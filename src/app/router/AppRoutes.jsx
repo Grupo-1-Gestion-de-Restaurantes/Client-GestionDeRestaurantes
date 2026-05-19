@@ -9,6 +9,7 @@ import { ProtectedRoute } from "./ProtectedRoute.jsx"
 import { RoleGuard } from "./RoleGuard.jsx"
 
 import { DashboardPage } from "../layouts/DashboardPage.jsx"
+import { DashboardHome } from "../../features/dashboard/components/DashboardHome.jsx"
 
 // Imports unificados
 import { Orders } from "../../features/orders/components/Orders.jsx"
@@ -46,6 +47,7 @@ export const AppRoutes = () => {
                     </ProtectedRoute>
                 }
             >
+                <Route index element={<DashboardHome />} />
                 <Route path="orders" element={<Orders />} />
                 <Route path="comments" element={<Comments />} />
                 <Route path="reservations" element={<Reservations />} />

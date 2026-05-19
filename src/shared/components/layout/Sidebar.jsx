@@ -14,7 +14,8 @@ import {
     TicketPercent,
     BookCheck,
     Store,
-    Table
+    Table,
+    LayoutDashboard
 } from "lucide-react";
 import imgLogo from "../../../assets/img/logoExpress.png"
 
@@ -25,6 +26,7 @@ export const Sidebar = () => {
     const user = useAuthStore((state) => state.user);
 
     const items = [
+        { label: "Dashboard", to: "/dashboard", icon: LayoutDashboard },
         { label: "Clientes", to: "/dashboard/clients", icon: Users },
         { label: "Comentarios", to: "/dashboard/comments", icon: MessageSquare },
         { label: "Platillos", to: "/dashboard/dishes", icon: Utensils },
