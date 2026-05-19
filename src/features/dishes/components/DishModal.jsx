@@ -36,7 +36,7 @@ export const DishModal = ({ isOpen, onClose, dish }) => {
 
     useEffect(() => {
         if (isOpen) {
-            if (getRestaurants) getRestaurants();
+            if (getRestaurants) getRestaurants({ isActive: 'all' });
             if (getInventories) getInventories();
         }
     }, [isOpen, getRestaurants, getInventories]);

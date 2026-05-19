@@ -9,6 +9,12 @@ export const useRestaurantStore = create((set, get) => ({
     restaurants: [],
     loading: false,
     error: null,
+    pagination: {
+        currentPage: 1,
+        limit: 20,
+        totalRecords: 0,
+        totalPages: 0
+    },
     filters: {
         searchTerm: "",
         activeFilter: "all"
@@ -23,10 +29,16 @@ export const useRestaurantStore = create((set, get) => ({
     getRestaurants: async (params = {}) => {
         try {
             set({ loading: true, error: null });
-            const response = await getRestaurantsRequest(params);
+            const queryParams = { 
+                page: get().pagination.currentPage, 
+                limit: get().pagination.limit, 
+                ...params 
+            };
+            const response = await getRestaurantsRequest(queryParams);
 
             set({
                 restaurants: response.data.data || response.data || [],
+                pagination: response.data.pagination || get().pagination,
                 loading: false
             });
         } catch (error) {

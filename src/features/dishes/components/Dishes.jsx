@@ -9,9 +9,10 @@ import { DishModal } from "./DishModal.jsx";
 import { useUIStore } from "../../../shared/components/ui/store/uiStore.js";
 import { PencilLine, Trash2, Search, Filter, BadgeCheck, Plus } from "lucide-react";
 import { LucideMotionIcon } from "../../../shared/components/ui/LucideMotionIcon.jsx";
+import { Pagination } from "../../../shared/components/ui/Pagination.jsx";
 
 export const Dishes = () => {
-    const { dishes, loading, error, filters, setFilters, getDishes, deleteDish } = useDishStore();
+    const { dishes, loading, error, filters, setFilters, getDishes, deleteDish, pagination } = useDishStore();
     const { searchTerm, activeFilter, dishTypeFilter } = filters;
     const { restaurants, getRestaurants } = useRestaurantStore();
     const { inventories, getInventories } = useInventoryStore();
@@ -23,7 +24,8 @@ export const Dishes = () => {
         const timeoutId = setTimeout(() => {
             const params = {
                 search: searchTerm.trim(),
-                dishType: dishTypeFilter
+                dishType: dishTypeFilter,
+                page: 1
             };
 
             if (activeFilter !== "all") {
@@ -36,8 +38,22 @@ export const Dishes = () => {
         return () => clearTimeout(timeoutId);
     }, [getDishes, activeFilter, searchTerm, dishTypeFilter]);
 
+    const handlePageChange = (page) => {
+        const params = {
+            search: searchTerm.trim(),
+            dishType: dishTypeFilter,
+            page
+        };
+
+        if (activeFilter !== "all") {
+            params.isActive = activeFilter === "active";
+        }
+
+        getDishes(params);
+    };
+
     useEffect(() => {
-        if (getRestaurants) getRestaurants();
+        if (getRestaurants) getRestaurants({ isActive: 'all' });
         if (getInventories) getInventories();
     }, [getRestaurants, getInventories]);
 
@@ -47,11 +63,19 @@ export const Dishes = () => {
 
     const getRestaurantName = (restaurantField) => {
         if (!restaurantField) return "N/A";
+        
+        // Si ya viene poblado como objeto
         if (typeof restaurantField === "object" && restaurantField.name) {
             return restaurantField.name;
         }
-        const found = restaurants?.find((r) => r._id === restaurantField);
-        return found ? found.name : "Cargando...";
+        
+        // Si viene solo el ID (string u objeto ObjectId)
+        const idToSearch = typeof restaurantField === "object" && restaurantField._id 
+            ? String(restaurantField._id) 
+            : String(restaurantField);
+
+        const found = restaurants?.find((r) => String(r._id) === idToSearch);
+        return found ? found.name : "Desconocido (" + idToSearch.substring(0, 5) + "...)";
     };
 
     const getInventoryItemName = (itemField) => {
@@ -312,6 +336,11 @@ export const Dishes = () => {
                     </tbody>
                 </table>
             </div>
+
+            <Pagination 
+                pagination={pagination} 
+                onPageChange={handlePageChange} 
+            />
 
             <DishModal
                 isOpen={openModal}

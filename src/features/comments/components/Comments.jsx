@@ -8,9 +8,10 @@ import { useRestaurantStore } from "../../restaurants/store/useRestaurantStore.j
 import { useDishStore } from "../../dishes/store/useDishStore.js"; // Lo mismo para platillos
 import { Trash2, Search, Filter, BadgeCheck } from "lucide-react";
 import { LucideMotionIcon } from "../../../shared/components/ui/LucideMotionIcon.jsx";
+import { Pagination } from "../../../shared/components/ui/Pagination.jsx";
 
 export const Comments = () => {
-    const { comments, loading, error, filters, setFilters, getComments, deleteComment } = useCommentStore();
+    const { comments, loading, error, filters, setFilters, getComments, deleteComment, pagination } = useCommentStore();
     const { searchTerm, activeFilter, restaurantFilter } = filters;
     const { restaurants, getRestaurants } = useRestaurantStore();
     const { dishes, getDishes } = useDishStore();
@@ -20,7 +21,8 @@ export const Comments = () => {
         const timeoutId = setTimeout(() => {
             const params = {
                 search: searchTerm.trim(),
-                restaurantId: restaurantFilter
+                restaurantId: restaurantFilter,
+                page: 1
             };
 
             if (activeFilter !== "all") {
@@ -32,6 +34,20 @@ export const Comments = () => {
 
         return () => clearTimeout(timeoutId);
     }, [getComments, activeFilter, searchTerm, restaurantFilter]);
+
+    const handlePageChange = (page) => {
+        const params = {
+            search: searchTerm.trim(),
+            restaurantId: restaurantFilter,
+            page
+        };
+
+        if (activeFilter !== "all") {
+            params.isActive = activeFilter === "active";
+        }
+
+        getComments(params);
+    };
 
     useEffect(() => {
         if (getRestaurants) getRestaurants();
@@ -252,6 +268,11 @@ export const Comments = () => {
                     </tbody>
                 </table>
             </div>
+
+            <Pagination 
+                pagination={pagination} 
+                onPageChange={handlePageChange} 
+            />
         </div >
     );
 };

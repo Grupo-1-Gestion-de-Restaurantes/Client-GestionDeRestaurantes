@@ -10,6 +10,12 @@ export const useDishStore = create((set, get) => ({
     dishes: [],
     loading: false,
     error: null,
+    pagination: {
+        currentPage: 1,
+        limit: 20,
+        totalRecords: 0,
+        totalPages: 0
+    },
     filters: {
         searchTerm: "",
         activeFilter: "all",
@@ -25,10 +31,16 @@ export const useDishStore = create((set, get) => ({
     getDishes: async (params = {}) => {
         try {
             set({ loading: true, error: null });
-            const response = await getDishesRequest(params);
+            const queryParams = { 
+                page: get().pagination.currentPage, 
+                limit: get().pagination.limit, 
+                ...params 
+            };
+            const response = await getDishesRequest(queryParams);
 
             set({
                 dishes: response.data.data || response.data,
+                pagination: response.data.pagination || get().pagination,
                 loading: false
             });
         } catch (error) {

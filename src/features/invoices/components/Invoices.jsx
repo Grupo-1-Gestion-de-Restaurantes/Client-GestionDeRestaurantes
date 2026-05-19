@@ -5,32 +5,46 @@ import { useEffect as useToastEffect } from "react";
 import { showError } from "../../../shared/utils/toast.js";
 import { Search, Filter, BadgeCheck } from "lucide-react";
 import { LucideMotionIcon } from "../../../shared/components/ui/LucideMotionIcon.jsx";
+import { Pagination } from "../../../shared/components/ui/Pagination.jsx";
 
 export const Invoices = () => {
-    const { invoices, loading, error, getInvoices } = useInvoiceStore();
+    const { invoices, loading, error, getInvoices, pagination } = useInvoiceStore();
     const [searchTerm, setSearchTerm] = useState("");
     const [paymentFilter, setPaymentFilter] = useState("all");
 
     useEffect(() => {
-        getInvoices();
-    }, [getInvoices]);
+        const timeoutId = setTimeout(() => {
+            const params = {
+                search: searchTerm.trim(),
+                page: 1
+            };
+
+            if (paymentFilter !== "all") {
+                params.paymentMethod = paymentFilter;
+            }
+
+            getInvoices(params);
+        }, 250);
+
+        return () => clearTimeout(timeoutId);
+    }, [getInvoices, searchTerm, paymentFilter]);
+
+    const handlePageChange = (page) => {
+        const params = {
+            search: searchTerm.trim(),
+            page
+        };
+
+        if (paymentFilter !== "all") {
+            params.paymentMethod = paymentFilter;
+        }
+
+        getInvoices(params);
+    };
 
     useToastEffect(() => {
         if (error) showError(error);
     }, [error]);
-
-    const filteredInvoices = useMemo(() => {
-        return invoices.filter((inv) => {
-            const matchesSearch = 
-                inv.invoiceNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                (inv.clientName || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-                (inv.restaurantName || "").toLowerCase().includes(searchTerm.toLowerCase());
-            
-            const matchesPayment = paymentFilter === "all" || inv.paymentMethod === paymentFilter;
-
-            return matchesSearch && matchesPayment;
-        });
-    }, [invoices, searchTerm, paymentFilter]);
 
     const getClientName = (client, clientName) => {
         if (clientName) return clientName;
@@ -116,7 +130,7 @@ export const Invoices = () => {
                         className="rounded-xl border border-[var(--border-color)] px-4 py-2.5 text-sm font-medium text-[var(--text-secondary)] transition hover:bg-[var(--bg-base)]"
                     >
                         <span className="inline-flex items-center gap-2">
-                            <LucideMotionIcon icon={BadgeCheck} className="!w-4 !h-4 md:!w-5 md:!h-5 text-[var(--text-secondary)]" />
+                            <LucideMotionIcon icon={BadgeCheck} className="!w-4 !h-4 md:!w-5 !h-5 text-[var(--text-secondary)]" />
                             Limpiar
                         </span>
                     </button>
@@ -138,8 +152,8 @@ export const Invoices = () => {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-[var(--border-color)]">
-                        {filteredInvoices.length > 0 ? (
-                            filteredInvoices.map((inv) => (
+                        {invoices.length > 0 ? (
+                            invoices.map((inv) => (
                                 <tr key={inv._id} className="hover:bg-[var(--bg-base)] transition-colors">
                                     <td className="px-6 py-4 text-sm font-medium text-[var(--text-primary)] whitespace-nowrap">
                                         {inv.invoiceNumber}
@@ -189,6 +203,11 @@ export const Invoices = () => {
                     </tbody>
                 </table>
             </div>
+
+            <Pagination 
+                pagination={pagination} 
+                onPageChange={handlePageChange} 
+            />
         </div>
     );
 };

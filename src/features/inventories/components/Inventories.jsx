@@ -8,37 +8,45 @@ import { InventoryModal } from "./InventoryModal.jsx";
 import { useUIStore } from "../../../shared/components/ui/store/uiStore.js";
 import { PencilLine, Trash2, Search, Filter, BadgeCheck } from "lucide-react";
 import { LucideMotionIcon } from "../../../shared/components/ui/LucideMotionIcon.jsx";
+import { Pagination } from "../../../shared/components/ui/Pagination.jsx";
 
 export const Inventories = () => {
-    const { inventories, loading, error, getInventories, deleteInventory } = useInventoryStore();
+    const { inventories, loading, error, getInventories, deleteInventory, pagination } = useInventoryStore();
     const { restaurants, getRestaurants } = useRestaurantStore();
     const [openModal, setOpenModal] = useState(false);
     const [selectedItem, setSelectedItem] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [restaurantFilter, setRestaurantFilter] = useState("all");
+    const [activeFilter, setActiveFilter] = useState("active");
     const { openConfirm } = useUIStore();
 
     useEffect(() => {
-        getInventories();
-        if (getRestaurants) getRestaurants();
-    }, [getInventories, getRestaurants]);
+        const params = { page: 1 };
+        if (restaurantFilter !== "all") params.restaurant = restaurantFilter;
+        if (activeFilter !== "all") params.isActive = activeFilter === "active";
+        
+        getInventories(params);
+        if (getRestaurants) getRestaurants({ limit: 100, isActive: 'all' });
+    }, [getInventories, getRestaurants, restaurantFilter, activeFilter]);
+
+    const handlePageChange = (page) => {
+        const params = { page };
+        if (restaurantFilter !== "all") params.restaurant = restaurantFilter;
+        if (activeFilter !== "all") params.isActive = activeFilter === "active";
+        getInventories(params);
+    };
 
     useToastEffect(() => {
         if (error) showError(error);
     }, [error]);
 
     const filteredItems = useMemo(() => {
+        if (!inventories) return [];
         return inventories.filter((item) => {
-            if (!item.isActive) return false;
-
             const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
-            
-            const restaurantId = typeof item.restaurant === "object" ? item.restaurant?._id : item.restaurant;
-            const matchesRestaurant = restaurantFilter === "all" || restaurantId === restaurantFilter;
-
-            return matchesSearch && matchesRestaurant;
+            return matchesSearch;
         });
-    }, [inventories, searchTerm, restaurantFilter]);
+    }, [inventories, searchTerm]);
 
     const getRestaurantName = (restaurantField) => {
         if (!restaurantField) return "N/A";
@@ -117,11 +125,30 @@ export const Inventories = () => {
                         </select>
                     </div>
 
+                    <div className="w-full lg:w-48">
+                        <label className="block text-sm font-semibold text-[var(--text-primary)] mb-2">
+                            <span className="inline-flex items-center gap-2">
+                                <LucideMotionIcon icon={Filter} />
+                                Estado
+                            </span>
+                        </label>
+                        <select
+                            value={activeFilter}
+                            onChange={(e) => setActiveFilter(e.target.value)}
+                            className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-base)] px-4 py-2.5 text-sm text-[var(--text-primary)] outline-none transition focus:border-[var(--color-brand-dark)]"
+                        >
+                            <option value="active">Activos</option>
+                            <option value="inactive">Inactivos</option>
+                            <option value="all">Todos</option>
+                        </select>
+                    </div>
+
                     <button
                         type="button"
                         onClick={() => {
                             setSearchTerm("");
                             setRestaurantFilter("all");
+                            setActiveFilter("active");
                         }}
                         className="rounded-xl border border-[var(--border-color)] px-4 py-2.5 text-sm font-medium text-[var(--text-secondary)] transition hover:bg-[var(--bg-base)]"
                     >
@@ -142,6 +169,7 @@ export const Inventories = () => {
                             <th className="px-6 py-4 font-semibold">Sucursal / Restaurante</th>
                             <th className="px-6 py-4 font-semibold">Stock Actual</th>
                             <th className="px-6 py-4 font-semibold">Estado de Alerta</th>
+                            <th className="px-6 py-4 font-semibold">Activo</th>
                             <th className="px-6 py-4 font-semibold text-center">Acciones</th>
                         </tr>
                     </thead>
@@ -175,6 +203,14 @@ export const Inventories = () => {
                                                 </span>
                                             )}
                                         </td>
+                                        <td className="px-6 py-4 text-sm">
+                                            <span className={`px-3 py-1 text-xs rounded-full font-medium ${item.isActive
+                                                ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                                                : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
+                                            }`}>
+                                                {item.isActive ? "Activo" : "Inactivo"}
+                                            </span>
+                                        </td>
                                         <td className="px-6 py-4 flex gap-3 justify-center">
                                             <button
                                                 className="inline-flex items-center gap-2 text-[var(--color-brand-yellow)] hover:opacity-75 font-medium transition cursor-pointer"
@@ -205,7 +241,7 @@ export const Inventories = () => {
                             })
                         ) : (
                             <tr>
-                                <td colSpan="5" className="text-center py-8 text-[var(--text-muted)]">
+                                <td colSpan="6" className="text-center py-8 text-[var(--text-muted)]">
                                     No hay ingredientes registrados en el almacén.
                                 </td>
                             </tr>
@@ -213,6 +249,11 @@ export const Inventories = () => {
                     </tbody>
                 </table>
             </div>
+
+            <Pagination 
+                pagination={pagination} 
+                onPageChange={handlePageChange} 
+            />
 
             <InventoryModal
                 isOpen={openModal}

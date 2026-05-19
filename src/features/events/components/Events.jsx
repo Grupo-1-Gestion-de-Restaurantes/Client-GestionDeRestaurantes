@@ -8,38 +8,47 @@ import { EventModal } from "./EventModal.jsx";
 import { useUIStore } from "../../../shared/components/ui/store/uiStore.js";
 import { Search, Filter, BadgeCheck, Plus, PencilLine, Trash2, Users, Utensils, Briefcase, Table as TableIcon } from "lucide-react";
 import { LucideMotionIcon } from "../../../shared/components/ui/LucideMotionIcon.jsx";
+import { Pagination } from "../../../shared/components/ui/Pagination.jsx";
 
 export const Events = () => {
-    const { events, loading, error, getEvents, deleteEvent } = useEventStore();
+    const { events, loading, error, getEvents, deleteEvent, pagination } = useEventStore();
     const { restaurants, getRestaurants } = useRestaurantStore();
     const [openModal, setOpenModal] = useState(false);
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [restaurantFilter, setRestaurantFilter] = useState("all");
+    const [activeFilter, setActiveFilter] = useState("active");
     const { openConfirm } = useUIStore();
 
     useEffect(() => {
-        getEvents();
-        if (getRestaurants) getRestaurants();
-    }, [getEvents, getRestaurants]);
+        const params = { page: 1 };
+        if (restaurantFilter !== "all") params.restaurant = restaurantFilter;
+        if (activeFilter !== "all") params.isActive = activeFilter === "active";
+        
+        getEvents(params);
+        if (getRestaurants) getRestaurants({ limit: 100, isActive: 'all' });
+    }, [getEvents, getRestaurants, restaurantFilter, activeFilter]);
+
+    const handlePageChange = (page) => {
+        const params = { page };
+        if (restaurantFilter !== "all") params.restaurant = restaurantFilter;
+        if (activeFilter !== "all") params.isActive = activeFilter === "active";
+        getEvents(params);
+    };
 
     useToastEffect(() => {
         if (error) showError(error);
     }, [error]);
 
     const filteredEvents = useMemo(() => {
+        if (!events) return [];
         return events.filter((evt) => {
-            if (!evt.isActive) return false;
-
             const matchesSearch = evt.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                                 evt.typeEvent.toLowerCase().includes(searchTerm.toLowerCase());
             
-            const restaurantId = typeof evt.restaurant === "object" ? evt.restaurant?._id : evt.restaurant;
-            const matchesRestaurant = restaurantFilter === "all" || restaurantId === restaurantFilter;
-
-            return matchesSearch && matchesRestaurant;
+            return matchesSearch;
         });
-    }, [events, searchTerm, restaurantFilter]);
+    }, [events, searchTerm]);
 
     const renderRestaurantInfo = (restaurantField) => {
         if (!restaurantField) return <span className="text-[var(--text-muted)] italic text-xs">Sin asignar</span>;
@@ -51,12 +60,10 @@ export const Events = () => {
         }
         if (found) {
             return (
-                // 💡 items-start asegura que todo se alinee perfectamente al borde izquierdo
                 <div className="flex flex-col items-start gap-0.5 text-left w-full">
                     <span className="font-semibold text-blue-700 dark:text-blue-400 text-xs">
                         {found.name}
                     </span>
-                    {/* 💡 Se eliminó el pl-5 para que empiece exactamente en la misma línea vertical */}
                     <span className="text-[10px] text-[var(--text-muted)] max-w-[180px] truncate block italic">
                         {found.address || found.direccion || "Dirección no registrada"}
                     </span>
@@ -66,7 +73,6 @@ export const Events = () => {
         return <span className="text-[var(--text-muted)] text-xs">Cargando sede...</span>;
     };
 
-    // Formateador dinámico para la fecha y hora
     const formatEventDate = (dateString) => {
         if (!dateString) return "";
         return new Date(dateString).toLocaleDateString("es-GT", {
@@ -83,7 +89,7 @@ export const Events = () => {
         return type.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
     };
 
-    if (loading && filteredEvents.length === 0) return <Spinner />;
+    if (loading && events.length === 0) return <Spinner />;
 
     return (
         <div className="p-4">
@@ -154,11 +160,30 @@ export const Events = () => {
                         </select>
                     </div>
 
+                    <div className="w-full lg:w-48">
+                        <label className="block text-sm font-semibold text-[var(--text-primary)] mb-2">
+                            <span className="inline-flex items-center gap-2">
+                                <LucideMotionIcon icon={Filter} />
+                                Estado
+                            </span>
+                        </label>
+                        <select
+                            value={activeFilter}
+                            onChange={(e) => setActiveFilter(e.target.value)}
+                            className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-base)] px-4 py-2.5 text-sm text-[var(--text-primary)] outline-none transition focus:border-[var(--color-brand-dark)]"
+                        >
+                            <option value="active">Activos</option>
+                            <option value="inactive">Inactivos</option>
+                            <option value="all">Todos</option>
+                        </select>
+                    </div>
+
                     <button
                         type="button"
                         onClick={() => {
                             setSearchTerm("");
                             setRestaurantFilter("all");
+                            setActiveFilter("active");
                         }}
                         className="rounded-xl border border-[var(--border-color)] px-4 py-2.5 text-sm font-medium text-[var(--text-secondary)] transition hover:bg-[var(--bg-base)]"
                     >
@@ -182,6 +207,7 @@ export const Events = () => {
                             <th className="px-6 py-4 font-semibold">Recursos</th>
                             <th className="px-6 py-4 font-semibold">Servicios</th>
                             <th className="px-6 py-4 font-semibold">Precio</th>
+                            <th className="px-6 py-4 font-semibold">Estado</th>
                             <th className="px-6 py-4 font-semibold text-center">Acciones</th>
                         </tr>
                     </thead>
@@ -249,6 +275,14 @@ export const Events = () => {
                                         <td className="px-6 py-4 text-sm font-mono font-bold text-[var(--text-primary)] whitespace-nowrap">
                                             Q {Number(evt.price).toFixed(2)}
                                         </td>
+                                        <td className="px-6 py-4">
+                                            <span className={`px-3 py-1 text-xs rounded-full font-medium ${evt.isActive
+                                                ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                                                : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
+                                            }`}>
+                                                {evt.isActive ? "Activo" : "Inactivo"}
+                                            </span>
+                                        </td>
                                         <td className="px-6 py-4 flex gap-3 justify-center">
                                             <button
                                                 className="inline-flex items-center gap-2 text-[var(--color-brand-yellow)] hover:text-[var(--color-brand-yellow-dark)] font-medium transition cursor-pointer"
@@ -279,7 +313,7 @@ export const Events = () => {
                             })
                         ) : (
                             <tr>
-                                <td colSpan="8" className="text-center py-8 text-[var(--text-muted)] italic">
+                                <td colSpan="9" className="text-center py-8 text-[var(--text-muted)] italic">
                                     No hay eventos planificados en la agenda.
                                 </td>
                             </tr>
@@ -287,6 +321,11 @@ export const Events = () => {
                     </tbody>
                 </table>
             </div>
+
+            <Pagination 
+                pagination={pagination} 
+                onPageChange={handlePageChange} 
+            />
 
             <EventModal
                 isOpen={openModal}

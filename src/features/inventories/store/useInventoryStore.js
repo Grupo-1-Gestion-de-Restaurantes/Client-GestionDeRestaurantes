@@ -10,14 +10,26 @@ export const useInventoryStore = create((set, get) => ({
     inventories: [],
     loading: false,
     error: null,
+    pagination: {
+        currentPage: 1,
+        limit: 20,
+        totalRecords: 0,
+        totalPages: 0
+    },
 
-    getInventories: async () => {
+    getInventories: async (params = {}) => {
         try {
             set({ loading: true, error: null });
-            const response = await getInventoriesRequest();
+            const queryParams = { 
+                page: get().pagination.currentPage, 
+                limit: get().pagination.limit, 
+                ...params 
+            };
+            const response = await getInventoriesRequest(queryParams);
 
             set({
                 inventories: response.data.data || response.data,
+                pagination: response.data.pagination || get().pagination,
                 loading: false
             });
         } catch (error) {

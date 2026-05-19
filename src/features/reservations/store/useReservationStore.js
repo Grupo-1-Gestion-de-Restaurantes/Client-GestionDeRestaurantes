@@ -10,15 +10,27 @@ export const useReservationStore = create((set, get) => ({
     reservations: [],
     loading: false,
     error: null,
+    pagination: {
+        currentPage: 1,
+        limit: 20,
+        totalRecords: 0,
+        totalPages: 0
+    },
 
-    getReservations: async () => {
+    getReservations: async (params = {}) => {
         try {
             set({ loading: true, error: null });
-            const response = await getReservationsRequest();
+            const queryParams = { 
+                page: get().pagination.currentPage, 
+                limit: get().pagination.limit, 
+                ...params 
+            };
+            const response = await getReservationsRequest(queryParams);
             console.log(response.data)
 
             set({
                 reservations: response.data.data || response.data,
+                pagination: response.data.pagination || get().pagination,
                 loading: false
             });
         } catch (error) {

@@ -7,9 +7,10 @@ import { Spinner } from "../../../shared/components/layout/Spinner.jsx";
 import { showError } from "../../../shared/utils/toast.js";
 import { useUIStore } from "../../../shared/components/ui/store/uiStore.js";
 import { LucideMotionIcon } from "../../../shared/components/ui/LucideMotionIcon.jsx";
+import { Pagination } from "../../../shared/components/ui/Pagination.jsx";
 
 export const Promotions = () => {
-  const { promotions, loading, error, getPromotions, deactivatePromotion, activatePromotion } = usePromotionStore();
+  const { promotions, loading, error, getPromotions, deactivatePromotion, activatePromotion, pagination } = usePromotionStore();
   const { restaurants, getRestaurants } = useRestaurantStore();
   const { openConfirm } = useUIStore();
 
@@ -19,12 +20,12 @@ export const Promotions = () => {
   const [activeFilter, setActiveFilter] = useState("active");
 
   useEffect(() => {
-    getRestaurants({ isActive: true, limit: 100 });
+    getRestaurants({ isActive: 'all', limit: 100 });
   }, [getRestaurants]);
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      const filters = {};
+      const filters = { page: 1 };
 
       if (activeFilter !== "all") {
         filters.isActive = activeFilter === "active";
@@ -35,6 +36,14 @@ export const Promotions = () => {
 
     return () => clearTimeout(timeoutId);
   }, [activeFilter, getPromotions]);
+
+  const handlePageChange = (page) => {
+    const filters = { page };
+    if (activeFilter !== "all") {
+      filters.isActive = activeFilter === "active";
+    }
+    getPromotions(filters);
+  };
 
   useEffect(() => {
     if (error) showError(error);
@@ -225,6 +234,11 @@ export const Promotions = () => {
         </table>
       </div>
 
+      <Pagination 
+        pagination={pagination} 
+        onPageChange={handlePageChange} 
+      />
+
       <PromotionModal
         isOpen={openModal}
         onClose={() => {
@@ -236,5 +250,3 @@ export const Promotions = () => {
     </div>
   );
 };
-
-

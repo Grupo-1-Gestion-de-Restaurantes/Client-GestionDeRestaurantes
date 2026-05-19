@@ -23,6 +23,7 @@ import {
     BadgeCheck
 } from "lucide-react";
 import { LucideMotionIcon } from "../../../shared/components/ui/LucideMotionIcon.jsx";
+import { Pagination } from "../../../shared/components/ui/Pagination.jsx";
 
 export const Restaurants = () => {
     const {
@@ -34,6 +35,7 @@ export const Restaurants = () => {
         getRestaurants,
         deactivateRestaurant,
         activateRestaurant,
+        pagination
     } = useRestaurantStore();
     const { searchTerm, activeFilter } = filters;
     const [openModal, setOpenModal] = useState(false);
@@ -42,7 +44,7 @@ export const Restaurants = () => {
 
     useEffect(() => {
         const timeoutId = setTimeout(() => {
-            const params = { search: searchTerm.trim() };
+            const params = { search: searchTerm.trim(), page: 1 };
 
             if (activeFilter !== "all") {
                 params.isActive = activeFilter === "active";
@@ -53,6 +55,16 @@ export const Restaurants = () => {
 
         return () => clearTimeout(timeoutId);
     }, [getRestaurants, activeFilter, searchTerm]);
+
+    const handlePageChange = (page) => {
+        const params = { search: searchTerm.trim(), page };
+
+        if (activeFilter !== "all") {
+            params.isActive = activeFilter === "active";
+        }
+
+        getRestaurants(params);
+    };
 
     useToastEffect(() => {
         if (error) showError(error);
@@ -363,6 +375,11 @@ export const Restaurants = () => {
                     </tbody>
                 </table>
             </div>
+
+            <Pagination 
+                pagination={pagination} 
+                onPageChange={handlePageChange} 
+            />
 
             <RestaurantModal
                 isOpen={openModal}

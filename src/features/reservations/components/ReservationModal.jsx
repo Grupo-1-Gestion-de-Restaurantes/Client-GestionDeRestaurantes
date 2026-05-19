@@ -12,6 +12,7 @@ export const ReservationModal = ({ isOpen, onClose, reservation }) => {
         register,
         handleSubmit,
         reset,
+        watch,
         formState: { errors },
     } = useForm();
 
@@ -21,11 +22,12 @@ export const ReservationModal = ({ isOpen, onClose, reservation }) => {
     const { restaurants, getRestaurants } = useRestaurantStore();
     const { tables, getTables } = useTableStore();
 
+    const selectedRestaurant = watch("restaurant");
+
     useEffect(() => {
         if (isOpen) {
             getClients();
             getRestaurants({ isActive: true, limit: 100 });
-            getTables({ isActive: true, limit: 100 });
 
             if (reservation) {
                 const dateObj = new Date(reservation.reservationDate);
@@ -54,7 +56,13 @@ export const ReservationModal = ({ isOpen, onClose, reservation }) => {
                 });
             }
         }
-    }, [isOpen, reservation, reset, getClients, getRestaurants, getTables]);
+    }, [isOpen, reservation, reset, getClients, getRestaurants]);
+
+    useEffect(() => {
+        if (isOpen && selectedRestaurant) {
+            getTables({ restaurante: selectedRestaurant, isActive: true, limit: 100 });
+        }
+    }, [isOpen, selectedRestaurant, getTables]);
 
     const onSubmit = async (data) => {
         try {

@@ -8,9 +8,10 @@ import { EmployeeModal } from "./EmployeeModal.jsx";
 import { useUIStore } from "../../../shared/components/ui/store/uiStore.js";
 import { PencilLine, Trash2, Search, Filter, BadgeCheck } from "lucide-react";
 import { LucideMotionIcon } from "../../../shared/components/ui/LucideMotionIcon.jsx";
+import { Pagination } from "../../../shared/components/ui/Pagination.jsx";
 
 export const Employees = () => {
-    const { employees, loading, error, getEmployees, deleteEmployee } = useEmployeeStore();
+    const { employees, loading, error, getEmployees, deleteEmployee, pagination } = useEmployeeStore();
     const { restaurants, getRestaurants } = useRestaurantStore();
     const [openModal, setOpenModal] = useState(false);
     const [selectedEmployee, setSelectedEmployee] = useState(null);
@@ -19,9 +20,13 @@ export const Employees = () => {
     const { openConfirm } = useUIStore();
 
     useEffect(() => {
-        getEmployees();
-        if (getRestaurants) getRestaurants();
+        getEmployees({ page: 1 });
+        if (getRestaurants) getRestaurants({ isActive: 'all', limit: 100 });
     }, [getEmployees, getRestaurants]);
+
+    const handlePageChange = (page) => {
+        getEmployees({ page });
+    };
 
     useToastEffect(() => {
         if (error) showError(error);
@@ -209,6 +214,11 @@ export const Employees = () => {
                     </tbody>
                 </table>
             </div>
+
+            <Pagination 
+                pagination={pagination} 
+                onPageChange={handlePageChange} 
+            />
 
             {/* MODAL DISTRIBUIDO DE CONTRATACIÓN */}
             <EmployeeModal

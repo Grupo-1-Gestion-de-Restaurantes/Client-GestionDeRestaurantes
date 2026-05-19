@@ -11,14 +11,26 @@ export const useTableStore = create((set, get) => ({
 	tables: [],
 	loading: false,
 	error: null,
+	pagination: {
+		currentPage: 1,
+		limit: 20,
+		totalRecords: 0,
+		totalPages: 0
+	},
 
-	getTables: async (filters = {}) => {
+	getTables: async (params = {}) => {
 		try {
 			set({ loading: true, error: null });
-			const response = await getTablesRequest(filters);
+			const queryParams = { 
+				page: get().pagination.currentPage, 
+				limit: get().pagination.limit, 
+				...params 
+			};
+			const response = await getTablesRequest(queryParams);
 
 			set({
 				tables: response.data.data || response.data || [],
+				pagination: response.data.pagination || get().pagination,
 				loading: false,
 			});
 		} catch (error) {

@@ -10,6 +10,12 @@ export const useClientStore = create((set, get) => ({
     clients: [],
     loading: false,
     error: null,
+    pagination: {
+        currentPage: 1,
+        limit: 20,
+        totalRecords: 0,
+        totalPages: 0
+    },
     filters: {
         searchTerm: "",
         activeFilter: "all"
@@ -24,10 +30,16 @@ export const useClientStore = create((set, get) => ({
     getClients: async (params = {}) => {
         try {
             set({ loading: true, error: null });
-            const response = await getClientsRequest(params);
+            const queryParams = { 
+                page: get().pagination.currentPage, 
+                limit: get().pagination.limit, 
+                ...params 
+            };
+            const response = await getClientsRequest(queryParams);
 
             set({
                 clients: response.data.data || response.data,
+                pagination: response.data.pagination || get().pagination,
                 loading: false
             });
         } catch (error) {

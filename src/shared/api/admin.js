@@ -1,8 +1,8 @@
 import { axiosAdmin, axiosAuth } from "./api";
 
 //Reservaciones
-export const getReservations = async () => {
-    return axiosAdmin.get("/reservations/get");
+export const getReservations = async (params = {}) => {
+    return axiosAdmin.get("/reservations/get", { params });
 }
 
 export const createReservation = async (data) => {
@@ -39,8 +39,8 @@ export const activateTable = async (id) => {
 }
 
 //Clientes
-export const getClients = async () => {
-    return axiosAdmin.get("/clients/get");
+export const getClients = async (params = {}) => {
+    return axiosAdmin.get("/clients/get", { params });
 }
 
 export const createClient = async (data) => {
@@ -56,17 +56,17 @@ export const deleteClient = async (id) => {
 }
 
 //Facturas
-export const getMyInvoices = async () => {
-    return axiosAdmin.get("/invoices/myInvoices");
+export const getMyInvoices = async (params = {}) => {
+    return axiosAdmin.get("/invoices/myInvoices", { params });
 }
 
 // Comentarios
-export const getComments = async () => {
-    return axiosAdmin.get("/comments/");
+export const getComments = async (params = {}) => {
+    return axiosAdmin.get("/comments/", { params });
 }
 
 export const deleteComment = async (id) => {
-    return await axiosAdmin.put(`/comments/desactivate/${id}`);
+    return await axiosAdmin.put(`/comments/deactivate/${id}`);
 }
 
 
@@ -95,8 +95,8 @@ export const activateRestaurant = async (id) => {
 }
 
 //Empleados
-export const getEmployees = async () => {
-    return axiosAdmin.get("/employees/");
+export const getEmployees = async (params = {}) => {
+    return axiosAdmin.get("/employees/", { params });
 }
 
 export const createEmployee = async (formData) => {
@@ -120,8 +120,8 @@ export const deleteEmployee = async (id) => {
 }
 
 //Inventarios
-export const getInventories = async () => {
-    return axiosAdmin.get("/inventories/");
+export const getInventories = async (params = {}) => {
+    return axiosAdmin.get("/inventories/", { params });
 }
 
 export const createInventory = async (data) => {
@@ -137,8 +137,8 @@ export const deleteInventory = async (id) => {
 }
 
 // Platillos
-export const getDishes = async () => {
-    return axiosAdmin.get("/dishes/");
+export const getDishes = async (params = {}) => {
+    return axiosAdmin.get("/dishes/", { params });
 }
 
 export const createDish = async (formData) => {
@@ -156,6 +156,16 @@ export const updateDish = async (id, formData) => {
 export const deleteDish = async (id) => {
     return await axiosAdmin.put(`/dishes/${id}`, { isActive: false });
 }
+
+// Partner Leads
+export const getPartnerLeads = async (params = {}) => {
+    return axiosAdmin.get("/partners/leads", { params });
+}
+
+export const updatePartnerLeadStatus = async (id, status) => {
+    return axiosAdmin.put(`/partners/leads/${id}/status`, { status });
+}
+
 // Promociones
 export const getPromotions = async (params = {}) => {
     return axiosAdmin.get("/promotions/get", { params });
@@ -174,7 +184,7 @@ export const activatePromotion = async (id) => {
 }
 
 export const deletePromotion = async (id) => {
-    return await axiosAdmin.put(`/promotions/${id}/desactivate`); // Desactivado lógico
+    return await axiosAdmin.put(`/promotions/${id}/deactivate`); // Desactivado lógico
 }
 
 // Notificaciones
@@ -195,8 +205,8 @@ export const deleteNotification = async (id) => {
 }
 
 //Eventos
-export const getEvents = async () => {
-    return axiosAdmin.get("/events/");
+export const getEvents = async (params = {}) => {
+    return axiosAdmin.get("/events/", { params });
 };
 
 export const createEvent = async (data) => {

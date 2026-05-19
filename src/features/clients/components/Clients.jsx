@@ -7,9 +7,10 @@ import { ClientModal } from "./ClientModal.jsx";
 import { useUIStore } from "../../../shared/components/ui/store/uiStore.js";
 import { PencilLine, Trash2, Search, Filter, BadgeCheck } from "lucide-react";
 import { LucideMotionIcon } from "../../../shared/components/ui/LucideMotionIcon.jsx";
+import { Pagination } from "../../../shared/components/ui/Pagination.jsx";
 
 export const Clients = () => {
-    const { clients, loading, error, filters, setFilters, getClients, deleteClient } = useClientStore();
+    const { clients, loading, error, filters, setFilters, getClients, deleteClient, pagination } = useClientStore();
     const { searchTerm, activeFilter } = filters;
     const [openModal, setOpenModal] = useState(false);
     const [selectedClient, setSelectedClient] = useState(null);
@@ -17,7 +18,7 @@ export const Clients = () => {
 
     useEffect(() => {
         const timeoutId = setTimeout(() => {
-            const params = { search: searchTerm.trim() };
+            const params = { search: searchTerm.trim(), page: 1 };
 
             if (activeFilter !== "all") {
                 params.isActive = activeFilter === "active";
@@ -28,6 +29,16 @@ export const Clients = () => {
 
         return () => clearTimeout(timeoutId);
     }, [getClients, activeFilter, searchTerm]);
+
+    const handlePageChange = (page) => {
+        const params = { search: searchTerm.trim(), page };
+
+        if (activeFilter !== "all") {
+            params.isActive = activeFilter === "active";
+        }
+
+        getClients(params);
+    };
 
     useToastEffect(() => {
         if (error) showError(error);
@@ -193,6 +204,11 @@ export const Clients = () => {
                     </tbody>
                 </table>
             </div>
+
+            <Pagination 
+                pagination={pagination} 
+                onPageChange={handlePageChange} 
+            />
 
             <ClientModal
                 isOpen={openModal}

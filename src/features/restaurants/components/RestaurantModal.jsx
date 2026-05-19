@@ -28,6 +28,7 @@ export const RestaurantModal = ({ isOpen, onClose, restaurant }) => {
             if (restaurant) {
                 reset({
                     name: restaurant.name,
+                    city: restaurant.city || "Guatemala",
                     address: restaurant.address,
                     categories: restaurant.categories,
                     description: restaurant.description,
@@ -43,6 +44,7 @@ export const RestaurantModal = ({ isOpen, onClose, restaurant }) => {
             } else {
                 reset({
                     name: "",
+                    city: "Guatemala",
                     address: "",
                     categories: "",
                     description: "",
@@ -123,7 +125,7 @@ export const RestaurantModal = ({ isOpen, onClose, restaurant }) => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
                         {/* Nombre */}
-                        <div className="flex flex-col md:col-span-2">
+                        <div className="flex flex-col md:col-span-1">
                             <label className="text-sm font-semibold text-[var(--text-primary)] mb-1">
                                 Nombre del restaurante
                             </label>
@@ -145,6 +147,24 @@ export const RestaurantModal = ({ isOpen, onClose, restaurant }) => {
                             />
                             {errors.name && (
                                 <p className="text-red-600 text-xs mt-1">{errors.name.message}</p>
+                            )}
+                        </div>
+
+                        {/* Ciudad */}
+                        <div className="flex flex-col md:col-span-1">
+                            <label className="text-sm font-semibold text-[var(--text-primary)] mb-1">
+                                Ciudad
+                            </label>
+                            <input
+                                className="w-full px-3 py-2 rounded-lg border-2 border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] shadow-sm 
+                                           focus:outline-none focus:border-[var(--color-brand-dark)] focus:ring-2 focus:ring-[var(--color-brand-dark)] transition"
+                                placeholder="Ej. Guatemala"
+                                {...register("city", {
+                                    required: "La ciudad es obligatoria",
+                                })}
+                            />
+                            {errors.city && (
+                                <p className="text-red-600 text-xs mt-1">{errors.city.message}</p>
                             )}
                         </div>
 

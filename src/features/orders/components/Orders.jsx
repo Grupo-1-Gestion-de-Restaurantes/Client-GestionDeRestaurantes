@@ -9,9 +9,10 @@ import { OrderModal } from "../components/OrderModal.jsx";
 import { useUIStore } from "../../../shared/components/ui/store/uiStore.js";
 import { PencilLine, Trash2, Search, Plus, Filter, BadgeCheck } from "lucide-react";
 import { LucideMotionIcon } from "../../../shared/components/ui/LucideMotionIcon.jsx";
+import { Pagination } from "../../../shared/components/ui/Pagination.jsx";
 
 export const Orders = () => {
-    const { orders, loading, error, getOrders, deleteOrder, updateOrder, updateOrderStatus } = useOrderStore();
+    const { orders, loading, error, getOrders, deleteOrder, updateOrder, updateOrderStatus, pagination } = useOrderStore();
     const { clients, getClients } = useClientStore();
     const { restaurants, getRestaurants } = useRestaurantStore();
     const [openModal, setOpenModal] = useState(false);
@@ -32,10 +33,31 @@ export const Orders = () => {
     };
 
     useEffect(() => {
-        getOrders();
+        const params = {};
+        if (activeFilter === "CANCELADO") {
+            params.isActive = "false";
+        } else if (activeFilter === "all") {
+            params.isActive = "all";
+        } else {
+            params.isActive = "true";
+        }
+        
+        getOrders(params);
         getClients();
         getRestaurants({ isActive: true, limit: 100 });
-    }, [getOrders]);
+    }, [getOrders, activeFilter]);
+
+    const handlePageChange = (page) => {
+        const params = { page };
+        if (activeFilter === "CANCELADO") {
+            params.isActive = "false";
+        } else if (activeFilter === "all") {
+            params.isActive = "all";
+        } else {
+            params.isActive = "true";
+        }
+        getOrders(params);
+    };
 
     useToastEffect(() => {
         if (error) showError(error);
@@ -74,8 +96,8 @@ export const Orders = () => {
 
     // Filtramos las órdenes
     const displayedOrders = orders.filter((order) => {
-        if (order.isActive === false) return false;
-        if (activeFilter !== "all" && order.status !== activeFilter) return false;
+        // El filtrado por isActive ya lo hace el backend mediante activeFilter -> isActive param
+        if (activeFilter !== "all" && activeFilter !== "CANCELADO" && order.status !== activeFilter) return false;
         
         const clientName = getClientName(order.client).toLowerCase();
         return clientName.includes(searchTerm.toLowerCase());
@@ -259,6 +281,11 @@ export const Orders = () => {
                     </tbody>
                 </table>
             </div>
+
+            <Pagination 
+                pagination={pagination} 
+                onPageChange={handlePageChange} 
+            />
 
             <OrderModal
                 isOpen={openModal}

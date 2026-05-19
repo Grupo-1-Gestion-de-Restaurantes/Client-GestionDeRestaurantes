@@ -10,24 +10,37 @@ import { ReservationModal } from "./ReservationModal.jsx";
 import { useUIStore } from "../../../shared/components/ui/store/uiStore.js";
 import { PencilLine, Trash2, Search, Plus, Filter, BadgeCheck } from "lucide-react";
 import { LucideMotionIcon } from "../../../shared/components/ui/LucideMotionIcon.jsx";
+import { Pagination } from "../../../shared/components/ui/Pagination.jsx";
 
 export const Reservations = () => {
-    const { reservations, loading, error, getReservations, deleteReservation } = useReservationStore();
+    const { reservations, loading, error, getReservations, deleteReservation, pagination } = useReservationStore();
     const { clients, getClients } = useClientStore();
     const { restaurants, getRestaurants } = useRestaurantStore();
     const { tables, getTables } = useTableStore();
     const [openModal, setOpenModal] = useState(false);
     const [selectedReservation, setSelectedReservation] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
-    const [activeFilter, setActiveFilter] = useState("active");
+    const [activeFilter, setActiveFilter] = useState("all");
     const { openConfirm } = useUIStore();
 
     useEffect(() => {
-        getReservations();
+        const params = { page: 1 };
+        if (activeFilter !== "all") {
+            params.isActive = activeFilter === "active";
+        }
+        getReservations(params);
         getClients();
         getRestaurants({ isActive: true, limit: 100 });
         getTables({ isActive: true, limit: 100 });
-    }, [getReservations]);
+    }, [getReservations, activeFilter]);
+
+    const handlePageChange = (page) => {
+        const params = { page };
+        if (activeFilter !== "all") {
+            params.isActive = activeFilter === "active";
+        }
+        getReservations(params);
+    };
 
     useToastEffect(() => {
         if (error) showError(error);
@@ -72,9 +85,7 @@ export const Reservations = () => {
     };
 
     const displayedReservations = reservations.filter((res) => {
-        if (activeFilter === "active" && !res.isActive) return false;
-        if (activeFilter === "inactive" && res.isActive) return false;
-        
+        // El filtrado por isActive ya lo hace el backend mediante activeFilter -> isActive param
         const clientName = getClientName(res.client).toLowerCase();
         return clientName.includes(searchTerm.toLowerCase());
     });
@@ -240,6 +251,11 @@ export const Reservations = () => {
                     </tbody>
                 </table>
             </div>
+
+            <Pagination 
+                pagination={pagination} 
+                onPageChange={handlePageChange} 
+            />
 
             <ReservationModal
                 isOpen={openModal}

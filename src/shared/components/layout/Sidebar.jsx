@@ -37,6 +37,7 @@ export const Sidebar = () => {
         { label: "Promociones", to: "/dashboard/promotions", icon: TicketPercent },
         { label: "Reservaciones", to: "/dashboard/reservations", icon: BookCheck },
         { label: "Mesas", to: "/dashboard/tables", icon: Table },
+        { label: "Solicitudes", to: "/dashboard/partners", icon: ClipboardList, adminOnly: true },
         { label: "Restaurantes", to: "/dashboard/restaurants", icon: Store, adminOnly: true },
     ];
 

@@ -10,14 +10,26 @@ export const useEmployeeStore = create((set, get) => ({
     employees: [],
     loading: false,
     error: null,
+    pagination: {
+        currentPage: 1,
+        limit: 20,
+        totalRecords: 0,
+        totalPages: 0
+    },
 
-    getEmployees: async () => {
+    getEmployees: async (params = {}) => {
         try {
             set({ loading: true, error: null });
-            const response = await getEmployeesRequest();
+            const queryParams = { 
+                page: get().pagination.currentPage, 
+                limit: get().pagination.limit, 
+                ...params 
+            };
+            const response = await getEmployeesRequest(queryParams);
 
             set({
                 employees: response.data.data || response.data,
+                pagination: response.data.pagination || get().pagination,
                 loading: false
             });
         } catch (error) {
