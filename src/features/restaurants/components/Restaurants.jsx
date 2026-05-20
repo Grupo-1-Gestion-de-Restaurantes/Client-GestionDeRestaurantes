@@ -48,6 +48,8 @@ export const Restaurants = () => {
 
             if (activeFilter !== "all") {
                 params.isActive = activeFilter === "active";
+            } else {
+                params.isActive = "all";
             }
 
             getRestaurants(params);
@@ -61,6 +63,8 @@ export const Restaurants = () => {
 
         if (activeFilter !== "all") {
             params.isActive = activeFilter === "active";
+        } else {
+            params.isActive = "all";
         }
 
         getRestaurants(params);

@@ -74,7 +74,7 @@ export const EmployeeModal = ({ isOpen, onClose, employeeItem }) => {
             <div className="bg-[var(--bg-surface)] rounded-2xl shadow-2xl w-full max-w-lg md:max-w-xl max-h-[90vh] flex flex-col overflow-hidden border border-[var(--border-color)] transition-colors duration-300">
 
                 {/* HEADER */}
-                <div className="p-4 sm:p-5 bg-[linear-gradient(90deg,var(--main-blue)_0%,#1956a3_100%)] text-white">
+                <div className="p-4 sm:p-5 bg-[linear-gradient(90deg,var(--main-blue)_0%,#1956a3_100%)] ">
                     <h2 className="text-xl sm:text-2xl font-bold">
                         {employeeItem ? "Editar Puesto de Personal" : "Contratación de Personal"}
                     </h2>
@@ -89,7 +89,7 @@ export const EmployeeModal = ({ isOpen, onClose, employeeItem }) => {
                     {/* SECCIÓN DATOS PERSONALES (Solo visible al Crear) */}
                     {!employeeItem && (
                         <div className="space-y-4 p-3 bg-[var(--bg-surface-alt)] rounded-xl border border-[var(--border-color)]">
-                            <h3 className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">👤 Datos del Nuevo Usuario</h3>
+                            <h3 className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">Datos del Nuevo Usuario</h3>
 
                             <div className="flex flex-col">
                                 <label className="text-xs font-semibold mb-1">Tipo de Rol</label>
@@ -108,24 +108,39 @@ export const EmployeeModal = ({ isOpen, onClose, employeeItem }) => {
                                     <input
                                         className="w-full px-3 py-1.5 text-sm rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none"
                                         placeholder="Marlon"
-                                        {...register("name", { required: true, minLength: 2, maxLength: 50 })}
+                                        {...register("name", { 
+                                            required: "El nombre es obligatorio", 
+                                            minLength: { value: 2, message: "Mínimo 2 caracteres" }, 
+                                            maxLength: { value: 50, message: "Máximo 50 caracteres" } 
+                                        })}
                                     />
+                                    {errors.name && <span className="text-[var(--color-brand-red)] text-[10px] mt-0.5">{errors.name.message}</span>}
                                 </div>
                                 <div className="flex flex-col">
                                     <label className="text-xs font-semibold mb-1">Apellido</label>
                                     <input
                                         className="w-full px-3 py-1.5 text-sm rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none"
                                         placeholder="Perez"
-                                        {...register("surname", { required: true, minLength: 2, maxLength: 50 })}
+                                        {...register("surname", { 
+                                            required: "El apellido es obligatorio", 
+                                            minLength: { value: 2, message: "Mínimo 2 caracteres" }, 
+                                            maxLength: { value: 50, message: "Máximo 50 caracteres" } 
+                                        })}
                                     />
+                                    {errors.surname && <span className="text-[var(--color-brand-red)] text-[10px] mt-0.5">{errors.surname.message}</span>}
                                 </div>
                                 <div className="flex flex-col">
                                     <label className="text-xs font-semibold mb-1">Username</label>
                                     <input
                                         className="w-full px-3 py-1.5 text-sm rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none"
                                         placeholder="mperez"
-                                        {...register("username", { required: true, minLength: 3, maxLength: 30 })}
+                                        {...register("username", { 
+                                            required: "El nombre de usuario es obligatorio", 
+                                            minLength: { value: 3, message: "Mínimo 3 caracteres" }, 
+                                            maxLength: { value: 30, message: "Máximo 30 caracteres" } 
+                                        })}
                                     />
+                                    {errors.username && <span className="text-[var(--color-brand-red)] text-[10px] mt-0.5">{errors.username.message}</span>}
                                 </div>
                                 <div className="flex flex-col">
                                     <label className="text-xs font-semibold mb-1">Teléfono</label>
@@ -134,8 +149,12 @@ export const EmployeeModal = ({ isOpen, onClose, employeeItem }) => {
                                         maxLength={8}
                                         className="w-full px-3 py-1.5 text-sm rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none"
                                         placeholder="55554444"
-                                        {...register("phone", { required: true, minLength: 8, maxLength: 8 })}
+                                        {...register("phone", { 
+                                            required: "El teléfono es obligatorio", 
+                                            pattern: { value: /^\d{8}$/, message: "Debe tener 8 dígitos" }
+                                        })}
                                     />
+                                    {errors.phone && <span className="text-[var(--color-brand-red)] text-[10px] mt-0.5">{errors.phone.message}</span>}
                                 </div>
                                 <div className="flex flex-col">
                                     <label className="text-xs font-semibold mb-1">Correo Electrónico</label>
@@ -143,8 +162,12 @@ export const EmployeeModal = ({ isOpen, onClose, employeeItem }) => {
                                         type="email"
                                         className="w-full px-3 py-1.5 text-sm rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none"
                                         placeholder="marlon@correo.com"
-                                        {...register("email", { required: true })}
+                                        {...register("email", { 
+                                            required: "El email es obligatorio",
+                                            pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: "Formato de email inválido" }
+                                        })}
                                     />
+                                    {errors.email && <span className="text-[var(--color-brand-red)] text-[10px] mt-0.5">{errors.email.message}</span>}
                                 </div>
                                 <div className="flex flex-col">
                                     <label className="text-xs font-semibold mb-1">Contraseña</label>
@@ -152,8 +175,12 @@ export const EmployeeModal = ({ isOpen, onClose, employeeItem }) => {
                                         type="password"
                                         className="w-full px-3 py-1.5 text-sm rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none"
                                         placeholder="••••••••"
-                                        {...register("password", { required: true, minLength: 8 })}
+                                        {...register("password", { 
+                                            required: "La contraseña es obligatoria", 
+                                            minLength: { value: 8, message: "Mínimo 8 caracteres" } 
+                                        })}
                                     />
+                                    {errors.password && <span className="text-[var(--color-brand-red)] text-[10px] mt-0.5">{errors.password.message}</span>}
                                 </div>
                             </div>
 
@@ -198,7 +225,7 @@ export const EmployeeModal = ({ isOpen, onClose, employeeItem }) => {
 
                                     <select
                                         className="w-full px-3 py-1.5 text-sm rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none"
-                                        {...register("specialty", { required: true })}
+                                        {...register("specialty", { required: "La especialidad es obligatoria" })}
                                     >
                                         <option value="COCINERO">Cocinero</option>
                                         <option value="BARTENDER">Bartender</option>
@@ -218,7 +245,7 @@ export const EmployeeModal = ({ isOpen, onClose, employeeItem }) => {
                                     /* 3. MODO CREACIÓN (Si seleccionó Employee): Solo puestos operativos de planta */
                                     <select
                                         className="w-full px-3 py-1.5 text-sm rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none"
-                                        {...register("specialty", { required: true })}
+                                        {...register("specialty", { required: "La especialidad es obligatoria" })}
                                     >
                                         <option value="COCINERO">Cocinero</option>
                                         <option value="BARTENDER">Bartender</option>
@@ -226,6 +253,7 @@ export const EmployeeModal = ({ isOpen, onClose, employeeItem }) => {
                                         <option value="OTRO">Otro Rol</option>
                                     </select>
                                 )}
+                                {errors.specialty && <p className="text-[var(--color-brand-red)] text-[10px] mt-0.5">{errors.specialty.message}</p>}
                             </div>
                         </div>
                     </div>
@@ -242,7 +270,7 @@ export const EmployeeModal = ({ isOpen, onClose, employeeItem }) => {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="px-5 py-2 rounded-lg text-sm font-medium text-white bg-[var(--color-brand-dark)] hover:bg-[var(--color-brand-red)] transition disabled:opacity-60"
+                            className="px-5 py-2 rounded-lg text-sm font-medium  bg-[var(--color-brand-dark)] hover:bg-[var(--color-brand-red)] transition disabled:opacity-60"
                         >
                             {loading ? "Guardando..." : employeeItem ? "Guardar Cambios" : "Efectuar Contratación"}
                         </button>

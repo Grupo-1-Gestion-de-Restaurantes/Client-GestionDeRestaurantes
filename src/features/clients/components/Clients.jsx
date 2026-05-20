@@ -22,6 +22,8 @@ export const Clients = () => {
 
             if (activeFilter !== "all") {
                 params.isActive = activeFilter === "active";
+            } else {
+                params.isActive = "all";
             }
 
             getClients(params);
@@ -35,6 +37,8 @@ export const Clients = () => {
 
         if (activeFilter !== "all") {
             params.isActive = activeFilter === "active";
+        } else {
+            params.isActive = "all";
         }
 
         getClients(params);

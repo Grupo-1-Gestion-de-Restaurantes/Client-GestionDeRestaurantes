@@ -10,9 +10,7 @@ export const getAllUsers = async () => {
 }
 
 export const register = async (data) => {
-    return await axiosAuth.post("/auth/register", data, {
-        headers: { "Content-Type": "multipart/form-data" }
-    })
+    return await axiosAuth.post("/auth/register", data)
 }
 
 export const updateUserRole = async (userId, roleName) => {
@@ -33,4 +31,12 @@ export const resetPassword = async (token, newPassword) => {
 
 export const refreshToken = async (refreshToken) => {
     return await axiosAuth.post("/auth/refresh-token", { refreshToken });
+}
+
+export const updateProfile = async (formData) => {
+    return await axiosAuth.post("/auth/update-profile", formData);
+}
+
+export const getProfile = async () => {
+    return await axiosAuth.get("/auth/profile");
 }

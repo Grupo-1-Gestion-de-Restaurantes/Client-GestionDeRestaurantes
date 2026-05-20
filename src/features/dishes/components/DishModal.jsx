@@ -96,7 +96,7 @@ export const DishModal = ({ isOpen, onClose, dish }) => {
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50 px-3 sm:px-4">
             <div className="bg-[var(--bg-surface)] rounded-2xl shadow-2xl w-full max-w-lg md:max-w-2xl max-h-[90vh] flex flex-col overflow-hidden border border-[var(--border-color)] transition-colors duration-300">
                 {/* HEADER */}
-                <div className="p-4 sm:p-5 bg-[linear-gradient(90deg,var(--main-blue)_0%,#1956a3_100%)] text-white sticky top-0 z-10 transition-colors duration-300">
+                <div className="p-4 sm:p-5 bg-[linear-gradient(90deg,var(--main-blue)_0%,#1956a3_100%)]  sticky top-0 z-10 transition-colors duration-300">
                     <h2 className="text-xl sm:text-2xl font-bold">
                         {dish ? "Editar Platillo" : "Nuevo Platillo"}
                     </h2>
@@ -184,7 +184,7 @@ export const DishModal = ({ isOpen, onClose, dish }) => {
                                     </h3>
                                     {!selectedRestaurant && (
                                         <p className="text-[var(--color-brand-red)] text-xs font-semibold mt-0.5">
-                                            ⚠️ Selecciona una sucursal arriba para poder cargar los ingredientes correspondientes.
+                                            Selecciona una sucursal arriba para poder cargar los ingredientes correspondientes.
                                         </p>
                                     )}
                                 </div>
@@ -197,6 +197,8 @@ export const DishModal = ({ isOpen, onClose, dish }) => {
                                     + Añadir Ingrediente
                                 </button>
                             </div>
+                            {errors.ingredients && <p className="text-[var(--color-brand-red)] text-xs mb-2 font-bold">{errors.ingredients.message}</p>}
+
 
                             {fields.length === 0 && (
                                 <p className="text-xs text-[var(--text-muted)] italic py-2 text-center bg-[var(--bg-surface-alt)] rounded-lg border border-dashed border-[var(--border-color)]">
@@ -287,7 +289,7 @@ export const DishModal = ({ isOpen, onClose, dish }) => {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full sm:w-auto px-5 py-2 rounded-lg font-medium transition-all duration-300 shadow bg-[var(--color-brand-dark)] text-white border border-transparent hover:bg-[var(--color-brand-red)] dark:bg-[var(--bg-surface-alt)] dark:text-[var(--text-primary)] dark:border-[var(--border-color)] dark:hover:bg-[var(--color-brand-yellow)] dark:hover:text-[var(--color-brand-dark)] dark:hover:border-transparent disabled:opacity-60 disabled:cursor-not-allowed"
+                            className="w-full sm:w-auto px-5 py-2 rounded-lg font-medium transition-all duration-300 shadow bg-[var(--color-brand-dark)]  border border-transparent hover:bg-[var(--color-brand-red)] dark:bg-[var(--bg-surface-alt)] dark:text-[var(--text-primary)] dark:border-[var(--border-color)] dark:hover:bg-[var(--color-brand-yellow)] dark:hover:text-[var(--color-brand-dark)] dark:hover:border-transparent disabled:opacity-60 disabled:cursor-not-allowed"
                         >
                             {loading ? "Guardando..." : dish ? "Guardar Cambios" : "Crear Platillo"}
                         </button>

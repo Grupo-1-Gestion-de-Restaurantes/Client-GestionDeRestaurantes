@@ -30,6 +30,8 @@ export const Dishes = () => {
 
             if (activeFilter !== "all") {
                 params.isActive = activeFilter === "active";
+            } else {
+                params.isActive = "all";
             }
 
             getDishes(params);
@@ -47,6 +49,8 @@ export const Dishes = () => {
 
         if (activeFilter !== "all") {
             params.isActive = activeFilter === "active";
+        } else {
+            params.isActive = "all";
         }
 
         getDishes(params);

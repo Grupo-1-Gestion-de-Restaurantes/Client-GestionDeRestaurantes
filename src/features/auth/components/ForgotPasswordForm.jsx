@@ -1,12 +1,20 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
+import { useLocation } from 'react-router-dom'
 import { useAuthStore } from '../store/useAuthStore'
 import { showSuccess, showError } from '../../../shared/utils/toast'
 
 export const ForgotPasswordForm = ({ onSwitch }) => {
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  const location = useLocation();
+  const { register, handleSubmit, reset, formState: { errors } } = useForm();
   
   const { requestPasswordReset, loading } = useAuthStore();
+
+  useEffect(() => {
+    if (location.state?.email) {
+      reset({ email: location.state.email });
+    }
+  }, [location.state, reset]);
 
   const onSubmit = async (data) => {
     const response = await requestPasswordReset(data.email);

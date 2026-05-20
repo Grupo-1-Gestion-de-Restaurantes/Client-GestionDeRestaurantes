@@ -24,6 +24,7 @@ export const Inventories = () => {
         const params = { page: 1 };
         if (restaurantFilter !== "all") params.restaurant = restaurantFilter;
         if (activeFilter !== "all") params.isActive = activeFilter === "active";
+        else params.isActive = "all";
         
         getInventories(params);
         if (getRestaurants) getRestaurants({ limit: 100, isActive: 'all' });
@@ -33,6 +34,7 @@ export const Inventories = () => {
         const params = { page };
         if (restaurantFilter !== "all") params.restaurant = restaurantFilter;
         if (activeFilter !== "all") params.isActive = activeFilter === "active";
+        else params.isActive = "all";
         getInventories(params);
     };
 

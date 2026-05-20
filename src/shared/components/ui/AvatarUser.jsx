@@ -98,6 +98,15 @@ export const AvatarUser = () => {
                             </li>
 
                             <li>
+                                <Link
+                                    to="/dashboard/profile"
+                                    className="block w-full p-2 rounded-md hover:bg-[var(--bg-surface-alt)] transition-colors"
+                                >
+                                    Mi Perfil
+                                </Link>
+                            </li>
+
+                            <li>
                                 <button
                                     onClick={handleLogoutClick}
                                     className="block w-full text-left p-2 mt-1 rounded-md hover:bg-[var(--color-brand-red)] hover:text-white text-[var(--color-brand-red)] transition-colors"

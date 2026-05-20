@@ -137,13 +137,14 @@ export const EventModal = ({ isOpen, onClose, eventItem }) => {
                             <label className="text-xs font-semibold mb-1">Categoría de Evento</label>
                             <select
                                 className="w-full px-3 py-1.5 text-sm rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none"
-                                {...register("typeEvent", { required: true })}
+                                {...register("typeEvent", { required: "El tipo de evento es obligatorio" })}
                             >
                                 <option value="CENA_TEMATICA">Cena Temática</option>
                                 <option value="DEGUSTACION">Degustación</option>
                                 <option value="FESTIVAL">Festival Gastronómico</option>
                                 <option value="OTRO">Otro</option>
                             </select>
+                            {errors.typeEvent && <p className="text-[var(--color-brand-red)] text-[10px] mt-0.5">{errors.typeEvent.message}</p>}
                         </div>
 
                         {/* Sucursal Destino */}
@@ -158,6 +159,7 @@ export const EventModal = ({ isOpen, onClose, eventItem }) => {
                                     <option key={r._id} value={r._id}>{r.name}</option>
                                 ))}
                             </select>
+                            {errors.restaurant && <p className="text-[var(--color-brand-red)] text-[10px] mt-0.5">{errors.restaurant.message}</p>}
                         </div>
                     </div>
 
@@ -169,8 +171,12 @@ export const EventModal = ({ isOpen, onClose, eventItem }) => {
                                 type="number"
                                 className="w-full px-3 py-1.5 text-sm rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none"
                                 placeholder="50"
-                                {...register("capacity", { required: "Requerido", min: 1 })}
+                                {...register("capacity", { 
+                                    required: "Requerido", 
+                                    min: { value: 1, message: "Mínimo 1" } 
+                                })}
                             />
+                            {errors.capacity && <p className="text-[var(--color-brand-red)] text-[10px] mt-0.5">{errors.capacity.message}</p>}
                         </div>
 
                         {/* Precio por Entrada */}
@@ -181,8 +187,12 @@ export const EventModal = ({ isOpen, onClose, eventItem }) => {
                                 step="any"
                                 className="w-full px-3 py-1.5 text-sm rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none"
                                 placeholder="0.00"
-                                {...register("price", { required: "Requerido", min: 0 })}
+                                {...register("price", { 
+                                    required: "Requerido", 
+                                    min: { value: 0, message: "No negativo" } 
+                                })}
                             />
+                            {errors.price && <p className="text-[var(--color-brand-red)] text-[10px] mt-0.5">{errors.price.message}</p>}
                         </div>
 
                         {/* Fecha y Hora */}
@@ -194,6 +204,7 @@ export const EventModal = ({ isOpen, onClose, eventItem }) => {
                                 className="w-full px-3 py-1.5 text-sm rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none"
                                 {...register("dateTime", { required: "Requerido" })}
                             />
+                            {errors.dateTime && <p className="text-[var(--color-brand-red)] text-[10px] mt-0.5">{errors.dateTime.message}</p>}
                         </div>
                     </div>
 
@@ -280,7 +291,7 @@ export const EventModal = ({ isOpen, onClose, eventItem }) => {
                                 {filteredEmployees.map(e => (
                                     <label key={e._id} className="flex items-center gap-2 text-xs cursor-pointer hover:bg-[var(--bg-base)] p-1 rounded">
                                         <input type="checkbox" value={e._id} {...register("assignedEmployees")} className="rounded border-[var(--border-color)]" />
-                                        {e.name} ({e.role})
+                                        {e.fullName} ({e.specialty})
                                     </label>
                                 ))}
                             </div>
@@ -299,7 +310,7 @@ export const EventModal = ({ isOpen, onClose, eventItem }) => {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="px-5 py-2 rounded-lg text-sm font-medium text-white bg-[var(--color-brand-dark)] hover:bg-[var(--color-brand-red)] transition disabled:opacity-60"
+                            className="px-5 py-2 rounded-lg text-sm font-medium  bg-[var(--color-brand-dark)] hover:bg-[var(--color-brand-red)] transition disabled:opacity-60"
                         >
                             {loading ? "Guardando..." : eventItem ? "Guardar Cambios" : "Agendar Evento"}
                         </button>

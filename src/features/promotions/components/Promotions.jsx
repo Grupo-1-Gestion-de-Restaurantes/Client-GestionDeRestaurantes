@@ -29,6 +29,8 @@ export const Promotions = () => {
 
       if (activeFilter !== "all") {
         filters.isActive = activeFilter === "active";
+      } else {
+        filters.isActive = "all";
       }
 
       getPromotions(filters);
@@ -41,6 +43,8 @@ export const Promotions = () => {
     const filters = { page };
     if (activeFilter !== "all") {
       filters.isActive = activeFilter === "active";
+    } else {
+      filters.isActive = "all";
     }
     getPromotions(filters);
   };

@@ -17,15 +17,25 @@ export const Employees = () => {
     const [selectedEmployee, setSelectedEmployee] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [restaurantFilter, setRestaurantFilter] = useState("all");
+    const [activeFilter, setActiveFilter] = useState("active");
     const { openConfirm } = useUIStore();
 
     useEffect(() => {
-        getEmployees({ page: 1 });
+        const params = { page: 1 };
+        if (restaurantFilter !== "all") params.restaurant = restaurantFilter;
+        if (activeFilter !== "all") params.isActive = activeFilter === "active";
+        else params.isActive = "all";
+
+        getEmployees(params);
         if (getRestaurants) getRestaurants({ isActive: 'all', limit: 100 });
-    }, [getEmployees, getRestaurants]);
+    }, [getEmployees, getRestaurants, restaurantFilter, activeFilter]);
 
     const handlePageChange = (page) => {
-        getEmployees({ page });
+        const params = { page };
+        if (restaurantFilter !== "all") params.restaurant = restaurantFilter;
+        if (activeFilter !== "all") params.isActive = activeFilter === "active";
+        else params.isActive = "all";
+        getEmployees(params);
     };
 
     useToastEffect(() => {
@@ -34,17 +44,12 @@ export const Employees = () => {
 
     const filteredEmployees = useMemo(() => {
         return employees.filter((emp) => {
-            if (!emp.isActive) return false;
-
             const matchesSearch = (emp.fullName || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
                                  (emp.specialty || "").toLowerCase().includes(searchTerm.toLowerCase());
             
-            const restaurantId = typeof emp.restaurant === "object" ? emp.restaurant?._id : emp.restaurant;
-            const matchesRestaurant = restaurantFilter === "all" || restaurantId === restaurantFilter;
-
-            return matchesSearch && matchesRestaurant;
+            return matchesSearch;
         });
-    }, [employees, searchTerm, restaurantFilter]);
+    }, [employees, searchTerm]);
 
     const getRestaurantName = (restaurantField) => {
         if (!restaurantField) return "Sin asignar";
@@ -123,11 +128,30 @@ export const Employees = () => {
                         </select>
                     </div>
 
+                    <div className="w-full lg:w-48">
+                        <label className="block text-sm font-semibold text-[var(--text-primary)] mb-2">
+                            <span className="inline-flex items-center gap-2">
+                                <LucideMotionIcon icon={Filter} />
+                                Estado
+                            </span>
+                        </label>
+                        <select
+                            value={activeFilter}
+                            onChange={(e) => setActiveFilter(e.target.value)}
+                            className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-base)] px-4 py-2.5 text-sm text-[var(--text-primary)] outline-none transition focus:border-[var(--color-brand-dark)]"
+                        >
+                            <option value="active">Activos</option>
+                            <option value="inactive">Inactivos</option>
+                            <option value="all">Todos</option>
+                        </select>
+                    </div>
+
                     <button
                         type="button"
                         onClick={() => {
                             setSearchTerm("");
                             setRestaurantFilter("all");
+                            setActiveFilter("active");
                         }}
                         className="rounded-xl border border-[var(--border-color)] px-4 py-2.5 text-sm font-medium text-[var(--text-secondary)] transition hover:bg-[var(--bg-base)]"
                     >

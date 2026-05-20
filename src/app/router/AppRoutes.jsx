@@ -26,6 +26,7 @@ import { Clients } from "../../features/clients/components/Clients.jsx"
 import { Comments } from "../../features/comments/components/Comments.jsx"
 import { Inventories } from "../../features/inventories/components/Inventories.jsx"
 import { Events } from "../../features/events/components/Events.jsx"
+import { Profile } from "../../features/auth/components/Profile.jsx"
 
 export const AppRoutes = () => {
     return (
@@ -62,6 +63,7 @@ export const AppRoutes = () => {
                 <Route path="partners" element={<PartnersLeads />} />
                 <Route path="events" element={<Events />} />
                 <Route path="notifications" element={<Notifications />} />
+                <Route path="profile" element={<Profile />} />
             </Route>
         </Routes>
     )

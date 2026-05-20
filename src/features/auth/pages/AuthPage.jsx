@@ -1,5 +1,6 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useLocation } from 'react-router-dom'
 import AuthImage from "../../../assets/img/auth-image.jpeg"
 import ExpressDark from '../../../assets/img/Express-ligth-2.png'
 import { LoginForm } from '../components/LoginForm'
@@ -9,7 +10,14 @@ import { Icon } from '../../../shared/components/ui/Icons'
 
 export const AuthPage = ({ children }) => {
 
+  const location = useLocation()
   const [currentView, setCurrentView] = useState('login')
+
+  useEffect(() => {
+    if (location.state?.view) {
+      setCurrentView(location.state.view)
+    }
+  }, [location.state])
 
   // Variantes de la animacion para transición de forms
   const variants = {

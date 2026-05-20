@@ -4,7 +4,9 @@ import {
     forgotPassword,
     login as loginRequest,
     register as registerRequest,
-    resetPassword as resetPasswordRequest
+    resetPassword as resetPasswordRequest,
+    updateProfile as updateProfileRequest,
+    getProfile as getProfileRequest
 } from "../../../shared/api"
 import { showError } from "../../../shared/utils/toast";
 
@@ -161,6 +163,46 @@ export const useAuthStore = create(
                     const message = err.response?.data?.message || "Error al restablecer la contraseña";
                     set({ error: message, loading: false });
                     return { success: false, error: message }
+                }
+            },
+            updateProfile: async (formData) => {
+                try {
+                    set({ loading: true, error: null });
+                    const { data } = await updateProfileRequest(formData);
+
+                    const updatedUser = {
+                        ...get().user,
+                        name: data.data.name,
+                        surname: data.data.surname,
+                        email: data.data.email,
+                        phone: data.data.phone,
+                        profilePicture: data.data.profilePicture
+                    };
+
+                    set({ user: updatedUser, loading: false });
+                    return { success: true, data: data.data };
+                } catch (err) {
+                    const message = err.response?.data?.message || "Error al actualizar el perfil";
+                    set({ error: message, loading: false });
+                    return { success: false, error: message };
+                }
+            },
+            getProfile: async () => {
+                try {
+                    set({ loading: true, error: null });
+                    const { data } = await getProfileRequest();
+                    
+                    const updatedUser = {
+                        ...get().user,
+                        ...data.data
+                    };
+                    
+                    set({ user: updatedUser, loading: false });
+                    return { success: true, data: data.data };
+                } catch (err) {
+                    const message = err.response?.data?.message || "Error al obtener el perfil";
+                    set({ error: message, loading: false });
+                    return { success: false, error: message };
                 }
             }
         }),

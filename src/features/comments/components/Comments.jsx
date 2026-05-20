@@ -21,12 +21,17 @@ export const Comments = () => {
         const timeoutId = setTimeout(() => {
             const params = {
                 search: searchTerm.trim(),
-                restaurantId: restaurantFilter,
                 page: 1
             };
 
+            if (restaurantFilter) {
+                params.restaurantId = restaurantFilter;
+            }
+
             if (activeFilter !== "all") {
                 params.isActive = activeFilter === "active";
+            } else {
+                params.isActive = "all";
             }
 
             getComments(params);
@@ -38,12 +43,17 @@ export const Comments = () => {
     const handlePageChange = (page) => {
         const params = {
             search: searchTerm.trim(),
-            restaurantId: restaurantFilter,
             page
         };
 
+        if (restaurantFilter) {
+            params.restaurantId = restaurantFilter;
+        }
+
         if (activeFilter !== "all") {
             params.isActive = activeFilter === "active";
+        } else {
+            params.isActive = "all";
         }
 
         getComments(params);

@@ -51,6 +51,14 @@ axiosAuth.interceptors.request.use((config) => {
         config.headers['x-token'] = token;
     }
 
+    if (typeof FormData !== 'undefined' && config.data instanceof FormData) {
+        if (config.headers && typeof config.headers.delete === 'function') {
+            config.headers.delete('Content-Type');
+        } else {
+            delete config.headers['Content-Type'];
+        }
+    }
+
     return config;
 })
 

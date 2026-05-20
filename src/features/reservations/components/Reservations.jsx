@@ -27,6 +27,8 @@ export const Reservations = () => {
         const params = { page: 1 };
         if (activeFilter !== "all") {
             params.isActive = activeFilter === "active";
+        } else {
+            params.isActive = "all";
         }
         getReservations(params);
         getClients();
@@ -38,6 +40,8 @@ export const Reservations = () => {
         const params = { page };
         if (activeFilter !== "all") {
             params.isActive = activeFilter === "active";
+        } else {
+            params.isActive = "all";
         }
         getReservations(params);
     };

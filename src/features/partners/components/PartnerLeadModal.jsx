@@ -123,7 +123,7 @@ export const PartnerLeadModal = ({ isOpen, onClose, lead, onApprove, onReject })
                             </button>
                             <button
                                 onClick={onApprove}
-                                className="px-4 py-2 text-sm font-medium bg-green-600 text-white hover:bg-green-700 shadow-lg shadow-green-600/20 rounded-lg transition-colors flex items-center gap-2"
+                                className="px-4 py-2 text-sm font-medium bg-green-600  hover:bg-green-700 shadow-lg shadow-green-600/20 rounded-lg transition-colors flex items-center gap-2"
                             >
                                 <Check size={18} />
                                 Aprobar y Activar
