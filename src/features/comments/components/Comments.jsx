@@ -6,7 +6,7 @@ import { showError } from "../../../shared/utils/toast.js";
 import { useUIStore } from "../../../shared/components/ui/store/uiStore.js";
 import { useRestaurantStore } from "../../restaurants/store/useRestaurantStore.js";
 import { useDishStore } from "../../dishes/store/useDishStore.js"; // Lo mismo para platillos
-import { Trash2, Search, Filter, BadgeCheck } from "lucide-react";
+import { Trash2, Search, Filter, BadgeCheck, Star } from "lucide-react";
 import { LucideMotionIcon } from "../../../shared/components/ui/LucideMotionIcon.jsx";
 import { Pagination } from "../../../shared/components/ui/Pagination.jsx";
 
@@ -209,7 +209,12 @@ export const Comments = () => {
                                     <tr key={com._id} className="hover:bg-[var(--bg-base)] transition-colors">
 
                                         <td className="px-6 py-4 text-sm font-bold text-amber-500 whitespace-nowrap">
-                                            {"⭐".repeat(com.review)} <span className="text-[var(--text-secondary)] font-normal ml-1">({com.review})</span>
+                                            <span className="inline-flex items-center gap-0.5 align-middle">
+                                                {Array.from({ length: com.review }).map((_, i) => (
+                                                    <Star key={i} size={14} fill="currentColor" strokeWidth={0} />
+                                                ))}
+                                            </span>
+                                            <span className="text-[var(--text-secondary)] font-normal ml-1">({com.review})</span>
                                         </td>
 
                                         <td className="px-6 py-4 text-sm text-[var(--text-primary)] max-w-xs md:max-w-md break-words">

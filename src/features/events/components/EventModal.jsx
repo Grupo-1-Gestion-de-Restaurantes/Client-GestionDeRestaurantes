@@ -310,7 +310,7 @@ export const EventModal = ({ isOpen, onClose, eventItem }) => {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="px-5 py-2 rounded-lg text-sm font-medium  bg-[var(--color-brand-dark)] hover:bg-[var(--color-brand-red)] transition disabled:opacity-60"
+                            className="px-5 py-2 rounded-lg text-sm font-medium bg-[var(--color-brand-dark)] text-white border border-transparent hover:bg-[var(--color-brand-red)] dark:bg-[var(--bg-surface-alt)] dark:text-[var(--text-primary)] dark:border-[var(--border-color)] dark:hover:bg-[var(--color-brand-yellow)] dark:hover:text-[var(--color-brand-dark)] dark:hover:border-transparent transition disabled:opacity-60"
                         >
                             {loading ? "Guardando..." : eventItem ? "Guardar Cambios" : "Agendar Evento"}
                         </button>

@@ -83,13 +83,7 @@ export const RestaurantModal = ({ isOpen, onClose, restaurant }) => {
             {/* CONTENEDOR */}
             <div className="bg-[var(--bg-surface)] text-[var(--text-primary)] rounded-2xl shadow-2xl w-full max-w-lg md:max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
                 {/* HEADER */}
-                <div
-                    className="p-4 sm:p-5 text-white sticky top-0 z-10"
-                    style={{
-                        background:
-                            "linear-gradient(90deg, var(--main-blue) 0%, #1956a3 100%)",
-                    }}
-                >
+                <div className="p-4 sm:p-5 text-white sticky top-0 z-10 bg-[linear-gradient(90deg,var(--color-brand-dark)_0%,var(--color-brand-red-dark)_100%)]">
                     <h2 className="text-xl sm:text-2xl font-bold">
                         {restaurant ? "Editar Restaurante" : "Nuevo Restaurante"}
                     </h2>
@@ -420,12 +414,7 @@ export const RestaurantModal = ({ isOpen, onClose, restaurant }) => {
 
                         <button
                             type="submit"
-                            className="w-full sm:w-auto px-5 py-2 rounded-lg text-white font-medium transition shadow"
-                            style={{
-                                background:
-                                    "linear-gradient(90deg, var(--main-blue) 0%, #1956a3 100%)",
-                                border: "none",
-                            }}
+                            className="w-full sm:w-auto px-5 py-2 rounded-lg font-medium transition-all duration-300 shadow bg-[var(--color-brand-dark)] text-white border border-transparent hover:bg-[var(--color-brand-red)] dark:bg-[var(--bg-surface-alt)] dark:text-[var(--text-primary)] dark:border-[var(--border-color)] dark:hover:bg-[var(--color-brand-yellow)] dark:hover:text-[var(--color-brand-dark)] dark:hover:border-transparent"
                         >
                             {loading ? <Spinner /> : restaurant ? "Guardar Cambios" : "Crear Restaurante"}
                         </button>

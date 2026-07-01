@@ -6,6 +6,7 @@ import { useClientStore } from "../../clients/store/useClientStore.js";
 import { useRestaurantStore } from "../../restaurants/store/useRestaurantStore.js";
 import { useDishStore } from "../../dishes/store/useDishStore.js";
 import { Spinner } from "../../../shared/components/layout/Spinner.jsx";
+import { X, Trash2 } from "lucide-react";
 
 export const OrderModal = ({ isOpen, onClose, order }) => {
     const { register, handleSubmit, reset, control, watch, formState: { errors } } = useForm({
@@ -94,11 +95,13 @@ export const OrderModal = ({ isOpen, onClose, order }) => {
             <div className="bg-[var(--bg-surface)] w-full max-w-3xl rounded-2xl shadow-2xl border border-[var(--border-color)] overflow-hidden flex flex-col max-h-[90vh]">
 
                 {/* Header */}
-                <div className="px-6 py-4 border-b border-[var(--border-color)] flex justify-between items-center bg-[linear-gradient(90deg,var(--main-blue)_0%,#1956a3_100%)] text-white">
+                <div className="px-6 py-4 border-b border-[var(--border-color)] flex justify-between items-center bg-[linear-gradient(90deg,var(--color-brand-dark)_0%,var(--color-brand-red-dark)_100%)] text-white">
                     <h2 className="text-xl font-bold">
                         {order ? "Editar Pedido Administrativo" : "Nuevo Pedido (Admin)"}
                     </h2>
-                    <button onClick={onClose} className="text-white opacity-80 hover:opacity-100 transition-opacity">✕</button>
+                    <button onClick={onClose} className="text-white opacity-80 hover:opacity-100 transition-opacity">
+                        <X size={20} />
+                    </button>
                 </div>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="p-6 overflow-y-auto space-y-6">
@@ -225,7 +228,7 @@ export const OrderModal = ({ isOpen, onClose, order }) => {
                                             onClick={() => remove(index)}
                                             className="text-red-500 p-1.5 hover:bg-red-100 rounded self-end mb-1"
                                         >
-                                            🗑️
+                                            <Trash2 size={16} />
                                         </button>
                                     )}
                                 </div>

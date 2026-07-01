@@ -96,13 +96,13 @@ export const Restaurants = () => {
         return Array.from({ length: 5 }, (_, index) => {
             const filled = index < ratingNumber;
             return (
-                <span
+                <Star
                     key={index}
+                    size={14}
                     className={filled ? "text-yellow-500" : "text-gray-400"}
+                    fill={filled ? "currentColor" : "none"}
                     aria-hidden
-                >
-                    {filled ? '★' : '☆'}
-                </span>
+                />
             );
         });
     };

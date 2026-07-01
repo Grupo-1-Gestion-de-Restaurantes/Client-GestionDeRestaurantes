@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
+import { X } from "lucide-react";
 import { useSaveDish } from "../hooks/UseSaveDish.jsx";
 import { useDishStore } from "../store/useDishStore";
 import { useRestaurantStore } from "../../restaurants/store/useRestaurantStore.js"; 
@@ -31,15 +32,19 @@ export const DishModal = ({ isOpen, onClose, dish }) => {
     const { restaurants, getRestaurants } = useRestaurantStore();
     const { inventories, getInventories } = useInventoryStore(); 
 
-    // 👁️ Observamos en tiempo real qué restaurante está seleccionado
     const selectedRestaurant = watch("restaurant");
 
     useEffect(() => {
         if (isOpen) {
             if (getRestaurants) getRestaurants({ isActive: 'all' });
-            if (getInventories) getInventories();
         }
-    }, [isOpen, getRestaurants, getInventories]);
+    }, [isOpen, getRestaurants]);
+
+    useEffect(() => {
+        if (isOpen && selectedRestaurant && getInventories) {
+            getInventories({ restaurant: selectedRestaurant, limit: 1000, page: 1 });
+        }
+    }, [isOpen, selectedRestaurant, getInventories]);
 
     useEffect(() => {
         if (isOpen) {
@@ -75,7 +80,6 @@ export const DishModal = ({ isOpen, onClose, dish }) => {
     }) || [];
 
     const onSubmit = async (data) => {
-        // 🚨 Validación: Debe llevar por lo menos 1 ingrediente obligatoriamente
         if (!data.ingredients || data.ingredients.length === 0) {
             showError("¡Error! Debes agregar por lo menos 1 ingrediente para poder guardar el platillo.");
             return;
@@ -96,7 +100,7 @@ export const DishModal = ({ isOpen, onClose, dish }) => {
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50 px-3 sm:px-4">
             <div className="bg-[var(--bg-surface)] rounded-2xl shadow-2xl w-full max-w-lg md:max-w-2xl max-h-[90vh] flex flex-col overflow-hidden border border-[var(--border-color)] transition-colors duration-300">
                 {/* HEADER */}
-                <div className="p-4 sm:p-5 bg-[linear-gradient(90deg,var(--main-blue)_0%,#1956a3_100%)]  sticky top-0 z-10 transition-colors duration-300">
+                <div className="p-4 sm:p-5 bg-[linear-gradient(90deg,var(--color-brand-dark)_0%,var(--color-brand-red-dark)_100%)] text-white sticky top-0 z-10 transition-colors duration-300">
                     <h2 className="text-xl sm:text-2xl font-bold">
                         {dish ? "Editar Platillo" : "Nuevo Platillo"}
                     </h2>
@@ -206,10 +210,15 @@ export const DishModal = ({ isOpen, onClose, dish }) => {
                                 </p>
                             )}
 
-                            <div className="space-y-3 max-h-[160px] overflow-y-auto pr-1">
-                                {fields.map((field, index) => (
-                                    <div key={field.id} className="flex items-center gap-3 bg-[var(--bg-surface-alt)] p-2 rounded-lg border border-[var(--border-color)]">
-                                        
+                            <div className="space-y-3 max-h-[200px] overflow-y-auto pr-1">
+                                {fields.map((field, index) => {
+                                    const selectedInventoryItemId = watch(`ingredients.${index}.inventoryItem`);
+                                    const selectedItem = filteredInventories.find((item) => item._id === selectedInventoryItemId);
+                                    const selectedUnit = selectedItem ? String(selectedItem.unit).toLowerCase() : null;
+
+                                    return (
+                                    <div key={field.id} className="flex items-start gap-3 bg-[var(--bg-surface-alt)] p-2 rounded-lg border border-[var(--border-color)]">
+
                                         {/* Select de Item de Inventario de la Sucursal */}
                                         <div className="flex-1">
                                             <select
@@ -219,21 +228,47 @@ export const DishModal = ({ isOpen, onClose, dish }) => {
                                                 <option value="">Seleccionar ingrediente</option>
                                                 {filteredInventories.map((item) => (
                                                     <option key={item._id} value={item._id}>
-                                                        {item.name || item.itemName || "Ingrediente sin nombre"} 
+                                                        {(item.name || item.itemName || "Ingrediente sin nombre")} — {item.quantity} {String(item.unit).toLowerCase()} disponible
                                                     </option>
                                                 ))}
                                             </select>
+                                            {errors.ingredients?.[index]?.inventoryItem && (
+                                                <p className="text-[var(--color-brand-red)] text-xs mt-1">{errors.ingredients[index].inventoryItem.message}</p>
+                                            )}
                                         </div>
 
                                         {/* Cantidad consumida */}
-                                        <div className="w-24 sm:w-32">
-                                            <input
-                                                type="number"
-                                                step="any"
-                                                placeholder="Cantidad"
-                                                className="w-full px-2 py-1.5 text-sm rounded-md border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none"
-                                                {...register(`ingredients.${index}.quantityUsed`, { required: "Requerido", min: 0.001 })}
-                                            />
+                                        <div className="w-28 sm:w-36">
+                                            <div className="relative">
+                                                <input
+                                                    type="number"
+                                                    step="any"
+                                                    max={selectedItem ? selectedItem.quantity : undefined}
+                                                    placeholder="Cantidad"
+                                                    className="w-full px-2 py-1.5 text-sm rounded-md border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none"
+                                                    {...register(`ingredients.${index}.quantityUsed`, {
+                                                        required: "Requerido",
+                                                        min: { value: 0.001, message: "Debe ser mayor a 0" },
+                                                        validate: (value, formValues) => {
+                                                            const invId = formValues.ingredients?.[index]?.inventoryItem;
+                                                            const invItem = filteredInventories.find((item) => item._id === invId);
+                                                            if (!invItem) return true;
+                                                            return (
+                                                                Number(value) <= invItem.quantity ||
+                                                                `Máx. disponible: ${invItem.quantity} ${String(invItem.unit).toLowerCase()}`
+                                                            );
+                                                        }
+                                                    })}
+                                                />
+                                            </div>
+                                            {selectedUnit && (
+                                                <p className="text-[10px] text-[var(--text-muted)] mt-1">
+                                                    Unidad: {selectedUnit} (disp. {selectedItem.quantity})
+                                                </p>
+                                            )}
+                                            {errors.ingredients?.[index]?.quantityUsed && (
+                                                <p className="text-[var(--color-brand-red)] text-xs mt-1">{errors.ingredients[index].quantityUsed.message}</p>
+                                            )}
                                         </div>
 
                                         {/* Botón de Remover */}
@@ -242,10 +277,11 @@ export const DishModal = ({ isOpen, onClose, dish }) => {
                                             onClick={() => remove(index)}
                                             className="text-sm p-1.5 text-[var(--color-brand-red)] hover:bg-red-50 dark:hover:bg-red-950/30 rounded-md transition"
                                         >
-                                            ❌
+                                            <X size={16} />
                                         </button>
                                     </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         </div>
 
@@ -289,7 +325,7 @@ export const DishModal = ({ isOpen, onClose, dish }) => {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full sm:w-auto px-5 py-2 rounded-lg font-medium transition-all duration-300 shadow bg-[var(--color-brand-dark)]  border border-transparent hover:bg-[var(--color-brand-red)] dark:bg-[var(--bg-surface-alt)] dark:text-[var(--text-primary)] dark:border-[var(--border-color)] dark:hover:bg-[var(--color-brand-yellow)] dark:hover:text-[var(--color-brand-dark)] dark:hover:border-transparent disabled:opacity-60 disabled:cursor-not-allowed"
+                            className="w-full sm:w-auto px-5 py-2 rounded-lg font-medium transition-all duration-300 shadow bg-[var(--color-brand-dark)] text-white border border-transparent hover:bg-[var(--color-brand-red)] dark:bg-[var(--bg-surface-alt)] dark:text-[var(--text-primary)] dark:border-[var(--border-color)] dark:hover:bg-[var(--color-brand-yellow)] dark:hover:text-[var(--color-brand-dark)] dark:hover:border-transparent disabled:opacity-60 disabled:cursor-not-allowed"
                         >
                             {loading ? "Guardando..." : dish ? "Guardar Cambios" : "Crear Platillo"}
                         </button>

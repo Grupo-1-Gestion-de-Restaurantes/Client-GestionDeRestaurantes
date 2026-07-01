@@ -247,7 +247,7 @@ export const Dishes = () => {
                                                 {dishItem.description}
                                             </p>
                                         )}
-                                        {/* 📝 Mapeo Visual de la Receta */}
+                                        {/* Mapeo Visual de la Receta */}
                                         <div className="flex flex-wrap gap-1 mt-1">
                                             {dishItem.ingredients && dishItem.ingredients.length > 0 ? (
                                                 dishItem.ingredients.map((ing, i) => (

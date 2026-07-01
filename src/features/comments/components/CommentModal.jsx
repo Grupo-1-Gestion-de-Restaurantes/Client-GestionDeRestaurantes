@@ -50,7 +50,7 @@ export const CommentModal = ({ isOpen, onClose, commentItem }) => {
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50 px-3 sm:px-4">
             <div className="bg-[var(--bg-surface)] rounded-2xl shadow-2xl w-full max-w-lg md:max-w-xl max-h-[90vh] flex flex-col overflow-hidden border border-[var(--border-color)] transition-colors duration-300">
                 {/* HEADER */}
-                <div className="p-4 sm:p-5 bg-[linear-gradient(90deg,var(--main-blue)_0%,#1956a3_100%)]  sticky top-0 z-10 transition-colors duration-300">
+                <div className="p-4 sm:p-5 bg-[linear-gradient(90deg,var(--color-brand-dark)_0%,var(--color-brand-red-dark)_100%)] text-white sticky top-0 z-10 transition-colors duration-300">
                     <h2 className="text-xl sm:text-2xl font-bold">
                         {commentItem ? "Editar Comentario / Reseña" : "Nuevo Comentario / Reseña"}
                     </h2>
@@ -74,11 +74,11 @@ export const CommentModal = ({ isOpen, onClose, commentItem }) => {
                                 className="w-full px-3 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--ring-color)] transition"
                                 {...register("review", { required: "La calificación es obligatoria", valueAsNumber: true })}
                             >
-                                <option value={5}>⭐⭐⭐⭐⭐ (5) Excelente</option>
-                                <option value={4}>⭐⭐⭐⭐ (4) Bueno</option>
-                                <option value={3}>⭐⭐⭐ (3) Regular</option>
-                                <option value={2}>⭐⭐ (2) Malo</option>
-                                <option value={1}>⭐ (1) Pésimo</option>
+                                <option value={5}>5 - Excelente</option>
+                                <option value={4}>4 - Bueno</option>
+                                <option value={3}>3 - Regular</option>
+                                <option value={2}>2 - Malo</option>
+                                <option value={1}>1 - Pésimo</option>
                             </select>
                         </div>
 

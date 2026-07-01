@@ -6,7 +6,7 @@ import { useEffect as useToastEffect } from "react";
 import { showError } from "../../../shared/utils/toast.js";
 import { InventoryModal } from "./InventoryModal.jsx";
 import { useUIStore } from "../../../shared/components/ui/store/uiStore.js";
-import { PencilLine, Trash2, Search, Filter, BadgeCheck } from "lucide-react";
+import { PencilLine, Trash2, Search, Filter, BadgeCheck, TriangleAlert } from "lucide-react";
 import { LucideMotionIcon } from "../../../shared/components/ui/LucideMotionIcon.jsx";
 import { Pagination } from "../../../shared/components/ui/Pagination.jsx";
 
@@ -178,7 +178,7 @@ export const Inventories = () => {
                     <tbody className="divide-y divide-[var(--border-color)]">
                         {filteredItems.length > 0 ? (
                             filteredItems.map((item) => {
-                                // 🚨 Lógica de Alerta de Stock Bajo
+                                // Lógica de Alerta de Stock Bajo
                                 const isLowStock = item.quantity <= (item.minStock || 5);
 
                                 return (
@@ -196,8 +196,8 @@ export const Inventories = () => {
                                         </td>
                                         <td className="px-6 py-4 text-sm">
                                             {isLowStock ? (
-                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-950/40 dark:text-red-400">
-                                                    ⚠️ Stock Bajo (Mín. {item.minStock || 5})
+                                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-950/40 dark:text-red-400">
+                                                    <TriangleAlert size={12} /> Stock Bajo (Mín. {item.minStock || 5})
                                                 </span>
                                             ) : (
                                                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-950/40 dark:text-green-400">

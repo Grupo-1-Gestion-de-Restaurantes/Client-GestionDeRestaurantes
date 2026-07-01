@@ -4,7 +4,7 @@ export const NotificationModal = ({ isOpen, onClose, notification }) => {
 	return (
 		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
 			<div className="w-full max-w-2xl overflow-hidden rounded-2xl bg-[var(--bg-surface)] text-[var(--text-primary)] shadow-2xl">
-				<div className="bg-[linear-gradient(90deg,var(--main-blue)_0%,#1956a3_100%)] p-5 ">
+				<div className="bg-[linear-gradient(90deg,var(--color-brand-dark)_0%,var(--color-brand-red-dark)_100%)] p-5 text-white">
 					<h2 className="text-2xl font-bold">Detalle de Notificación</h2>
 					<p className="text-sm opacity-80">Consulta rápida del contenido recibido</p>
 				</div>

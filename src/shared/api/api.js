@@ -68,6 +68,8 @@ axiosAdmin.interceptors.request.use((config) => {
     // Debug log temporal: indicar si hay token al hacer la request
     try {
         const short = token ? token.slice(0, 8) + '...' : null;
+        // eslint-disable-next-line no-console
+        console.log('[API][admin][request]', { url: config.url, client: config._axiosClient, hasToken: !!token, tokenPreview: short });
     } catch (e) {}
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
@@ -140,7 +142,10 @@ const handleRefreshToken = async function (_error) {
         _isRefreshing = true;
         const refreshToken = useAuthStore.getState().refreshToken;
         if (!refreshToken) {
-            useAuthStore.getState().logout();
+            // Este backend no emite refreshToken, así que no hay forma de refrescar.
+            // No cerramos la sesión aquí: un 401 aislado (p. ej. una carrera al
+            // montar un componente) no debe invalidar un token válido en memoria.
+            _isRefreshing = false;
             return Promise.reject(_error);
         }
         try {

@@ -175,7 +175,7 @@ export const Promotions = () => {
                     {promotion.startDate ? new Date(promotion.startDate).toLocaleDateString() : "N/A"} - {promotion.endDate ? new Date(promotion.endDate).toLocaleDateString() : "N/A"}
                   </td>
                   <td className="px-6 py-4 text-sm text-[var(--text-secondary)]">
-                    <span className={`rounded-full px-3 py-1 text-xs font-medium ${promotion.status === "APPROVED" ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400" : promotion.status === "REJECTED" ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400" : "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400"}`}>
+                    <span className={`rounded-full px-3 py-1 text-xs font-medium ${promotion.status === "APPROVED" ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400" : promotion.status === "REJECTED" ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400" : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400"}`}>
                       {promotion.status}
                     </span>
                   </td>

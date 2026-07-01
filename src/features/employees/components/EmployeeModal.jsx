@@ -74,7 +74,7 @@ export const EmployeeModal = ({ isOpen, onClose, employeeItem }) => {
             <div className="bg-[var(--bg-surface)] rounded-2xl shadow-2xl w-full max-w-lg md:max-w-xl max-h-[90vh] flex flex-col overflow-hidden border border-[var(--border-color)] transition-colors duration-300">
 
                 {/* HEADER */}
-                <div className="p-4 sm:p-5 bg-[linear-gradient(90deg,var(--main-blue)_0%,#1956a3_100%)] ">
+                <div className="p-4 sm:p-5 bg-[linear-gradient(90deg,var(--color-brand-dark)_0%,var(--color-brand-red-dark)_100%)] text-white">
                     <h2 className="text-xl sm:text-2xl font-bold">
                         {employeeItem ? "Editar Puesto de Personal" : "Contratación de Personal"}
                     </h2>
@@ -270,7 +270,7 @@ export const EmployeeModal = ({ isOpen, onClose, employeeItem }) => {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="px-5 py-2 rounded-lg text-sm font-medium  bg-[var(--color-brand-dark)] hover:bg-[var(--color-brand-red)] transition disabled:opacity-60"
+                            className="px-5 py-2 rounded-lg text-sm font-medium bg-[var(--color-brand-dark)] text-white border border-transparent hover:bg-[var(--color-brand-red)] dark:bg-[var(--bg-surface-alt)] dark:text-[var(--text-primary)] dark:border-[var(--border-color)] dark:hover:bg-[var(--color-brand-yellow)] dark:hover:text-[var(--color-brand-dark)] dark:hover:border-transparent transition disabled:opacity-60"
                         >
                             {loading ? "Guardando..." : employeeItem ? "Guardar Cambios" : "Efectuar Contratación"}
                         </button>
