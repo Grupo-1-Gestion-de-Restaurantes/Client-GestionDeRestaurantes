@@ -4,8 +4,9 @@ import { X } from "lucide-react";
 import { useSaveDish } from "../hooks/UseSaveDish.jsx";
 import { useDishStore } from "../store/useDishStore";
 import { useRestaurantStore } from "../../restaurants/store/useRestaurantStore.js"; 
-import { useInventoryStore } from "../../inventories/store/useInventoryStore.js"; 
+import { useInventoryStore } from "../../inventories/store/useInventoryStore.js";
 import { showError } from "../../../shared/utils/toast.js"; // Para alertar la falta de ingredientes
+import { useManagerRestaurant } from "../../../shared/hooks/useManagerRestaurant.js";
 
 export const DishModal = ({ isOpen, onClose, dish }) => {
     const {
@@ -14,6 +15,7 @@ export const DishModal = ({ isOpen, onClose, dish }) => {
         reset,
         control,
         watch,
+        setValue,
         formState: { errors },
     } = useForm({
         defaultValues: {
@@ -30,7 +32,8 @@ export const DishModal = ({ isOpen, onClose, dish }) => {
     const { saveDish } = useSaveDish();
     const loading = useDishStore((state) => state.loading);
     const { restaurants, getRestaurants } = useRestaurantStore();
-    const { inventories, getInventories } = useInventoryStore(); 
+    const { inventories, getInventories } = useInventoryStore();
+    const { isManager, myRestaurantId, myRestaurantName } = useManagerRestaurant();
 
     const selectedRestaurant = watch("restaurant");
     const [focusedQtyIndex, setFocusedQtyIndex] = useState(null);
@@ -40,6 +43,12 @@ export const DishModal = ({ isOpen, onClose, dish }) => {
             if (getRestaurants) getRestaurants({ isActive: 'all' });
         }
     }, [isOpen, getRestaurants]);
+
+    useEffect(() => {
+        if (isOpen && isManager && myRestaurantId) {
+            setValue("restaurant", myRestaurantId);
+        }
+    }, [isOpen, isManager, myRestaurantId, setValue]);
 
     useEffect(() => {
         if (isOpen && selectedRestaurant && getInventories) {
@@ -119,21 +128,31 @@ export const DishModal = ({ isOpen, onClose, dish }) => {
                         {/* Restaurante Select (Lo subimos de posición para flujo lógico) */}
                         <div className="flex flex-col md:col-span-2">
                             <label className="text-sm font-semibold text-[var(--text-secondary)] mb-1">1. Selecciona el Restaurante / Sucursal</label>
-                            <select
-                                className="w-full px-3 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--ring-color)] transition"
-                                {...register("restaurant", { required: "El restaurante es obligatorio" })}
-                                onChange={(e) => {
-                                    // Al cambiar de restaurante, limpiamos los ingredientes anteriores para evitar cruces de sucursales
-                                    reset({ ...watch(), restaurant: e.target.value, ingredients: [] });
-                                }}
-                            >
-                                <option value="">Selecciona una sucursal...</option>
-                                {restaurants?.map((r) => (
-                                    <option key={r._id} value={r._id}>
-                                        {r.name}
-                                    </option>
-                                ))}
-                            </select>
+                            {isManager ? (
+                                <input
+                                    type="text"
+                                    value={myRestaurantName || "Cargando..."}
+                                    disabled
+                                    readOnly
+                                    className="w-full px-3 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-surface-alt)] text-[var(--text-muted)] cursor-not-allowed"
+                                />
+                            ) : (
+                                <select
+                                    className="w-full px-3 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--ring-color)] transition"
+                                    {...register("restaurant", { required: "El restaurante es obligatorio" })}
+                                    onChange={(e) => {
+                                        // Al cambiar de restaurante, limpiamos los ingredientes anteriores para evitar cruces de sucursales
+                                        reset({ ...watch(), restaurant: e.target.value, ingredients: [] });
+                                    }}
+                                >
+                                    <option value="">Selecciona una sucursal...</option>
+                                    {restaurants?.map((r) => (
+                                        <option key={r._id} value={r._id}>
+                                            {r.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            )}
                             {errors.restaurant && <p className="text-[var(--color-brand-red)] text-xs mt-1">{errors.restaurant.message}</p>}
                         </div>
 

@@ -107,6 +107,10 @@ export const getEmployees = async (params = {}) => {
     return axiosAdmin.get("/employees/", { params });
 }
 
+export const getMyEmployee = async () => {
+    return axiosAdmin.get("/employees/me");
+}
+
 export const createEmployee = async (formData) => {
     return await axiosAdmin.post("/employees/", formData, {
         headers: { "Content-Type": "multipart/form-data" }
@@ -231,4 +235,8 @@ export const updateEvent = async (id, data) => {
 
 export const deleteEvent = async (id) => {
     return await axiosAdmin.patch(`/events/${id}`, { isActive: false });
+};
+
+export const activateEvent = async (id) => {
+    return await axiosAdmin.patch(`/events/${id}`, { isActive: true });
 };

@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useEmployeeStore } from "../store/useEmployeeStore.js";
 import { useRestaurantStore } from "../../restaurants/store/useRestaurantStore.js";
+import { useAuthStore } from "../../auth/store/useAuthStore.js";
 import { Spinner } from "../../../shared/components/layout/Spinner.jsx";
 import { useEffect as useToastEffect } from "react";
 import { showError } from "../../../shared/utils/toast.js";
@@ -13,6 +14,8 @@ import { Pagination } from "../../../shared/components/ui/Pagination.jsx";
 export const Employees = () => {
     const { employees, loading, error, getEmployees, deleteEmployee, activateEmployee, pagination } = useEmployeeStore();
     const { restaurants, getRestaurants } = useRestaurantStore();
+    const { user } = useAuthStore();
+    const isAdmin = user?.role === "ADMIN_ROLE";
     const [openModal, setOpenModal] = useState(false);
     const [selectedEmployee, setSelectedEmployee] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
@@ -109,24 +112,26 @@ export const Employees = () => {
                         </div>
                     </div>
 
-                    <div className="w-full lg:w-64">
-                        <label className="block text-sm font-semibold text-[var(--text-primary)] mb-2">
-                            <span className="inline-flex items-center gap-2">
-                                <LucideMotionIcon icon={Filter} />
-                                Restaurante
-                            </span>
-                        </label>
-                        <select
-                            value={restaurantFilter}
-                            onChange={(e) => setRestaurantFilter(e.target.value)}
-                            className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-base)] px-4 py-2.5 text-sm text-[var(--text-primary)] outline-none transition focus:border-[var(--color-brand-dark)]"
-                        >
-                            <option value="all">Todos los restaurantes</option>
-                            {restaurants?.map((r) => (
-                                <option key={r._id} value={r._id}>{r.name}</option>
-                            ))}
-                        </select>
-                    </div>
+                    {isAdmin && (
+                        <div className="w-full lg:w-64">
+                            <label className="block text-sm font-semibold text-[var(--text-primary)] mb-2">
+                                <span className="inline-flex items-center gap-2">
+                                    <LucideMotionIcon icon={Filter} />
+                                    Restaurante
+                                </span>
+                            </label>
+                            <select
+                                value={restaurantFilter}
+                                onChange={(e) => setRestaurantFilter(e.target.value)}
+                                className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-base)] px-4 py-2.5 text-sm text-[var(--text-primary)] outline-none transition focus:border-[var(--color-brand-dark)]"
+                            >
+                                <option value="all">Todos los restaurantes</option>
+                                {restaurants?.map((r) => (
+                                    <option key={r._id} value={r._id}>{r.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
 
                     <div className="w-full lg:w-48">
                         <label className="block text-sm font-semibold text-[var(--text-primary)] mb-2">

@@ -7,6 +7,7 @@ import { useTableStore } from "../../tables/store/useTableStore.js";
 import { useDishStore } from "../../dishes/store/useDishStore.js";
 import { useEmployeeStore } from "../../employees/store/useEmployeeStore.js";
 import { showError } from "../../../shared/utils/toast.js";
+import { useManagerRestaurant } from "../../../shared/hooks/useManagerRestaurant.js";
 
 export const EventModal = ({ isOpen, onClose, eventItem }) => {
     const {
@@ -14,6 +15,7 @@ export const EventModal = ({ isOpen, onClose, eventItem }) => {
         handleSubmit,
         reset,
         watch,
+        setValue,
         formState: { errors },
     } = useForm();
 
@@ -23,10 +25,13 @@ export const EventModal = ({ isOpen, onClose, eventItem }) => {
     const { tables, getTables } = useTableStore();
     const { dishes, getDishes } = useDishStore();
     const { employees, getEmployees } = useEmployeeStore();
+    const { isManager, myRestaurantId, myRestaurantName } = useManagerRestaurant();
 
     const selectedRestaurant = watch("restaurant");
     const selectedRestaurantData = restaurants?.find(r => r._id === selectedRestaurant);
     const restaurantCapacity = selectedRestaurantData?.capacity || 0;
+    const selectedAdditionalServices = watch("additionalServices") || [];
+    const isOtherServiceSelected = selectedAdditionalServices.includes("OTRO");
 
     useEffect(() => {
         if (isOpen) {
@@ -36,6 +41,12 @@ export const EventModal = ({ isOpen, onClose, eventItem }) => {
             if (getEmployees) getEmployees({ isActive: 'all', limit: 100 });
         }
     }, [isOpen, getRestaurants, getTables, getDishes, getEmployees]);
+
+    useEffect(() => {
+        if (isOpen && isManager && myRestaurantId) {
+            setValue("restaurant", myRestaurantId);
+        }
+    }, [isOpen, isManager, myRestaurantId, setValue]);
 
     useEffect(() => {
         if (isOpen) {
@@ -51,6 +62,7 @@ export const EventModal = ({ isOpen, onClose, eventItem }) => {
                     restaurant: eventItem.restaurant?._id || eventItem.restaurant || "",
                     dateTime: localDate,
                     additionalServices: eventItem.additionalServices || [],
+                    otherServiceDescription: eventItem.otherServiceDescription || "",
                     assignedTables: eventItem.assignedTables?.map(t => t._id || t) || [],
                     specialDishes: eventItem.specialDishes?.map(d => d._id || d) || [],
                     assignedEmployees: eventItem.assignedEmployees?.map(e => e._id || e) || []
@@ -65,6 +77,7 @@ export const EventModal = ({ isOpen, onClose, eventItem }) => {
                     restaurant: "",
                     dateTime: "",
                     additionalServices: [],
+                    otherServiceDescription: "",
                     assignedTables: [],
                     specialDishes: [],
                     assignedEmployees: []
@@ -152,15 +165,25 @@ export const EventModal = ({ isOpen, onClose, eventItem }) => {
                         {/* Sucursal Destino */}
                         <div className="flex flex-col">
                             <label className="text-xs font-semibold mb-1">Sucursal / Sede Anfitriona</label>
-                            <select
-                                className="w-full px-3 py-1.5 text-sm rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none"
-                                {...register("restaurant", { required: "Sede obligatoria" })}
-                            >
-                                <option value="">Selecciona restaurante...</option>
-                                {restaurants?.map((r) => (
-                                    <option key={r._id} value={r._id}>{r.name}</option>
-                                ))}
-                            </select>
+                            {isManager ? (
+                                <input
+                                    type="text"
+                                    value={myRestaurantName || "Cargando..."}
+                                    disabled
+                                    readOnly
+                                    className="w-full px-3 py-1.5 text-sm rounded-lg border border-[var(--border-color)] bg-[var(--bg-surface-alt)] text-[var(--text-muted)] cursor-not-allowed"
+                                />
+                            ) : (
+                                <select
+                                    className="w-full px-3 py-1.5 text-sm rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none"
+                                    {...register("restaurant", { required: "Sede obligatoria" })}
+                                >
+                                    <option value="">Selecciona restaurante...</option>
+                                    {restaurants?.map((r) => (
+                                        <option key={r._id} value={r._id}>{r.name}</option>
+                                    ))}
+                                </select>
+                            )}
                             {errors.restaurant && <p className="text-[var(--color-brand-red)] text-[10px] mt-0.5">{errors.restaurant.message}</p>}
                         </div>
                     </div>
@@ -241,6 +264,21 @@ export const EventModal = ({ isOpen, onClose, eventItem }) => {
                                 Otro Servicio
                             </label>
                         </div>
+                        {isOtherServiceSelected && (
+                            <div className="mt-3 flex flex-col">
+                                <label className="text-xs font-semibold mb-1">Especifica el otro servicio</label>
+                                <input
+                                    type="text"
+                                    className="w-full px-3 py-1.5 text-sm rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none"
+                                    placeholder="Ej. Servicio de valet parking"
+                                    {...register("otherServiceDescription", {
+                                        required: isOtherServiceSelected ? "Especifica el otro servicio" : false,
+                                        maxLength: { value: 100, message: "Máximo 100 caracteres" }
+                                    })}
+                                />
+                                {errors.otherServiceDescription && <p className="text-[var(--color-brand-red)] text-[10px] mt-0.5">{errors.otherServiceDescription.message}</p>}
+                            </div>
+                        )}
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

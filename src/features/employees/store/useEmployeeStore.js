@@ -4,7 +4,8 @@ import {
     createEmployee as createEmployeeRequest,
     updateEmployee as updateEmployeeRequest,
     deleteEmployee as deleteEmployeeRequest,
-    activateEmployee as activateEmployeeRequest
+    activateEmployee as activateEmployeeRequest,
+    getMyEmployee as getMyEmployeeRequest
 } from "../../../shared/api/";
 import { useAuthStore } from "../../auth/store/useAuthStore.js";
 
@@ -17,6 +18,19 @@ export const useEmployeeStore = create((set, get) => ({
         limit: 20,
         totalRecords: 0,
         totalPages: 0
+    },
+    myEmployee: null,
+
+    getMyRestaurant: async () => {
+        if (get().myEmployee) return get().myEmployee;
+        try {
+            const response = await getMyEmployeeRequest();
+            const myEmployee = response.data.data;
+            set({ myEmployee });
+            return myEmployee;
+        } catch {
+            return null;
+        }
     },
 
     getEmployees: async (params = {}) => {

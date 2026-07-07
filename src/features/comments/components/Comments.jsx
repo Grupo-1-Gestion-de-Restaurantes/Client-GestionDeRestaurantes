@@ -6,8 +6,10 @@ import { showError } from "../../../shared/utils/toast.js";
 import { useUIStore } from "../../../shared/components/ui/store/uiStore.js";
 import { useRestaurantStore } from "../../restaurants/store/useRestaurantStore.js";
 import { useDishStore } from "../../dishes/store/useDishStore.js"; // Lo mismo para platillos
-import { Trash2, Search, Filter, BadgeCheck, Star, Eye } from "lucide-react";
+import { useAuthStore } from "../../auth/store/useAuthStore.js";
+import { Trash2, Search, Filter, BadgeCheck, Eye } from "lucide-react";
 import { LucideMotionIcon } from "../../../shared/components/ui/LucideMotionIcon.jsx";
+import { RatingStars } from "../../../shared/components/ui/RatingStars.jsx";
 import { Pagination } from "../../../shared/components/ui/Pagination.jsx";
 
 export const Comments = () => {
@@ -15,6 +17,8 @@ export const Comments = () => {
     const { searchTerm, activeFilter, restaurantFilter } = filters;
     const { restaurants, getRestaurants } = useRestaurantStore();
     const { dishes, getDishes } = useDishStore();
+    const { user } = useAuthStore();
+    const isAdmin = user?.role === "ADMIN_ROLE";
     const { openConfirm } = useUIStore();
 
     useEffect(() => {
@@ -132,26 +136,28 @@ export const Comments = () => {
                         </div>
                     </div>
 
-                    <div className="w-full lg:w-48">
-                        <label className="block text-sm font-semibold text-[var(--text-primary)] mb-2">
-                            <span className="inline-flex items-center gap-2">
-                                <LucideMotionIcon icon={Filter} />
-                                Restaurante
-                            </span>
-                        </label>
-                        <select
-                            value={restaurantFilter}
-                            onChange={(e) => setFilters({ restaurantFilter: e.target.value })}
-                            className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-base)] px-4 py-2.5 text-sm text-[var(--text-primary)] outline-none transition focus:border-[var(--color-brand-dark)]"
-                        >
-                            <option value="">Todos los Rest.</option>
-                            {restaurants?.map((r) => (
-                                <option key={r._id} value={r._id}>
-                                    {r.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+                    {isAdmin && (
+                        <div className="w-full lg:w-48">
+                            <label className="block text-sm font-semibold text-[var(--text-primary)] mb-2">
+                                <span className="inline-flex items-center gap-2">
+                                    <LucideMotionIcon icon={Filter} />
+                                    Restaurante
+                                </span>
+                            </label>
+                            <select
+                                value={restaurantFilter}
+                                onChange={(e) => setFilters({ restaurantFilter: e.target.value })}
+                                className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-base)] px-4 py-2.5 text-sm text-[var(--text-primary)] outline-none transition focus:border-[var(--color-brand-dark)]"
+                            >
+                                <option value="">Todos los Rest.</option>
+                                {restaurants?.map((r) => (
+                                    <option key={r._id} value={r._id}>
+                                        {r.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
 
                     <div className="w-full lg:w-48">
                         <label className="block text-sm font-semibold text-[var(--text-primary)] mb-2">
@@ -208,12 +214,8 @@ export const Comments = () => {
                                 return (
                                     <tr key={com._id} className="hover:bg-[var(--bg-base)] transition-colors">
 
-                                        <td className="px-6 py-4 text-sm font-bold text-amber-500 whitespace-nowrap">
-                                            <span className="inline-flex items-center gap-0.5 align-middle">
-                                                {Array.from({ length: com.review }).map((_, i) => (
-                                                    <Star key={i} size={14} fill="currentColor" strokeWidth={0} />
-                                                ))}
-                                            </span>
+                                        <td className="px-6 py-4 text-sm font-bold whitespace-nowrap">
+                                            <RatingStars rating={com.review} />
                                             <span className="text-[var(--text-secondary)] font-normal ml-1">({com.review})</span>
                                         </td>
 

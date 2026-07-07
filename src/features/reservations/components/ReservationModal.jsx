@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useSaveReservation } from "../hooks/UseSaveReservation";
 import { useReservationStore } from "../store/useReservationStore";
@@ -6,6 +6,7 @@ import { useClientStore } from "../../clients/store/useClientStore.js";
 import { useRestaurantStore } from "../../restaurants/store/useRestaurantStore.js";
 import { useTableStore } from "../../tables/store/useTableStore.js";
 import { Spinner } from "../../../shared/components/layout/Spinner.jsx";
+import { useManagerRestaurant } from "../../../shared/hooks/useManagerRestaurant.js";
 
 export const ReservationModal = ({ isOpen, onClose, reservation }) => {
     const {
@@ -13,6 +14,7 @@ export const ReservationModal = ({ isOpen, onClose, reservation }) => {
         handleSubmit,
         reset,
         watch,
+        setValue,
         formState: { errors },
     } = useForm();
 
@@ -20,11 +22,18 @@ export const ReservationModal = ({ isOpen, onClose, reservation }) => {
     const { clients, getClients } = useClientStore();
     const { restaurants, getRestaurants } = useRestaurantStore();
     const { tables, getTables } = useTableStore();
+    const { isManager, myRestaurantId, myRestaurantName } = useManagerRestaurant();
 
     // Use local loading state instead of store loading to prevent spinner on edit
     const [localLoading, setLocalLoading] = useState(false);
 
     const selectedRestaurant = watch("restaurant");
+
+    useEffect(() => {
+        if (isOpen && isManager && myRestaurantId) {
+            setValue("restaurant", myRestaurantId);
+        }
+    }, [isOpen, isManager, myRestaurantId, setValue]);
 
     useEffect(() => {
         if (isOpen) {
@@ -127,17 +136,27 @@ export const ReservationModal = ({ isOpen, onClose, reservation }) => {
 
                         <div className="flex flex-col">
                             <label className="text-sm font-semibold text-[var(--text-secondary)] mb-1">Restaurante</label>
-                            <select
-                                className="w-full px-3 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--ring-color)] transition"
-                                {...register("restaurant", { required: "El restaurante es requerido" })}
-                            >
-                                <option value="">Seleccione un restaurante</option>
-                                {restaurants.map((restaurant) => (
-                                    <option key={restaurant._id} value={restaurant._id}>
-                                        {restaurant.name}
-                                    </option>
-                                ))}
-                            </select>
+                            {isManager ? (
+                                <input
+                                    type="text"
+                                    value={myRestaurantName || "Cargando..."}
+                                    disabled
+                                    readOnly
+                                    className="w-full px-3 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-surface-alt)] text-[var(--text-muted)] cursor-not-allowed"
+                                />
+                            ) : (
+                                <select
+                                    className="w-full px-3 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--ring-color)] transition"
+                                    {...register("restaurant", { required: "El restaurante es requerido" })}
+                                >
+                                    <option value="">Seleccione un restaurante</option>
+                                    {restaurants.map((restaurant) => (
+                                        <option key={restaurant._id} value={restaurant._id}>
+                                            {restaurant.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            )}
                             {errors.restaurant && <p className="text-[var(--color-brand-red)] text-xs mt-1">{errors.restaurant.message}</p>}
                         </div>
 

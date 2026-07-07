@@ -28,8 +28,6 @@ export const Orders = () => {
     const handleStatusChange = async (orderId, newStatus) => {
         try {
             await updateOrderStatus(orderId, { status: newStatus });
-
-            console.log("¡Estado actualizado con éxito!");
         } catch (error) {
             alert("No se pudo actualizar el estado");
             console.error(error);
@@ -234,93 +232,88 @@ export const Orders = () => {
                 </div>
             </div>
 
-            {/* TABLA RESPONSIVE */}
-            <div className="bg-[var(--bg-surface)] rounded-xl shadow-md border border-[var(--border-color)] overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                    <thead className="bg-[var(--bg-surface-alt)] text-[var(--text-secondary)] text-sm border-b border-[var(--border-color)]">
-                        <tr>
-                            <th className="px-6 py-4 font-semibold">Fecha</th>
-                            <th className="px-6 py-4 font-semibold">Cliente</th>
-                            <th className="px-6 py-4 font-semibold">Restaurante</th>
-                            <th className="px-6 py-4 font-semibold">Tipo</th>
-                            <th className="px-6 py-4 font-semibold">Total</th>
-                            <th className="px-6 py-4 font-semibold">Estado</th>
-                            <th className="px-6 py-4 font-semibold text-center">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-[var(--border-color)]">
-                        {displayedOrders.length > 0 ? (
-                            displayedOrders.map((order) => (
-                                <tr key={order._id} className="hover:bg-[var(--bg-base)] transition-colors">
-                                    <td className="px-6 py-4 text-sm text-[var(--text-primary)] whitespace-nowrap">
-                                        {new Date(order.createdAt).toLocaleDateString()}
-                                    </td>
-                                    <td className="px-6 py-4 text-sm text-[var(--text-secondary)]">
-                                        {getClientName(order.client)}
-                                    </td>
-                                    <td className="px-6 py-4 text-sm text-[var(--text-secondary)]">
-                                        {getRestaurantName(order.restaurant)}
-                                    </td>
-                                    <td className="px-6 py-4 text-sm text-[var(--text-secondary)]">
-                                        <span className="text-xs font-mono bg-[var(--bg-base)] px-2 py-1 rounded">
-                                            {order.deliveryType}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 text-sm font-bold text-[var(--text-primary)]">
-                                        Q{order.total?.toFixed(2)}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <select
-                                            value={order.status}
-                                            onChange={(e) => handleStatusChange(order._id, e.target.value)}
-                                            className={getSelectStyle(order.status)}
-                                        >
-                                            <option value="PENDIENTE">PENDIENTE</option>
-                                            <option value="EN_PREPARACION">EN PREPARACIÓN</option>
-                                            <option value="LISTO_PARA_RECOGER">LISTO PARA RECOGER</option>
-                                            <option value="EN_CAMINO">EN CAMINO</option>
-                                            <option value="CONFIRMADO">CONFIRMADO</option>
-                                            <option value="ENTREGADO">ENTREGADO</option>
-                                            <option value="CANCELADO">CANCELADO</option>
-                                        </select>
-                                    </td>
-                                    <td className="px-6 py-4 flex gap-3 justify-center">
-                                        <button
-                                            className="inline-flex items-center gap-2 text-[var(--color-brand-yellow)] hover:opacity-75 font-medium transition cursor-pointer"
-                                            onClick={() => {
-                                                setSelectedOrder(order);
-                                                setOpenModal(true);
-                                            }}
-                                        >
-                                            <LucideMotionIcon icon={PencilLine} className="!w-4 !h-4 text-[var(--color-brand-yellow)]" />
-                                            Editar
-                                        </button>
-                                        <button
-                                            className="inline-flex items-center gap-2 text-[var(--color-brand-red)] hover:text-[var(--color-brand-red-dark)] font-medium transition cursor-pointer"
-                                            onClick={() =>
-                                                openConfirm({
-                                                    title: "Eliminar Pedido",
-                                                    message: `¿Estás seguro de eliminar este pedido?`,
-                                                    onConfirm: () => deleteOrder(order._id)
-                                                })
-                                            }
-                                        >
-                                            <LucideMotionIcon icon={Trash2} className="!w-4 !h-4 text-[var(--color-brand-red)]" />
-                                            Eliminar
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan="7" className="text-center py-8 text-[var(--text-muted)]">
-                                    No hay pedidos registrados.
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
+            {/* TARJETAS DE PEDIDOS */}
+            {displayedOrders.length > 0 ? (
+                <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+                    {displayedOrders.map((order) => (
+                        <div
+                            key={order._id}
+                            className="flex flex-col gap-4 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-5 shadow-sm transition-shadow hover:shadow-md"
+                        >
+                            {/* Fecha + Tipo de entrega */}
+                            <div className="flex items-center justify-between">
+                                <span className="text-xs font-medium text-[var(--text-muted)]">
+                                    {new Date(order.createdAt).toLocaleDateString()}
+                                </span>
+                                <span className="rounded bg-[var(--bg-base)] px-2 py-1 font-mono text-xs text-[var(--text-secondary)]">
+                                    {order.deliveryType}
+                                </span>
+                            </div>
+
+                            {/* Cliente */}
+                            <div>
+                                <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--text-muted)]">Cliente</p>
+                                <p className="text-sm font-bold text-[var(--text-primary)]">{getClientName(order.client)}</p>
+                            </div>
+
+                            {/* Restaurante */}
+                            <div>
+                                <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--text-muted)]">Restaurante</p>
+                                <p className="text-sm text-[var(--text-secondary)]">{getRestaurantName(order.restaurant)}</p>
+                            </div>
+
+                            {/* Total + Estado */}
+                            <div className="flex items-center justify-between gap-3 border-t border-[var(--border-color)] pt-3">
+                                <span className="text-lg font-bold text-[var(--text-primary)]">Q{order.total?.toFixed(2)}</span>
+                                <select
+                                    value={order.status}
+                                    onChange={(e) => handleStatusChange(order._id, e.target.value)}
+                                    className={getSelectStyle(order.status)}
+                                >
+                                    <option value="PENDIENTE">PENDIENTE</option>
+                                    <option value="EN_PREPARACION">EN PREPARACIÓN</option>
+                                    <option value="LISTO_PARA_RECOGER">LISTO PARA RECOGER</option>
+                                    <option value="EN_CAMINO">EN CAMINO</option>
+                                    <option value="CONFIRMADO">CONFIRMADO</option>
+                                    <option value="ENTREGADO">ENTREGADO</option>
+                                    <option value="CANCELADO">CANCELADO</option>
+                                </select>
+                            </div>
+
+                            {/* Acciones */}
+                            <div className="flex justify-end gap-4 border-t border-[var(--border-color)] pt-3">
+                                <button
+                                    className="inline-flex items-center gap-2 text-sm font-medium text-[var(--color-brand-yellow)] transition hover:opacity-75 cursor-pointer"
+                                    onClick={() => {
+                                        setSelectedOrder(order);
+                                        setOpenModal(true);
+                                    }}
+                                >
+                                    <LucideMotionIcon icon={PencilLine} className="!w-4 !h-4 text-[var(--color-brand-yellow)]" />
+                                    Editar
+                                </button>
+                                <button
+                                    className="inline-flex items-center gap-2 text-sm font-medium text-[var(--color-brand-red)] transition hover:text-[var(--color-brand-red-dark)] cursor-pointer"
+                                    onClick={() =>
+                                        openConfirm({
+                                            title: "Eliminar Pedido",
+                                            message: `¿Estás seguro de eliminar este pedido?`,
+                                            onConfirm: () => deleteOrder(order._id)
+                                        })
+                                    }
+                                >
+                                    <LucideMotionIcon icon={Trash2} className="!w-4 !h-4 text-[var(--color-brand-red)]" />
+                                    Eliminar
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] py-12 text-center text-[var(--text-muted)] shadow-sm">
+                    No hay pedidos registrados.
+                </div>
+            )}
 
             <Pagination 
                 pagination={pagination} 

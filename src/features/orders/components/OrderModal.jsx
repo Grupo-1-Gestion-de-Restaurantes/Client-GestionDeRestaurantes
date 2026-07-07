@@ -7,9 +7,10 @@ import { useRestaurantStore } from "../../restaurants/store/useRestaurantStore.j
 import { useDishStore } from "../../dishes/store/useDishStore.js";
 import { Spinner } from "../../../shared/components/layout/Spinner.jsx";
 import { X, Trash2 } from "lucide-react";
+import { useManagerRestaurant } from "../../../shared/hooks/useManagerRestaurant.js";
 
 export const OrderModal = ({ isOpen, onClose, order }) => {
-    const { register, handleSubmit, reset, control, watch, formState: { errors } } = useForm({
+    const { register, handleSubmit, reset, control, watch, setValue, formState: { errors } } = useForm({
         defaultValues: {
             items: [{ dishId: "", quantity: 1 }] // Valor inicial para el array de items
         }
@@ -26,8 +27,15 @@ export const OrderModal = ({ isOpen, onClose, order }) => {
     const { clients, getClients } = useClientStore();
     const { restaurants, getRestaurants } = useRestaurantStore();
     const { dishes, getDishes } = useDishStore();
+    const { isManager, myRestaurantId, myRestaurantName } = useManagerRestaurant();
 
     const selectedRestaurant = watch("restaurant");
+
+    useEffect(() => {
+        if (isManager && myRestaurantId) {
+            setValue("restaurant", myRestaurantId);
+        }
+    }, [isManager, myRestaurantId, setValue]);
 
     useEffect(() => {
         getClients();
@@ -73,8 +81,6 @@ export const OrderModal = ({ isOpen, onClose, order }) => {
                     quantity: Number(item.quantity)
                 }))
             };
-
-            console.log("Datos listos para enviar:", formattedData);
 
             if (!formattedData.deliveryAddress.addressLine) {
                 alert("La dirección de entrega es obligatoria");
@@ -122,14 +128,24 @@ export const OrderModal = ({ isOpen, onClose, order }) => {
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">Restaurante</label>
-                            <select {...register("restaurant", { required: "El restaurante es obligatorio" })} className="w-full px-4 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)]">
-                                <option value="">Seleccione un restaurante</option>
-                                {restaurants.map((restaurant) => (
-                                    <option key={restaurant._id} value={restaurant._id}>
-                                        {restaurant.name}
-                                    </option>
-                                ))}
-                            </select>
+                            {isManager ? (
+                                <input
+                                    type="text"
+                                    value={myRestaurantName || "Cargando..."}
+                                    disabled
+                                    readOnly
+                                    className="w-full px-4 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-surface-alt)] text-[var(--text-muted)] cursor-not-allowed"
+                                />
+                            ) : (
+                                <select {...register("restaurant", { required: "El restaurante es obligatorio" })} className="w-full px-4 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)]">
+                                    <option value="">Seleccione un restaurante</option>
+                                    {restaurants.map((restaurant) => (
+                                        <option key={restaurant._id} value={restaurant._id}>
+                                            {restaurant.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            )}
                             {errors.restaurant && <p className="mt-1 text-xs text-red-600">{errors.restaurant.message}</p>}
                         </div>
                     </div>

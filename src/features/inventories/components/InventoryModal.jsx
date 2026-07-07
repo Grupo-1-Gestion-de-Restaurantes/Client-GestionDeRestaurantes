@@ -3,27 +3,33 @@ import { useForm } from "react-hook-form";
 import { useSaveInventory } from "../hooks/useSaveInventory.jsx";
 import { useInventoryStore } from "../store/useInventoryStore";
 import { useRestaurantStore } from "../../restaurants/store/useRestaurantStore.js";
-import { useAuthStore } from "../../../features/auth/store/useAuthStore.js";
+import { useManagerRestaurant } from "../../../shared/hooks/useManagerRestaurant.js";
 
 export const InventoryModal = ({ isOpen, onClose, item }) => {
     const {
         register,
         handleSubmit,
         reset,
+        setValue,
         formState: { errors },
     } = useForm();
 
     const { saveInventory } = useSaveInventory();
     const loading = useInventoryStore((state) => state.loading);
     const { restaurants, getRestaurants } = useRestaurantStore();
-    const { user } = useAuthStore();
-    const isAdmin = user?.role === "ADMIN_ROLE";
+    const { isManager, myRestaurantId, myRestaurantName } = useManagerRestaurant();
 
     useEffect(() => {
         if (isOpen && getRestaurants) {
             getRestaurants();
         }
     }, [isOpen, getRestaurants]);
+
+    useEffect(() => {
+        if (isOpen && isManager && myRestaurantId) {
+            setValue("restaurant", myRestaurantId);
+        }
+    }, [isOpen, isManager, myRestaurantId, setValue]);
 
     useEffect(() => {
         if (isOpen) {
@@ -88,22 +94,31 @@ export const InventoryModal = ({ isOpen, onClose, item }) => {
                     {/* Restaurante Desplegable */}
                     <div className="flex flex-col">
                         <label className="text-sm font-semibold text-[var(--text-secondary)] mb-1">Sucursal / Restaurante Destino</label>
-                        <select
-                            className="w-full px-3 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--ring-color)] transition"
-                            {...register("restaurant", { required: "El restaurante es obligatorio" })}
-                            disabled={item && !isAdmin}
-                        >
-                            <option value="">Selecciona una sucursal...</option>
-                            {restaurants?.map((r) => (
-                                <option key={r._id} value={r._id}>
-                                    {r.name}
-                                </option>
-                            ))}
-                        </select>
-                        {item && !isAdmin && (
-                            <p className="text-xs text-[var(--text-muted)] mt-1">
-                                Los gerentes solo pueden gestionar el inventario de su propio restaurante.
-                            </p>
+                        {isManager ? (
+                            <>
+                                <input
+                                    type="text"
+                                    value={myRestaurantName || "Cargando..."}
+                                    disabled
+                                    readOnly
+                                    className="w-full px-3 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-surface-alt)] text-[var(--text-muted)] cursor-not-allowed"
+                                />
+                                <p className="text-xs text-[var(--text-muted)] mt-1">
+                                    Los gerentes solo pueden gestionar el inventario de su propio restaurante.
+                                </p>
+                            </>
+                        ) : (
+                            <select
+                                className="w-full px-3 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--ring-color)] transition"
+                                {...register("restaurant", { required: "El restaurante es obligatorio" })}
+                            >
+                                <option value="">Selecciona una sucursal...</option>
+                                {restaurants?.map((r) => (
+                                    <option key={r._id} value={r._id}>
+                                        {r.name}
+                                    </option>
+                                ))}
+                            </select>
                         )}
                         {errors.restaurant && <p className="text-[var(--color-brand-red)] text-xs mt-1">{errors.restaurant.message}</p>}
                     </div>

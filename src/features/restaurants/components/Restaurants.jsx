@@ -13,7 +13,6 @@ import {
     Clock3,
     Users,
     Phone,
-    Star,
     PencilLine,
     Ban,
     CircleCheckBig,
@@ -23,6 +22,7 @@ import {
     BadgeCheck
 } from "lucide-react";
 import { LucideMotionIcon } from "../../../shared/components/ui/LucideMotionIcon.jsx";
+import { RatingStars } from "../../../shared/components/ui/RatingStars.jsx";
 import { Pagination } from "../../../shared/components/ui/Pagination.jsx";
 
 export const Restaurants = () => {
@@ -89,22 +89,6 @@ export const Restaurants = () => {
             case "Casual": return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400";
             default: return "bg-gray-100 text-gray-800 dark:bg-zinc-800 dark:text-zinc-300";
         }
-    };
-
-    const renderRating = (ratingValue) => {
-        const ratingNumber = Math.max(0, Math.min(5, Number(ratingValue) || 0));
-        return Array.from({ length: 5 }, (_, index) => {
-            const filled = index < ratingNumber;
-            return (
-                <Star
-                    key={index}
-                    size={14}
-                    className={filled ? "text-yellow-500" : "text-gray-400"}
-                    fill={filled ? "currentColor" : "none"}
-                    aria-hidden
-                />
-            );
-        });
     };
 
     const emptyMessage = searchTerm.trim() || activeFilter !== "all"
@@ -287,10 +271,7 @@ export const Restaurants = () => {
 
                                     {/* Rating */}
                                     <td className="px-6 py-4 text-sm text-[var(--text-secondary)] whitespace-nowrap">
-                                        <span className="inline-flex items-center gap-1">
-                                            <LucideMotionIcon icon={Star} className="!w-4 !h-4 md:!w-5 md:!h-5 text-yellow-500 dark:text-[var(--color-brand-yellow)] hover:translate-y-0 hover:scale-100" />
-                                            {renderRating(restaurant.rating)}
-                                        </span>
+                                        <RatingStars rating={restaurant.rating} />
                                         <span className="ml-2 align-middle">{Number(restaurant.rating).toFixed(1)}/5</span>
                                     </td>
 
@@ -318,14 +299,14 @@ export const Restaurants = () => {
                                     <td className="px-6 py-4">
                                         <div className="flex gap-3 justify-center">
                                             <button
-                                                className="text-[var(--color-brand-dark)] dark:text-[var(--color-brand-yellow)] hover:text-[var(--color-brand-yellow)] font-medium transition"
+                                                className="text-[var(--color-brand-yellow)] hover:opacity-75 font-medium transition"
                                                 onClick={() => {
                                                     setSelectedRestaurant(restaurant);
                                                     setOpenModal(true);
                                                 }}
                                             >
                                                 <span className="inline-flex items-center gap-2">
-                                                    <LucideMotionIcon icon={PencilLine} className="!w-4 !h-4 md:!w-5 md:!h-5 text-[var(--color-brand-dark)] dark:text-[var(--color-brand-yellow)]" />
+                                                    <LucideMotionIcon icon={PencilLine} className="!w-4 !h-4 md:!w-5 md:!h-5 text-[var(--color-brand-yellow)]" />
                                                     Editar
                                                 </span>
                                             </button>
@@ -341,7 +322,7 @@ export const Restaurants = () => {
                                                     }
                                                 >
                                                     <span className="inline-flex items-center gap-2">
-                                                        <LucideMotionIcon icon={Ban} className="!w-4 !h-4 md:!w-5 md:!h-5 text-[var(--color-brand-red)] dark:text-[var(--color-brand-yellow)]" />
+                                                        <LucideMotionIcon icon={Ban} className="!w-4 !h-4 md:!w-5 md:!h-5 text-[var(--color-brand-red)]" />
                                                         Cerrar
                                                     </span>
                                                 </button>

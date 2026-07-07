@@ -118,8 +118,8 @@ export const Promotions = () => {
       </div>
 
       <div className="mb-6 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-4 shadow-sm">
-        <div className="grid gap-4 lg:grid-cols-[1fr_240px_auto] lg:items-end">
-          <div>
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="flex-1">
             <label className="mb-2 block text-sm font-semibold text-[var(--text-primary)]">Buscar promociones</label>
             <div className="relative">
               <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-[var(--text-muted)]">
@@ -134,7 +134,7 @@ export const Promotions = () => {
             </div>
           </div>
 
-          <div>
+          <div className="w-full lg:w-64">
             <label className="mb-2 block text-sm font-semibold text-[var(--text-primary)]">Mostrar</label>
             <select
               value={activeFilter}
@@ -148,7 +148,7 @@ export const Promotions = () => {
           </div>
 
           {isAdmin && (
-            <div>
+            <div className="w-full lg:w-64">
               <label className="mb-2 block text-sm font-semibold text-[var(--text-primary)]">Restaurante</label>
               <select
                 value={restaurantFilter}
@@ -163,23 +163,20 @@ export const Promotions = () => {
             </div>
           )}
 
-          <div>
-            <label className="mb-2 block text-sm font-semibold text-[var(--text-primary)] invisible">Limpiar</label>
-            <button
-              type="button"
-              onClick={() => {
-                setSearchTerm("");
-                setActiveFilter("active");
-                setRestaurantFilter("");
-              }}
-              className="w-full rounded-xl border border-[var(--border-color)] px-4 py-2.5 text-sm font-medium text-[var(--text-secondary)] transition hover:bg-[var(--bg-base)]"
-            >
-              <span className="inline-flex items-center gap-2">
-                <LucideMotionIcon icon={BadgeCheck} className="!w-4 !h-4 md:!w-5 md:!h-5 text-[var(--text-secondary)] dark:text-[var(--text-secondary)]" />
-                Limpiar
-              </span>
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setSearchTerm("");
+              setActiveFilter("active");
+              setRestaurantFilter("");
+            }}
+            className="rounded-xl border border-[var(--border-color)] px-4 py-2.5 text-sm font-medium text-[var(--text-secondary)] transition hover:bg-[var(--bg-base)]"
+          >
+            <span className="inline-flex items-center gap-2">
+              <LucideMotionIcon icon={BadgeCheck} className="!w-4 !h-4 md:!w-5 md:!h-5 text-[var(--text-secondary)] dark:text-[var(--text-secondary)]" />
+              Limpiar
+            </span>
+          </button>
         </div>
       </div>
 

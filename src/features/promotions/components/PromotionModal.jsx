@@ -4,6 +4,7 @@ import { useSavePromotion } from "../hooks/UseSavePromotion.jsx";
 import { useRestaurantStore } from "../../restaurants/store/useRestaurantStore.js";
 import { useDishStore } from "../../dishes/store/useDishStore.js";
 import { showError } from "../../../shared/utils/toast.js";
+import { useManagerRestaurant } from "../../../shared/hooks/useManagerRestaurant.js";
 
 export const PromotionModal = ({ isOpen, onClose, promotion }) => {
 	const {
@@ -11,6 +12,7 @@ export const PromotionModal = ({ isOpen, onClose, promotion }) => {
 		handleSubmit,
 		reset,
 		watch,
+		setValue,
 		formState: { errors },
 	} = useForm();
 
@@ -18,8 +20,15 @@ export const PromotionModal = ({ isOpen, onClose, promotion }) => {
 	const restaurants = useRestaurantStore((state) => state.restaurants);
 	const getDishes = useDishStore((state) => state.getDishes);
 	const dishes = useDishStore((state) => state.dishes);
+	const { isManager, myRestaurantId, myRestaurantName } = useManagerRestaurant();
 
 	const selectedRestaurant = watch("restaurant");
+
+	useEffect(() => {
+		if (isOpen && isManager && myRestaurantId) {
+			setValue("restaurant", myRestaurantId);
+		}
+	}, [isOpen, isManager, myRestaurantId, setValue]);
 
 	useEffect(() => {
 		if (selectedRestaurant) {
@@ -101,24 +110,6 @@ export const PromotionModal = ({ isOpen, onClose, promotion }) => {
 
 	if (!isOpen) return null;
 
-	// Determinar si la promoción está vencida (basado en el prop promotion para edición)
-	const today = new Date();
-	today.setHours(0, 0, 0, 0);
-	const isExpired = promotion ? new Date(promotion.endDate) < today : false;
-
-	// Watch endDate changes to auto-uncheck isActive
-	const endDateValue = watch("endDate");
-	const isEndDateExpired = endDateValue ? new Date(endDateValue) < today : false;
-
-	useEffect(() => {
-		if (isEndDateExpired) {
-			// Auto-desactivar cuando la fecha de fin es anterior a hoy
-			// Solo si el usuario no lo ha activado manualmente después
-			// Usamos setValue para actualizar sin disparar validación
-			// Nota: En un caso real, podrías querer mostrar una advertencia
-		}
-	}, [isEndDateExpired]);
-
 	return (
 		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
 			<div className="w-full max-w-3xl overflow-hidden rounded-2xl bg-[var(--bg-surface)] text-[var(--text-primary)] shadow-2xl">
@@ -148,12 +139,22 @@ export const PromotionModal = ({ isOpen, onClose, promotion }) => {
 
 					<div>
 						<label className="mb-1 block text-sm font-semibold">Restaurante</label>
-						<select className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-base)] px-4 py-2.5 text-sm outline-none" {...register("restaurant", { required: "El restaurante es obligatorio" })}>
-							<option value="">Selecciona un restaurante</option>
-							{restaurants.map((restaurant) => (
-								<option key={restaurant._id} value={restaurant._id}>{restaurant.name}</option>
-							))}
-						</select>
+						{isManager ? (
+							<input
+								type="text"
+								value={myRestaurantName || "Cargando..."}
+								disabled
+								readOnly
+								className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface-alt)] px-4 py-2.5 text-sm text-[var(--text-muted)] cursor-not-allowed outline-none"
+							/>
+						) : (
+							<select className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-base)] px-4 py-2.5 text-sm outline-none" {...register("restaurant", { required: "El restaurante es obligatorio" })}>
+								<option value="">Selecciona un restaurante</option>
+								{restaurants.map((restaurant) => (
+									<option key={restaurant._id} value={restaurant._id}>{restaurant.name}</option>
+								))}
+							</select>
+						)}
 						{errors.restaurant && <p className="mt-1 text-xs text-red-600">{errors.restaurant.message}</p>}
 					</div>
 

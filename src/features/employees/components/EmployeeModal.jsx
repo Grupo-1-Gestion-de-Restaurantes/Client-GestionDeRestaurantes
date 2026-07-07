@@ -4,6 +4,7 @@ import { useSaveEmployee } from "../hooks/useSaveEmployee";
 import { useEmployeeStore } from "../store/useEmployeeStore";
 import { useRestaurantStore } from "../../restaurants/store/useRestaurantStore.js";
 import { showError } from "../../../shared/utils/toast.js";
+import { useManagerRestaurant } from "../../../shared/hooks/useManagerRestaurant.js";
 
 export const EmployeeModal = ({ isOpen, onClose, employeeItem }) => {
     const {
@@ -11,6 +12,7 @@ export const EmployeeModal = ({ isOpen, onClose, employeeItem }) => {
         handleSubmit,
         reset,
         watch,
+        setValue,
         formState: { errors },
     } = useForm({
         defaultValues: {
@@ -22,6 +24,7 @@ export const EmployeeModal = ({ isOpen, onClose, employeeItem }) => {
     const { saveEmployee } = useSaveEmployee();
     const loading = useEmployeeStore((state) => state.loading);
     const { restaurants, getRestaurants } = useRestaurantStore();
+    const { isManager, myRestaurantId, myRestaurantName } = useManagerRestaurant();
 
     // Observamos el rol elegido en el formulario
     const selectedRole = watch("role");
@@ -29,6 +32,12 @@ export const EmployeeModal = ({ isOpen, onClose, employeeItem }) => {
     useEffect(() => {
         if (isOpen && getRestaurants) getRestaurants();
     }, [isOpen, getRestaurants]);
+
+    useEffect(() => {
+        if (isOpen && isManager && myRestaurantId) {
+            setValue("restaurant", myRestaurantId);
+        }
+    }, [isOpen, isManager, myRestaurantId, setValue]);
 
     useEffect(() => {
         if (isOpen) {
@@ -216,15 +225,25 @@ export const EmployeeModal = ({ isOpen, onClose, employeeItem }) => {
                             {/* Asignación de Sucursal */}
                             <div className="flex flex-col">
                                 <label className="text-xs font-semibold mb-1">Asignar a Restaurante</label>
-                                <select
-                                    className="w-full px-3 py-1.5 text-sm rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none"
-                                    {...register("restaurant", { required: "El restaurante es obligatorio" })}
-                                >
-                                    <option value="">Selecciona sucursal...</option>
-                                    {restaurants?.map((r) => (
-                                        <option key={r._id} value={r._id}>{r.name}</option>
-                                    ))}
-                                </select>
+                                {isManager ? (
+                                    <input
+                                        type="text"
+                                        value={myRestaurantName || "Cargando..."}
+                                        disabled
+                                        readOnly
+                                        className="w-full px-3 py-1.5 text-sm rounded-lg border border-[var(--border-color)] bg-[var(--bg-surface-alt)] text-[var(--text-muted)] cursor-not-allowed"
+                                    />
+                                ) : (
+                                    <select
+                                        className="w-full px-3 py-1.5 text-sm rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none"
+                                        {...register("restaurant", { required: "El restaurante es obligatorio" })}
+                                    >
+                                        <option value="">Selecciona sucursal...</option>
+                                        {restaurants?.map((r) => (
+                                            <option key={r._id} value={r._id}>{r.name}</option>
+                                        ))}
+                                    </select>
+                                )}
                                 {errors.restaurant && <p className="text-[var(--color-brand-red)] text-xs mt-1">{errors.restaurant.message}</p>}
                             </div>
 

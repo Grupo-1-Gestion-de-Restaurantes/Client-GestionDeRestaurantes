@@ -351,11 +351,13 @@ export const RestaurantModal = ({ isOpen, onClose, restaurant }) => {
                             </label>
                             <input
                                 type="number"
-                                className="w-full px-3 py-2 rounded-lg border-2 border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] shadow-sm 
+                                step="0.1"
+                                className="w-full px-3 py-2 rounded-lg border-2 border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] shadow-sm
                                            focus:outline-none focus:border-[var(--color-brand-dark)] focus:ring-2 focus:ring-[var(--color-brand-dark)] transition"
-                                placeholder="Ej. 4"
+                                placeholder="Ej. 4.5"
                                 {...register("rating", {
                                     required: "El rating es obligatorio",
+                                    valueAsNumber: true,
                                     min: { value: 1, message: "El mínimo es 1" },
                                     max: { value: 5, message: "El máximo es 5" },
                                 })}

@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { useAuthStore } from "../store/useAuthStore";
 import { showSuccess, showError } from "../../../shared/utils/toast";
 import { Spinner } from "../../../shared/components/layout/Spinner";
-import { Camera, Mail, User, Phone, ShieldCheck, Lock, LogOut } from "lucide-react";
+import { Camera, Mail, User, Phone, ShieldCheck, Lock, LogOut, ArrowLeft } from "lucide-react";
 import { LucideMotionIcon } from "../../../shared/components/ui/LucideMotionIcon";
 import { useNavigate } from "react-router-dom";
 import defaultAvatarImg from "../../../assets/img/avatarDefault.png";
@@ -77,6 +77,14 @@ export const Profile = () => {
     return (
         <div className="p-4 sm:p-8 max-w-4xl mx-auto">
             <div className="mb-8">
+                <button
+                    type="button"
+                    onClick={() => navigate(-1)}
+                    className="mb-3 inline-flex items-center gap-2 text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+                >
+                    <ArrowLeft size={16} />
+                    Volver
+                </button>
                 <h1 className="text-3xl font-bold text-[var(--text-primary)]">Mi Perfil</h1>
                 <p className="text-[var(--text-muted)] mt-1">Gestiona tu información personal y configuración de cuenta</p>
             </div>

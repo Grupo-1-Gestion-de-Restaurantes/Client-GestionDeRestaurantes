@@ -1,7 +1,7 @@
 import { axiosAdmin } from "./api";
 
-export const getOrders = async () => {
-    return axiosAdmin.get("/orders/get");
+export const getOrders = async (params = {}) => {
+    return axiosAdmin.get("/orders/get", { params });
 }
 
 export const createOrder = async (data) => {

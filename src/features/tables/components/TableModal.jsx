@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { useSaveTable } from "../hooks/useSaveTable.jsx";
 import { useRestaurantStore } from "../../restaurants/store/useRestaurantStore.js";
+import { useManagerRestaurant } from "../../../shared/hooks/useManagerRestaurant.js";
 
 export const TableModal = ({ isOpen, onClose, table }) => {
 	const {
@@ -11,6 +12,7 @@ export const TableModal = ({ isOpen, onClose, table }) => {
 		control,
 		setError,
 		clearErrors,
+		setValue,
 		formState: { errors },
 	} = useForm({
 		defaultValues: {
@@ -25,7 +27,14 @@ export const TableModal = ({ isOpen, onClose, table }) => {
 
 	const { saveTable } = useSaveTable();
 	const restaurants = useRestaurantStore((state) => state.restaurants);
+	const { isManager, myRestaurantId, myRestaurantName } = useManagerRestaurant();
 	const [availabilityError, setAvailabilityError] = useState("");
+
+	useEffect(() => {
+		if (isOpen && isManager && myRestaurantId) {
+			setValue("restaurant", myRestaurantId);
+		}
+	}, [isOpen, isManager, myRestaurantId, setValue]);
 
 	useEffect(() => {
 		if (!isOpen) return;
@@ -111,17 +120,27 @@ export const TableModal = ({ isOpen, onClose, table }) => {
 				<form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 p-5 md:grid-cols-2">
 					<div className="md:col-span-2">
 						<label className="mb-1 block text-sm font-semibold">Restaurante</label>
-						<select
-							className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-base)] px-4 py-2.5 text-sm outline-none"
-							{...register("restaurant", { required: "El restaurante es obligatorio" })}
-						>
-							<option value="">Selecciona un restaurante</option>
-							{restaurants.map((restaurant) => (
-								<option key={restaurant._id} value={restaurant._id}>
-									{restaurant.name}
-								</option>
-							))}
-						</select>
+						{isManager ? (
+							<input
+								type="text"
+								value={myRestaurantName || "Cargando..."}
+								disabled
+								readOnly
+								className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface-alt)] px-4 py-2.5 text-sm text-[var(--text-muted)] cursor-not-allowed outline-none"
+							/>
+						) : (
+							<select
+								className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-base)] px-4 py-2.5 text-sm outline-none"
+								{...register("restaurant", { required: "El restaurante es obligatorio" })}
+							>
+								<option value="">Selecciona un restaurante</option>
+								{restaurants.map((restaurant) => (
+									<option key={restaurant._id} value={restaurant._id}>
+										{restaurant.name}
+									</option>
+								))}
+							</select>
+						)}
 						{errors.restaurant && <p className="mt-1 text-xs text-red-600">{errors.restaurant.message}</p>}
 					</div>
 

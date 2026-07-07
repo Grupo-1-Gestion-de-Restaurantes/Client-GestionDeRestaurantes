@@ -100,18 +100,13 @@ export const useRestaurantStore = create((set, get) => ({
     activateRestaurant: async (id) => {
         try {
             set({ loading: true, error: null });
-            const response = await updateRestaurantRequest(id, {
+            await updateRestaurantRequest(id, {
                 isActive: true,
                 status: "Abierto",
             });
-            const updatedRestaurant = response.data.data || response.data;
 
-            set({
-                restaurants: get().restaurants.map((restaurant) =>
-                    restaurant._id === id ? updatedRestaurant : restaurant
-                ),
-                loading: false
-            });
+            // Recargar la lista completa usando los filtros actuales para mantener la consistencia
+            await get().getRestaurants(get().filters);
         } catch (error) {
             set({
                 loading: false,
