@@ -55,6 +55,10 @@ export const deleteClient = async (id) => {
     return await axiosAdmin.put(`/clients/${id}/deactivate`);
 }
 
+export const activateClient = async (id) => {
+    return await axiosAdmin.put(`/clients/${id}/activate`);
+}
+
 //Facturas
 export const getMyInvoices = async (params = {}) => {
     return axiosAdmin.get("/invoices/myInvoices", { params });
@@ -67,6 +71,10 @@ export const getComments = async (params = {}) => {
 
 export const deleteComment = async (id) => {
     return await axiosAdmin.put(`/comments/deactivate/${id}`);
+}
+
+export const activateComment = async (id) => {
+    return await axiosAdmin.put(`/comments/activate/${id}`);
 }
 
 
@@ -117,6 +125,10 @@ export const updateEmployee = async (id, data) => {
 
 export const deleteEmployee = async (id) => {
     return await axiosAdmin.put(`/employees/${id}/status`, { isActive: false });
+}
+
+export const activateEmployee = async (id) => {
+    return await axiosAdmin.put(`/employees/${id}/status`, { isActive: true });
 }
 
 //Inventarios

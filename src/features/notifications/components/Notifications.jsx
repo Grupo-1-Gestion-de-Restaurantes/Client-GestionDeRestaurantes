@@ -153,7 +153,7 @@ export const Notifications = () => {
 									<td className="px-6 py-4 text-sm text-[var(--text-secondary)]">
 										<div className="flex flex-col">
 											<span className="font-semibold text-[var(--text-primary)]">
-												{notification.referenceId?.client?.name || notification.referenceId?.client?.email || "N/A"}
+												{(typeof notification.referenceId?.client === 'object' ? notification.referenceId?.client?.name || notification.referenceId?.client?.email : notification.referenceId?.client?.name || notification.referenceId?.client?.email) || "N/A"}
 											</span>
 											<span className="text-xs opacity-70">
 												{notification.referenceType === 'Order' ? 'Pedido' : 'Reservación'}

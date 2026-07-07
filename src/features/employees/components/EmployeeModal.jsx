@@ -63,7 +63,17 @@ export const EmployeeModal = ({ isOpen, onClose, employeeItem }) => {
             onClose();
         } catch (error) {
             console.error(error);
-            showError(error.response?.data?.message || "Error al procesar la solicitud");
+            const message = error.response?.data?.message || "Error al procesar la solicitud";
+            
+            // Si el error es de email duplicado, marcar el campo
+            if (message.toLowerCase().includes("email") && message.toLowerCase().includes("exist")) {
+                // Set error manually on email field
+                // Note: This requires using setError from useForm, but we don't have access to it here
+                // We'll show it in toast with specific message
+                showError("Este correo electrónico ya está registrado para otro empleado activo");
+            } else {
+                showError(message);
+            }
         }
     };
 

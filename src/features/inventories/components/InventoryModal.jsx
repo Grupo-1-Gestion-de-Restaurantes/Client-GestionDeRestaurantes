@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { useSaveInventory } from "../hooks/useSaveInventory.jsx";
 import { useInventoryStore } from "../store/useInventoryStore";
 import { useRestaurantStore } from "../../restaurants/store/useRestaurantStore.js";
+import { useAuthStore } from "../../../features/auth/store/useAuthStore.js";
 
 export const InventoryModal = ({ isOpen, onClose, item }) => {
     const {
@@ -15,6 +16,8 @@ export const InventoryModal = ({ isOpen, onClose, item }) => {
     const { saveInventory } = useSaveInventory();
     const loading = useInventoryStore((state) => state.loading);
     const { restaurants, getRestaurants } = useRestaurantStore();
+    const { user } = useAuthStore();
+    const isAdmin = user?.role === "ADMIN_ROLE";
 
     useEffect(() => {
         if (isOpen && getRestaurants) {
@@ -88,6 +91,7 @@ export const InventoryModal = ({ isOpen, onClose, item }) => {
                         <select
                             className="w-full px-3 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--ring-color)] transition"
                             {...register("restaurant", { required: "El restaurante es obligatorio" })}
+                            disabled={item && !isAdmin}
                         >
                             <option value="">Selecciona una sucursal...</option>
                             {restaurants?.map((r) => (
@@ -96,6 +100,11 @@ export const InventoryModal = ({ isOpen, onClose, item }) => {
                                 </option>
                             ))}
                         </select>
+                        {item && !isAdmin && (
+                            <p className="text-xs text-[var(--text-muted)] mt-1">
+                                Los gerentes solo pueden gestionar el inventario de su propio restaurante.
+                            </p>
+                        )}
                         {errors.restaurant && <p className="text-[var(--color-brand-red)] text-xs mt-1">{errors.restaurant.message}</p>}
                     </div>
 

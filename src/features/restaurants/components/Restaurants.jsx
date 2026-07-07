@@ -291,7 +291,7 @@ export const Restaurants = () => {
                                             <LucideMotionIcon icon={Star} className="!w-4 !h-4 md:!w-5 md:!h-5 text-yellow-500 dark:text-[var(--color-brand-yellow)] hover:translate-y-0 hover:scale-100" />
                                             {renderRating(restaurant.rating)}
                                         </span>
-                                        <span className="ml-2 align-middle">{restaurant.rating}/5</span>
+                                        <span className="ml-2 align-middle">{Number(restaurant.rating).toFixed(1)}/5</span>
                                     </td>
 
                                     {/* Estado */}
@@ -318,7 +318,7 @@ export const Restaurants = () => {
                                     <td className="px-6 py-4">
                                         <div className="flex gap-3 justify-center">
                                             <button
-                                                className="text-[var(--color-brand-dark)] hover:text-[var(--color-brand-yellow)] font-medium transition"
+                                                className="text-[var(--color-brand-dark)] dark:text-[var(--color-brand-yellow)] hover:text-[var(--color-brand-yellow)] font-medium transition"
                                                 onClick={() => {
                                                     setSelectedRestaurant(restaurant);
                                                     setOpenModal(true);

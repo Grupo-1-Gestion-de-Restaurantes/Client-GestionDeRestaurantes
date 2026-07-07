@@ -33,6 +33,7 @@ export const DishModal = ({ isOpen, onClose, dish }) => {
     const { inventories, getInventories } = useInventoryStore(); 
 
     const selectedRestaurant = watch("restaurant");
+    const [focusedQtyIndex, setFocusedQtyIndex] = useState(null);
 
     useEffect(() => {
         if (isOpen) {
@@ -228,7 +229,7 @@ export const DishModal = ({ isOpen, onClose, dish }) => {
                                                 <option value="">Seleccionar ingrediente</option>
                                                 {filteredInventories.map((item) => (
                                                     <option key={item._id} value={item._id}>
-                                                        {(item.name || item.itemName || "Ingrediente sin nombre")} — {item.quantity} {String(item.unit).toLowerCase()} disponible
+                                                        {(item.name || item.itemName || "Ingrediente sin nombre")}
                                                     </option>
                                                 ))}
                                             </select>
@@ -259,11 +260,13 @@ export const DishModal = ({ isOpen, onClose, dish }) => {
                                                             );
                                                         }
                                                     })}
+                                                    onFocus={() => setFocusedQtyIndex(index)}
+                                                    onBlur={() => setFocusedQtyIndex(null)}
                                                 />
                                             </div>
-                                            {selectedUnit && (
+                                            {selectedUnit && focusedQtyIndex === index && selectedItem && (
                                                 <p className="text-[10px] text-[var(--text-muted)] mt-1">
-                                                    Unidad: {selectedUnit} (disp. {selectedItem.quantity})
+                                                    Disponible: {selectedItem.quantity} {selectedUnit}
                                                 </p>
                                             )}
                                             {errors.ingredients?.[index]?.quantityUsed && (

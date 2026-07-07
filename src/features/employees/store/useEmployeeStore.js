@@ -3,8 +3,10 @@ import {
     getEmployees as getEmployeesRequest,
     createEmployee as createEmployeeRequest,
     updateEmployee as updateEmployeeRequest,
-    deleteEmployee as deleteEmployeeRequest
+    deleteEmployee as deleteEmployeeRequest,
+    activateEmployee as activateEmployeeRequest
 } from "../../../shared/api/";
+import { useAuthStore } from "../../auth/store/useAuthStore.js";
 
 export const useEmployeeStore = create((set, get) => ({
     employees: [],
@@ -74,6 +76,11 @@ export const useEmployeeStore = create((set, get) => ({
 
     deleteEmployee: async (id) => {
         try {
+            const currentUser = useAuthStore.getState().user;
+            if (currentUser?._id === id) {
+                throw new Error("No puedes eliminarte a ti mismo.");
+            }
+
             set({ loading: true, error: null });
             await deleteEmployeeRequest(id);
 
@@ -82,7 +89,23 @@ export const useEmployeeStore = create((set, get) => ({
         } catch (error) {
             set({
                 loading: false,
-                error: error.response?.data?.message || "Error al eliminar el empleado."
+                error: error.response?.data?.message || error.message || "Error al eliminar el empleado."
+            });
+            throw error;
+        }
+    },
+
+    activateEmployee: async (id) => {
+        try {
+            set({ loading: true, error: null });
+            await activateEmployeeRequest(id);
+
+            // Refrescar la lista de empleados tras activar uno
+            await get().getEmployees();
+        } catch (error) {
+            set({
+                loading: false,
+                error: error.response?.data?.message || "Error al activar el empleado."
             });
             throw error;
         }

@@ -173,7 +173,7 @@ export const TableModal = ({ isOpen, onClose, table }) => {
 							{fields.map((field, idx) => (
 								<div key={field.id} className="flex flex-wrap gap-2 items-center border border-[var(--border-color)] rounded-lg p-2 bg-[var(--bg-base)]">
 									<select
-										className="rounded border px-2 py-1 text-sm"
+										className="rounded border border-[var(--border-color)] px-2 py-1 text-sm bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--color-brand-dark)]"
 										{...register(`availability.${idx}.day`, { required: true })}
 									>
 										<option value="">Día</option>
@@ -187,18 +187,18 @@ export const TableModal = ({ isOpen, onClose, table }) => {
 									</select>
 									<input
 										type="time"
-										className="rounded border px-2 py-1 text-sm"
+										className="rounded border border-[var(--border-color)] px-2 py-1 text-sm bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--color-brand-dark)]"
 										{...register(`availability.${idx}.startTime`, { required: true })}
 									/>
-									<span className="text-xs">a</span>
+									<span className="text-xs text-[var(--text-secondary)]">a</span>
 									<input
 										type="time"
-										className="rounded border px-2 py-1 text-sm"
+										className="rounded border border-[var(--border-color)] px-2 py-1 text-sm bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--color-brand-dark)]"
 										{...register(`availability.${idx}.endTime`, { required: true })}
 									/>
 									<button
 										type="button"
-										className="ml-2 px-2 py-1 rounded bg-red-100 text-red-700 text-xs font-semibold hover:bg-red-200"
+										className="ml-2 px-2 py-1 rounded bg-red-100 text-red-700 text-xs font-semibold hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50"
 										onClick={() => remove(idx)}
 									>
 										Quitar

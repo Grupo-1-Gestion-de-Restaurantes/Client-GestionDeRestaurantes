@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useOrderStore } from "../store/useOrdersStore.js";
 import { useClientStore } from "../../clients/store/useClientStore.js";
 import { useRestaurantStore } from "../../restaurants/store/useRestaurantStore.js";
+import { useAuthStore } from "../../../features/auth/store/useAuthStore.js";
 import { Spinner } from "../../../shared/components/layout/Spinner.jsx";
 import { useEffect as useToastEffect } from "react";
 import { showError } from "../../../shared/utils/toast.js";
@@ -15,10 +16,13 @@ export const Orders = () => {
     const { orders, loading, error, getOrders, deleteOrder, updateOrder, updateOrderStatus, pagination } = useOrderStore();
     const { clients, getClients } = useClientStore();
     const { restaurants, getRestaurants } = useRestaurantStore();
+    const { user } = useAuthStore();
+    const isAdmin = user?.role === "ADMIN_ROLE";
     const [openModal, setOpenModal] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [activeFilter, setActiveFilter] = useState("all");
+    const [restaurantFilter, setRestaurantFilter] = useState("");
     const { openConfirm } = useUIStore();
 
     const handleStatusChange = async (orderId, newStatus) => {
@@ -41,11 +45,15 @@ export const Orders = () => {
         } else {
             params.isActive = "true";
         }
+
+        if (isAdmin && restaurantFilter) {
+            params.restaurant = restaurantFilter;
+        }
         
         getOrders(params);
         getClients();
         getRestaurants({ isActive: true, limit: 100 });
-    }, [getOrders, activeFilter]);
+    }, [getOrders, activeFilter, restaurantFilter, isAdmin]);
 
     const handlePageChange = (page) => {
         const params = { page };
@@ -55,6 +63,10 @@ export const Orders = () => {
             params.isActive = "all";
         } else {
             params.isActive = "true";
+        }
+
+        if (isAdmin && restaurantFilter) {
+            params.restaurant = restaurantFilter;
         }
         getOrders(params);
     };
@@ -74,6 +86,12 @@ export const Orders = () => {
             case 'EN_PREPARACION': return 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400';
             default: return 'bg-gray-100 text-gray-800 dark:bg-zinc-800 dark:text-zinc-300';
         }
+    };
+
+    const getSelectStyle = (status) => {
+        const base = 'px-3 py-1 rounded-full text-xs font-bold border-none cursor-pointer focus:ring-2 focus:ring-offset-2 transition-colors text-[var(--text-primary)] dark:text-[var(--text-primary)]';
+        const statusStyle = getStatusStyle(status);
+        return `${base} ${statusStyle}`;
     };
 
     const getClientName = (client) => {
@@ -178,11 +196,33 @@ export const Orders = () => {
                         </select>
                     </div>
 
+                    {isAdmin && (
+                        <div className="w-full lg:w-64">
+                            <label className="block text-sm font-semibold text-[var(--text-primary)] mb-2">
+                                <span className="inline-flex items-center gap-2">
+                                    <LucideMotionIcon icon={Filter} />
+                                    Restaurante
+                                </span>
+                            </label>
+                            <select
+                                value={restaurantFilter}
+                                onChange={(e) => setRestaurantFilter(e.target.value)}
+                                className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-base)] px-4 py-2.5 text-sm text-[var(--text-primary)] outline-none transition focus:border-[var(--color-brand-dark)]"
+                            >
+                                <option value="">Todos los restaurantes</option>
+                                {restaurants?.map((r) => (
+                                    <option key={r._id} value={r._id}>{r.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
+
                     <button
                         type="button"
                         onClick={() => {
                             setSearchTerm("");
                             setActiveFilter("all");
+                            setRestaurantFilter("");
                         }}
                         className="rounded-xl border border-[var(--border-color)] px-4 py-2.5 text-sm font-medium text-[var(--text-secondary)] transition hover:bg-[var(--bg-base)]"
                     >
@@ -233,7 +273,7 @@ export const Orders = () => {
                                         <select
                                             value={order.status}
                                             onChange={(e) => handleStatusChange(order._id, e.target.value)}
-                                            className={`px-3 py-1 rounded-full text-xs font-bold border-none cursor-pointer focus:ring-2 focus:ring-offset-2 transition-colors ${getStatusStyle(order.status)}`}
+                                            className={getSelectStyle(order.status)}
                                         >
                                             <option value="PENDIENTE">PENDIENTE</option>
                                             <option value="EN_PREPARACION">EN PREPARACIÓN</option>

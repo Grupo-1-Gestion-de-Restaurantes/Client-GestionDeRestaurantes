@@ -6,12 +6,12 @@ import { useEffect as useToastEffect } from "react";
 import { showError } from "../../../shared/utils/toast.js";
 import { EmployeeModal } from "./EmployeeModal.jsx";
 import { useUIStore } from "../../../shared/components/ui/store/uiStore.js";
-import { PencilLine, Trash2, Search, Filter, BadgeCheck } from "lucide-react";
+import { PencilLine, Trash2, Search, Filter, BadgeCheck, RotateCcw } from "lucide-react";
 import { LucideMotionIcon } from "../../../shared/components/ui/LucideMotionIcon.jsx";
 import { Pagination } from "../../../shared/components/ui/Pagination.jsx";
 
 export const Employees = () => {
-    const { employees, loading, error, getEmployees, deleteEmployee, pagination } = useEmployeeStore();
+    const { employees, loading, error, getEmployees, deleteEmployee, activateEmployee, pagination } = useEmployeeStore();
     const { restaurants, getRestaurants } = useRestaurantStore();
     const [openModal, setOpenModal] = useState(false);
     const [selectedEmployee, setSelectedEmployee] = useState(null);
@@ -198,7 +198,7 @@ export const Employees = () => {
                                         </span>
                                     </td>
 
-                                    {/* Acciones de Control Perfectamente Centradas */}
+{/* Acciones de Control Perfectamente Centradas */}
                                     <td className="px-6 py-4 text-center whitespace-nowrap">
                                         <div className="flex items-center justify-center gap-4">
                                             <button
@@ -211,19 +211,35 @@ export const Employees = () => {
                                                 <LucideMotionIcon icon={PencilLine} className="!w-4 !h-4 text-[var(--color-brand-yellow)]" />
                                                 <span>Editar</span>
                                             </button>
-                                            <button
-                                                className="inline-flex items-center gap-2 text-[var(--color-brand-red)] hover:text-[var(--color-brand-red-dark)] font-medium text-sm transition cursor-pointer"
-                                                onClick={() =>
-                                                    openConfirm({
-                                                        title: "Dar de Baja Empleado",
-                                                        message: `¿Estás seguro de desactivar al empleado "${emp.fullName || 'este usuario'}"? Ya no tendrá acceso operativo a la sucursal.`,
-                                                        onConfirm: () => deleteEmployee(emp._id)
-                                                    })
-                                                }
-                                            >
-                                                <LucideMotionIcon icon={Trash2} className="!w-4 !h-4 text-[var(--color-brand-red)]" />
-                                                <span>Eliminar</span>
-                                            </button>
+                                            {emp.isActive ? (
+                                                <button
+                                                    className="inline-flex items-center gap-2 text-[var(--color-brand-red)] hover:text-[var(--color-brand-red-dark)] font-medium text-sm transition cursor-pointer"
+                                                    onClick={() =>
+                                                        openConfirm({
+                                                            title: "Dar de Baja Empleado",
+                                                            message: `¿Estás seguro de desactivar al empleado "${emp.fullName || 'este usuario'}"? Ya no tendrá acceso operativo a la sucursal.`,
+                                                            onConfirm: () => deleteEmployee(emp._id)
+                                                        })
+                                                    }
+                                                >
+                                                    <LucideMotionIcon icon={Trash2} className="!w-4 !h-4 text-[var(--color-brand-red)]" />
+                                                    <span>Eliminar</span>
+                                                </button>
+                                            ) : (
+                                                <button
+                                                    className="inline-flex items-center gap-2 text-green-700 hover:text-green-500 font-medium text-sm transition cursor-pointer"
+                                                    onClick={() =>
+                                                        openConfirm({
+                                                            title: "Activar Empleado",
+                                                            message: `¿Estás seguro de activar al empleado "${emp.fullName || 'este usuario'}"?`,
+                                                            onConfirm: () => activateEmployee(emp._id)
+                                                        })
+                                                    }
+                                                >
+                                                    <LucideMotionIcon icon={RotateCcw} className="!w-4 !h-4 text-green-700 dark:text-[var(--color-brand-yellow)]" />
+                                                    <span>Activar</span>
+                                                </button>
+                                            )}
                                         </div>
                                     </td>
                                 </tr>

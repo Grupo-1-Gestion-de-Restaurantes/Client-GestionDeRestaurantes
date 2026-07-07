@@ -6,12 +6,12 @@ import { showError } from "../../../shared/utils/toast.js";
 import { useUIStore } from "../../../shared/components/ui/store/uiStore.js";
 import { useRestaurantStore } from "../../restaurants/store/useRestaurantStore.js";
 import { useDishStore } from "../../dishes/store/useDishStore.js"; // Lo mismo para platillos
-import { Trash2, Search, Filter, BadgeCheck, Star } from "lucide-react";
+import { Trash2, Search, Filter, BadgeCheck, Star, Eye } from "lucide-react";
 import { LucideMotionIcon } from "../../../shared/components/ui/LucideMotionIcon.jsx";
 import { Pagination } from "../../../shared/components/ui/Pagination.jsx";
 
 export const Comments = () => {
-    const { comments, loading, error, filters, setFilters, getComments, deleteComment, pagination } = useCommentStore();
+    const { comments, loading, error, filters, setFilters, getComments, deleteComment, activateComment, pagination } = useCommentStore();
     const { searchTerm, activeFilter, restaurantFilter } = filters;
     const { restaurants, getRestaurants } = useRestaurantStore();
     const { dishes, getDishes } = useDishStore();
@@ -255,21 +255,37 @@ export const Comments = () => {
                                             )}
                                         </td>
 
-                                        <td className="px-6 py-4 text-center whitespace-nowrap">
-                                            <button
-                                                className="inline-flex items-center gap-2 text-[var(--color-brand-red)] hover:text-[var(--color-brand-red-dark)] hover:underline font-medium text-sm transition cursor-pointer"
-                                                onClick={() =>
-                                                    openConfirm({
-                                                        title: "Ocultar Comentario",
-                                                        message: `¿Estás seguro de que deseas retirar esta reseña del feed público? El cliente no será eliminado, pero el comentario ya no se mostrará.`,
-                                                        onConfirm: () => deleteComment(com._id)
-                                                    })
-                                                }
-                                            >
-                                                <LucideMotionIcon icon={Trash2} className="!w-4 !h-4 text-[var(--color-brand-red)]" />
-                                                Ocultar
-                                            </button>
-                                        </td>
+<td className="px-6 py-4 text-center whitespace-nowrap">
+    {com.isActive ? (
+        <button
+            className="inline-flex items-center gap-2 text-[var(--color-brand-red)] hover:text-[var(--color-brand-red-dark)] hover:underline font-medium text-sm transition cursor-pointer"
+            onClick={() =>
+                openConfirm({
+                    title: "Ocultar Comentario",
+                    message: `¿Estás seguro de que deseas retirar esta reseña del feed público? El cliente no será eliminado, pero el comentario ya no se mostrará.`,
+                    onConfirm: () => deleteComment(com._id)
+                })
+            }
+        >
+            <LucideMotionIcon icon={Trash2} className="!w-4 !h-4 text-[var(--color-brand-red)]" />
+            Ocultar
+        </button>
+    ) : (
+        <button
+            className="inline-flex items-center gap-2 text-green-600 hover:text-green-700 hover:underline font-medium text-sm transition cursor-pointer"
+            onClick={() =>
+                openConfirm({
+                    title: "Mostrar Comentario",
+                    message: `¿Deseas volver a mostrar esta reseña en el feed público?`,
+                    onConfirm: () => activateComment(com._id)
+                })
+            }
+        >
+            <LucideMotionIcon icon={Eye} className="!w-4 !h-4 text-green-600" />
+            Mostrar
+        </button>
+    )}
+</td>
                                     </tr>
                                 );
                             })

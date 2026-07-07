@@ -314,8 +314,8 @@ export const RestaurantModal = ({ isOpen, onClose, restaurant }) => {
                                 {...register("phone", {
                                     required: "El teléfono es obligatorio",
                                     pattern: {
-                                        value: /^[0-9]{8,15}$/,
-                                        message: "Ingrese un número válido (8-15 dígitos)",
+                                        value: /^[0-9]{8}$/,
+                                        message: "El teléfono debe tener exactamente 8 dígitos",
                                     },
                                 })}
                             />
@@ -414,7 +414,8 @@ export const RestaurantModal = ({ isOpen, onClose, restaurant }) => {
 
                         <button
                             type="submit"
-                            className="w-full sm:w-auto px-5 py-2 rounded-lg font-medium transition-all duration-300 shadow bg-[var(--color-brand-dark)] text-white border border-transparent hover:bg-[var(--color-brand-red)] dark:bg-[var(--bg-surface-alt)] dark:text-[var(--text-primary)] dark:border-[var(--border-color)] dark:hover:bg-[var(--color-brand-yellow)] dark:hover:text-[var(--color-brand-dark)] dark:hover:border-transparent"
+                            disabled={loading}
+                            className="w-full sm:w-auto px-5 py-2 rounded-lg font-medium transition-all duration-300 shadow bg-[var(--color-brand-dark)] text-white border border-transparent hover:bg-[var(--color-brand-red)] dark:bg-[var(--bg-surface-alt)] dark:text-[var(--text-primary)] dark:border-[var(--border-color)] dark:hover:bg-[var(--color-brand-yellow)] dark:hover:text-[var(--color-brand-dark)] dark:hover:border-transparent disabled:opacity-60 disabled:cursor-not-allowed"
                         >
                             {loading ? <Spinner /> : restaurant ? "Guardar Cambios" : "Crear Restaurante"}
                         </button>

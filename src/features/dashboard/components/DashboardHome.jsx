@@ -166,7 +166,7 @@ export const DashboardHome = () => {
                 />
                 <Card 
                     title="Satisfacción Promedio" 
-                    value={`${currentStats.satisfaccion} / 5.0`} 
+                    value={`${Number(currentStats.satisfaccion).toFixed(1)} / 5.0`} 
                     icon={Star} 
                     color="bg-yellow-500" 
                 />

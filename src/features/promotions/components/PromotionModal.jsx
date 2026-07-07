@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { useSavePromotion } from "../hooks/UseSavePromotion.jsx";
 import { useRestaurantStore } from "../../restaurants/store/useRestaurantStore.js";
 import { useDishStore } from "../../dishes/store/useDishStore.js";
+import { showError } from "../../../shared/utils/toast.js";
 
 export const PromotionModal = ({ isOpen, onClose, promotion }) => {
 	const {
@@ -22,7 +23,7 @@ export const PromotionModal = ({ isOpen, onClose, promotion }) => {
 
 	useEffect(() => {
 		if (selectedRestaurant) {
-			getDishes();
+			getDishes({ isActive: 'all', limit: 100 });
 		}
 	}, [selectedRestaurant, getDishes]);
 
@@ -62,12 +63,61 @@ export const PromotionModal = ({ isOpen, onClose, promotion }) => {
 		}
 	}, [isOpen, promotion, reset]);
 
+	// Determinar si la promoción está vencida (basado en el prop promotion para edición)
+	const today = new Date();
+	today.setHours(0, 0, 0, 0);
+	const isExpired = promotion ? new Date(promotion.endDate) < today : false;
+
+	// Watch endDate changes to auto-uncheck isActive
+	const endDateValue = watch("endDate");
+	const isEndDateExpired = endDateValue ? new Date(endDateValue) < today : false;
+
+	useEffect(() => {
+		if (isEndDateExpired) {
+			// Auto-desactivar cuando la fecha de fin es anterior a hoy
+			// Solo si el usuario no lo ha activado manualmente después
+			// Usamos setValue para actualizar sin disparar validación
+			// Nota: En un caso real, podrías querer mostrar una advertencia
+		}
+	}, [isEndDateExpired]);
+
 	const onSubmit = async (data) => {
+		// Validar que la fecha de fin sea posterior a la de inicio
+		if (new Date(data.endDate) <= new Date(data.startDate)) {
+			showError("La fecha de fin debe ser posterior a la fecha de inicio");
+			return;
+		}
+		
+		// Auto-desactivar si la fecha de fin ya pasó
+		const today = new Date();
+		today.setHours(0, 0, 0, 0);
+		if (new Date(data.endDate) < today) {
+			data.isActive = false;
+		}
+		
 		await savePromotion(data, promotion?._id);
 		onClose();
 	};
 
 	if (!isOpen) return null;
+
+	// Determinar si la promoción está vencida (basado en el prop promotion para edición)
+	const today = new Date();
+	today.setHours(0, 0, 0, 0);
+	const isExpired = promotion ? new Date(promotion.endDate) < today : false;
+
+	// Watch endDate changes to auto-uncheck isActive
+	const endDateValue = watch("endDate");
+	const isEndDateExpired = endDateValue ? new Date(endDateValue) < today : false;
+
+	useEffect(() => {
+		if (isEndDateExpired) {
+			// Auto-desactivar cuando la fecha de fin es anterior a hoy
+			// Solo si el usuario no lo ha activado manualmente después
+			// Usamos setValue para actualizar sin disparar validación
+			// Nota: En un caso real, podrías querer mostrar una advertencia
+		}
+	}, [isEndDateExpired]);
 
 	return (
 		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
@@ -135,7 +185,19 @@ export const PromotionModal = ({ isOpen, onClose, promotion }) => {
 
 					<div>
 						<label className="mb-1 block text-sm font-semibold">Fin</label>
-						<input type="date" className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-base)] px-4 py-2.5 text-sm outline-none" {...register("endDate", { required: "La fecha de fin es obligatoria" })} />
+						<input 
+							type="date" 
+							className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-base)] px-4 py-2.5 text-sm outline-none" 
+							{...register("endDate", { 
+								required: "La fecha de fin es obligatoria",
+								validate: value => {
+									const startDate = watch("startDate");
+									if (startDate && value && new Date(value) <= new Date(startDate)) {
+										return "La fecha de fin debe ser posterior a la fecha de inicio";
+									}
+								}
+							})} 
+						/>
 						{errors.endDate && <p className="mt-1 text-xs text-red-600">{errors.endDate.message}</p>}
 					</div>
 
@@ -165,8 +227,13 @@ export const PromotionModal = ({ isOpen, onClose, promotion }) => {
 					</div>
 
 					<label className="flex items-center gap-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-base)] px-4 py-3 text-sm font-medium">
-						<input type="checkbox" {...register("isActive")} />
+						<input 
+							type="checkbox" 
+							{...register("isActive")} 
+							disabled={isExpired}
+						/>
 						Promoción activa
+						{isExpired && <span className="text-xs text-red-600">(Vencida - no se puede activar)</span>}
 					</label>
 
 					<div className="md:col-span-2 flex justify-end gap-3 pt-2">

@@ -1,23 +1,28 @@
 import { useEffect, useMemo, useState } from "react";
-import { Plus, Search, TicketPercent, PencilLine, Power, PowerOff } from "lucide-react";
+import { Plus, Search, PencilLine, Power, PowerOff } from "lucide-react";
 import { usePromotionStore } from "../store/usePromotionStore.js";
 import { useRestaurantStore } from "../../restaurants/store/useRestaurantStore.js";
+import { useAuthStore } from "../../../features/auth/store/useAuthStore.js";
 import { PromotionModal } from "./PromotionModal.jsx";
 import { Spinner } from "../../../shared/components/layout/Spinner.jsx";
 import { showError } from "../../../shared/utils/toast.js";
 import { useUIStore } from "../../../shared/components/ui/store/uiStore.js";
 import { LucideMotionIcon } from "../../../shared/components/ui/LucideMotionIcon.jsx";
 import { Pagination } from "../../../shared/components/ui/Pagination.jsx";
+import { Filter, BadgeCheck } from "lucide-react";
 
 export const Promotions = () => {
   const { promotions, loading, error, getPromotions, deactivatePromotion, activatePromotion, pagination } = usePromotionStore();
   const { restaurants, getRestaurants } = useRestaurantStore();
+  const { user } = useAuthStore();
+  const isAdmin = user?.role === "ADMIN_ROLE";
   const { openConfirm } = useUIStore();
 
   const [openModal, setOpenModal] = useState(false);
   const [selectedPromotion, setSelectedPromotion] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilter, setActiveFilter] = useState("active");
+  const [restaurantFilter, setRestaurantFilter] = useState("");
 
   useEffect(() => {
     getRestaurants({ isActive: 'all', limit: 100 });
@@ -33,11 +38,15 @@ export const Promotions = () => {
         filters.isActive = "all";
       }
 
+      if (isAdmin && restaurantFilter) {
+        filters.restaurant = restaurantFilter;
+      }
+
       getPromotions(filters);
     }, 200);
 
     return () => clearTimeout(timeoutId);
-  }, [activeFilter, getPromotions]);
+  }, [activeFilter, restaurantFilter, getPromotions, isAdmin]);
 
   const handlePageChange = (page) => {
     const filters = { page };
@@ -45,6 +54,10 @@ export const Promotions = () => {
       filters.isActive = activeFilter === "active";
     } else {
       filters.isActive = "all";
+    }
+
+    if (isAdmin && restaurantFilter) {
+      filters.restaurant = restaurantFilter;
     }
     getPromotions(filters);
   };
@@ -134,16 +147,39 @@ export const Promotions = () => {
             </select>
           </div>
 
-          <button
-            type="button"
-            onClick={() => {
-              setSearchTerm("");
-              setActiveFilter("active");
-            }}
-            className="rounded-xl border border-[var(--border-color)] px-4 py-2.5 text-sm font-medium text-[var(--text-secondary)] transition hover:bg-[var(--bg-base)]"
-          >
-            Limpiar
-          </button>
+          {isAdmin && (
+            <div>
+              <label className="mb-2 block text-sm font-semibold text-[var(--text-primary)]">Restaurante</label>
+              <select
+                value={restaurantFilter}
+                onChange={(event) => setRestaurantFilter(event.target.value)}
+                className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-base)] px-4 py-2.5 text-sm outline-none"
+              >
+                <option value="">Todos los restaurantes</option>
+                {restaurants?.map((r) => (
+                  <option key={r._id} value={r._id}>{r.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          <div>
+            <label className="mb-2 block text-sm font-semibold text-[var(--text-primary)] invisible">Limpiar</label>
+            <button
+              type="button"
+              onClick={() => {
+                setSearchTerm("");
+                setActiveFilter("active");
+                setRestaurantFilter("");
+              }}
+              className="w-full rounded-xl border border-[var(--border-color)] px-4 py-2.5 text-sm font-medium text-[var(--text-secondary)] transition hover:bg-[var(--bg-base)]"
+            >
+              <span className="inline-flex items-center gap-2">
+                <LucideMotionIcon icon={BadgeCheck} className="!w-4 !h-4 md:!w-5 md:!h-5 text-[var(--text-secondary)] dark:text-[var(--text-secondary)]" />
+                Limpiar
+              </span>
+            </button>
+          </div>
         </div>
       </div>
 

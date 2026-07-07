@@ -25,13 +25,15 @@ export const EventModal = ({ isOpen, onClose, eventItem }) => {
     const { employees, getEmployees } = useEmployeeStore();
 
     const selectedRestaurant = watch("restaurant");
+    const selectedRestaurantData = restaurants?.find(r => r._id === selectedRestaurant);
+    const restaurantCapacity = selectedRestaurantData?.capacity || 0;
 
     useEffect(() => {
         if (isOpen) {
-            if (getRestaurants) getRestaurants();
-            if (getTables) getTables({ isActive: true });
-            if (getDishes) getDishes();
-            if (getEmployees) getEmployees();
+            if (getRestaurants) getRestaurants({ isActive: 'all', limit: 100 });
+            if (getTables) getTables({ isActive: true, limit: 100 });
+            if (getDishes) getDishes({ isActive: 'all', limit: 100 });
+            if (getEmployees) getEmployees({ isActive: 'all', limit: 100 });
         }
     }, [isOpen, getRestaurants, getTables, getDishes, getEmployees]);
 
@@ -173,10 +175,18 @@ export const EventModal = ({ isOpen, onClose, eventItem }) => {
                                 placeholder="50"
                                 {...register("capacity", { 
                                     required: "Requerido", 
-                                    min: { value: 1, message: "Mínimo 1" } 
+                                    min: { value: 1, message: "Mínimo 1" },
+                                    validate: value => {
+                                        if (restaurantCapacity > 0 && value > restaurantCapacity) {
+                                            return `La capacidad no puede exceder la del restaurante (${restaurantCapacity})`;
+                                        }
+                                    }
                                 })}
                             />
                             {errors.capacity && <p className="text-[var(--color-brand-red)] text-[10px] mt-0.5">{errors.capacity.message}</p>}
+                            {restaurantCapacity > 0 && (
+                                <p className="text-[10px] text-[var(--text-muted)] mt-1">Capacidad máxima del restaurante: {restaurantCapacity}</p>
+                            )}
                         </div>
 
                         {/* Precio por Entrada */}

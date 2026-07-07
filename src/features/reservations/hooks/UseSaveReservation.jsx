@@ -7,8 +7,8 @@ export const useSaveReservation = () => {
     const saveReservation = async (data, reservationId = null) => {
         const payload = {
             client: data.client,
-            restaurant: data.restaurant,
-            table: data.table,
+            restaurantId: data.restaurant,
+            tableId: data.table,
             reservationDate: new Date(data.reservationDate).toISOString(),
             numberOfPeople: Number(data.numberOfPeople),
             durationInMinutes: Number(data.durationInMinutes),

@@ -32,7 +32,7 @@ export const OrderModal = ({ isOpen, onClose, order }) => {
     useEffect(() => {
         getClients();
         getRestaurants({ isActive: true, limit: 100 });
-        getDishes();
+        getDishes({ isActive: 'all', limit: 100 });
 
         if (order) {
             reset({

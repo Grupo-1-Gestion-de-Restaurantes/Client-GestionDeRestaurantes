@@ -3,7 +3,8 @@ import {
     getClients as getClientsRequest,
     createClient as createClientRequest,
     updateClient as updateClientRequest,
-    deleteClient as deleteClientRequest
+    deleteClient as deleteClientRequest,
+    activateClient as activateClientRequest
 } from "../../../shared/api/";
 
 export const useClientStore = create((set, get) => ({
@@ -78,6 +79,22 @@ export const useClientStore = create((set, get) => ({
             set({
                 loading: false,
                 error: error.response?.data?.message || "Error al eliminar cliente."
+            });
+            throw error;
+        }
+    },
+
+    activateClient: async (id) => {
+        try {
+            set({ loading: true, error: null });
+            await activateClientRequest(id);
+
+            // Recargar la lista completa usando los filtros actuales
+            await get().getClients(get().filters);
+        } catch (error) {
+            set({
+                loading: false,
+                error: error.response?.data?.message || "Error al activar cliente."
             });
             throw error;
         }
