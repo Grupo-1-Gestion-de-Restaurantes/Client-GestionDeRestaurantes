@@ -59,7 +59,7 @@ export const EventModal = ({ isOpen, onClose, eventItem }) => {
                     typeEvent: eventItem.typeEvent || "CENA_TEMATICA",
                     capacity: eventItem.capacity || "",
                     price: eventItem.price || "",
-                    restaurant: eventItem.restaurant?._id || eventItem.restaurant || "",
+                    restaurant: isManager && myRestaurantId ? myRestaurantId : (eventItem.restaurant?._id || eventItem.restaurant || ""),
                     dateTime: localDate,
                     additionalServices: eventItem.additionalServices || [],
                     otherServiceDescription: eventItem.otherServiceDescription || "",
@@ -74,7 +74,7 @@ export const EventModal = ({ isOpen, onClose, eventItem }) => {
                     typeEvent: "CENA_TEMATICA",
                     capacity: "",
                     price: "",
-                    restaurant: "",
+                    restaurant: isManager && myRestaurantId ? myRestaurantId : "",
                     dateTime: "",
                     additionalServices: [],
                     otherServiceDescription: "",
@@ -84,7 +84,7 @@ export const EventModal = ({ isOpen, onClose, eventItem }) => {
                 });
             }
         }
-    }, [isOpen, eventItem, reset]);
+    }, [isOpen, eventItem, reset, isManager, myRestaurantId]);
 
     const filteredTables = tables.filter(t => t.restaurant?._id === selectedRestaurant || t.restaurant === selectedRestaurant);
     const filteredDishes = dishes.filter(d => d.restaurant?._id === selectedRestaurant || d.restaurant === selectedRestaurant);

@@ -73,23 +73,23 @@ export const Orders = () => {
         if (error) showError(error);
     }, [error]);
 
-    const getStatusStyle = (status) => {
+    const getStatusTextStyle = (status) => {
         switch (status) {
-            case 'CONFIRMADO': return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400';
-            case 'EN_CAMINO': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400';
-            case 'LISTO_PARA_RECOGER': return 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400';
-            case 'PENDIENTE': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400';
-            case 'CANCELADO': return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400';
-            case 'ENTREGADO': return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400';
-            case 'EN_PREPARACION': return 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400';
-            default: return 'bg-gray-100 text-gray-800 dark:bg-zinc-800 dark:text-zinc-300';
+            case 'CONFIRMADO': return 'text-green-800 dark:text-green-400';
+            case 'EN_CAMINO': return 'text-blue-800 dark:text-blue-400';
+            case 'LISTO_PARA_RECOGER': return 'text-indigo-800 dark:text-indigo-400';
+            case 'PENDIENTE': return 'text-yellow-800 dark:text-yellow-400';
+            case 'CANCELADO': return 'text-red-800 dark:text-red-400';
+            case 'ENTREGADO': return 'text-emerald-800 dark:text-emerald-400';
+            case 'EN_PREPARACION': return 'text-orange-800 dark:text-orange-400';
+            default: return 'text-gray-800 dark:text-zinc-300';
         }
     };
 
     const getSelectStyle = (status) => {
-        const base = 'px-3 py-1 rounded-full text-xs font-bold border-none cursor-pointer focus:ring-2 focus:ring-offset-2 transition-colors text-[var(--text-primary)] dark:text-[var(--text-primary)]';
-        const statusStyle = getStatusStyle(status);
-        return `${base} ${statusStyle}`;
+        const base = 'px-3 py-1 rounded-full text-xs font-bold border border-[var(--border-color)] bg-[var(--bg-base)] cursor-pointer focus:ring-2 focus:ring-offset-2 transition-colors';
+        const statusTextStyle = getStatusTextStyle(status);
+        return `${base} ${statusTextStyle}`;
     };
 
     const getClientName = (client) => {
@@ -240,14 +240,21 @@ export const Orders = () => {
                             key={order._id}
                             className="flex flex-col gap-4 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-5 shadow-sm transition-shadow hover:shadow-md"
                         >
-                            {/* Fecha + Tipo de entrega */}
-                            <div className="flex items-center justify-between">
+                            {/* Fecha + Restaurante (solo admin) + Tipo de entrega */}
+                            <div className="flex items-center justify-between gap-2">
                                 <span className="text-xs font-medium text-[var(--text-muted)]">
                                     {new Date(order.createdAt).toLocaleDateString()}
                                 </span>
-                                <span className="rounded bg-[var(--bg-base)] px-2 py-1 font-mono text-xs text-[var(--text-secondary)]">
-                                    {order.deliveryType}
-                                </span>
+                                <div className="flex items-center gap-2">
+                                    {isAdmin && (
+                                        <span className="rounded bg-blue-50 px-2 py-1 text-[10px] font-semibold text-blue-700 dark:bg-blue-900/20 dark:text-blue-400">
+                                            {getRestaurantName(order.restaurant)}
+                                        </span>
+                                    )}
+                                    <span className="rounded bg-[var(--bg-base)] px-2 py-1 font-mono text-xs text-[var(--text-secondary)]">
+                                        {order.deliveryType}
+                                    </span>
+                                </div>
                             </div>
 
                             {/* Cliente */}
@@ -256,10 +263,20 @@ export const Orders = () => {
                                 <p className="text-sm font-bold text-[var(--text-primary)]">{getClientName(order.client)}</p>
                             </div>
 
-                            {/* Restaurante */}
+                            {/* Pedido (platos solicitados) */}
                             <div>
-                                <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--text-muted)]">Restaurante</p>
-                                <p className="text-sm text-[var(--text-secondary)]">{getRestaurantName(order.restaurant)}</p>
+                                <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--text-muted)]">Pedido</p>
+                                {order.items?.length > 0 ? (
+                                    <ul className="max-h-24 space-y-0.5 overflow-y-auto text-sm text-[var(--text-secondary)]">
+                                        {order.items.map((item, idx) => (
+                                            <li key={idx} className="flex items-center justify-between gap-2">
+                                                <span className="truncate">{item.quantity}x {item.name}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                ) : (
+                                    <p className="text-sm italic text-[var(--text-muted)]">Sin productos</p>
+                                )}
                             </div>
 
                             {/* Total + Estado */}

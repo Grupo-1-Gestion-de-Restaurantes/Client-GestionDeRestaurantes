@@ -39,7 +39,7 @@ export const InventoryModal = ({ isOpen, onClose, item }) => {
                     quantity: item.quantity ?? 0,
                     unit: item.unit || "UNIDAD",
                     minStock: item.minStock ?? 5,
-                    restaurant: item.restaurant?._id || item.restaurant || "",
+                    restaurant: item.restaurant?._id || item.restaurant || (isManager ? myRestaurantId : ""),
                 });
             } else {
                 reset({
@@ -47,7 +47,7 @@ export const InventoryModal = ({ isOpen, onClose, item }) => {
                     quantity: "",
                     unit: "UNIDAD",
                     minStock: 5,
-                    restaurant: "",
+                    restaurant: isManager ? myRestaurantId : "",
                 });
             }
         }

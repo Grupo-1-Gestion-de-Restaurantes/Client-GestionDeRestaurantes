@@ -13,6 +13,7 @@ export const EmployeeModal = ({ isOpen, onClose, employeeItem }) => {
         reset,
         watch,
         setValue,
+        setError,
         formState: { errors },
     } = useForm({
         defaultValues: {
@@ -24,7 +25,7 @@ export const EmployeeModal = ({ isOpen, onClose, employeeItem }) => {
     const { saveEmployee } = useSaveEmployee();
     const loading = useEmployeeStore((state) => state.loading);
     const { restaurants, getRestaurants } = useRestaurantStore();
-    const { isManager, myRestaurantId, myRestaurantName } = useManagerRestaurant();
+    const { isAdmin, isManager, myRestaurantId, myRestaurantName } = useManagerRestaurant();
 
     // Observamos el rol elegido en el formulario
     const selectedRole = watch("role");
@@ -44,7 +45,7 @@ export const EmployeeModal = ({ isOpen, onClose, employeeItem }) => {
             if (employeeItem) {
                 // MODO EDICIÓN: Cargamos los datos actuales de MongoDB
                 reset({
-                    restaurant: employeeItem.restaurant?._id || employeeItem.restaurant || "",
+                    restaurant: isManager && myRestaurantId ? myRestaurantId : (employeeItem.restaurant?._id || employeeItem.restaurant || ""),
                     specialty: employeeItem.specialty || "COCINERO",
                 });
             } else {
@@ -57,13 +58,13 @@ export const EmployeeModal = ({ isOpen, onClose, employeeItem }) => {
                     password: "",
                     phone: "",
                     role: "EMPLOYEE_ROLE",
-                    restaurant: "",
+                    restaurant: isManager && myRestaurantId ? myRestaurantId : "",
                     specialty: "COCINERO",
                     profilePicture: null
                 });
             }
         }
-    }, [isOpen, employeeItem, reset]);
+    }, [isOpen, employeeItem, reset, isManager, myRestaurantId]);
 
     const onSubmit = async (data) => {
         try {
@@ -72,17 +73,33 @@ export const EmployeeModal = ({ isOpen, onClose, employeeItem }) => {
             onClose();
         } catch (error) {
             console.error(error);
-            const message = error.response?.data?.message || "Error al procesar la solicitud";
-            
-            // Si el error es de email duplicado, marcar el campo
-            if (message.toLowerCase().includes("email") && message.toLowerCase().includes("exist")) {
-                // Set error manually on email field
-                // Note: This requires using setError from useForm, but we don't have access to it here
-                // We'll show it in toast with specific message
-                showError("Este correo electrónico ya está registrado para otro empleado activo");
-            } else {
-                showError(message);
+
+            // Validaciones del backend Node (ej. email ya registrado como cliente)
+            const validationErrors = error.response?.data?.errors;
+            const fieldError = validationErrors?.find((e) => e.field === "email" || e.field === "username");
+            if (fieldError) {
+                setError(fieldError.field, { type: "manual", message: fieldError.message });
+                showError(fieldError.message);
+                return;
             }
+
+            // Errores del AuthService (username/email ya usados por otro usuario)
+            const authErrorCode = error.response?.data?.error?.errorCode;
+            if (authErrorCode === "EMAIL_ALREADY_EXISTS") {
+                const duplicateEmailMessage = "Este correo electrónico ya está en uso.";
+                setError("email", { type: "manual", message: duplicateEmailMessage });
+                showError(duplicateEmailMessage);
+                return;
+            }
+            if (authErrorCode === "USERNAME_ALREADY_EXISTS") {
+                const duplicateUsernameMessage = "Este nombre de usuario ya está en uso.";
+                setError("username", { type: "manual", message: duplicateUsernameMessage });
+                showError(duplicateUsernameMessage);
+                return;
+            }
+
+            const message = error.response?.data?.error?.message || error.response?.data?.message || "Error al procesar la solicitud";
+            showError(message);
         }
     };
 
@@ -117,7 +134,7 @@ export const EmployeeModal = ({ isOpen, onClose, employeeItem }) => {
                                     {...register("role", { required: true })}
                                 >
                                     <option value="EMPLOYEE_ROLE">Employee (Personal Operativo)</option>
-                                    <option value="MANAGER_ROLE">Manager (Gerente de Sucursal)</option>
+                                    {isAdmin && <option value="MANAGER_ROLE">Manager (Gerente de Sucursal)</option>}
                                 </select>
                             </div>
 

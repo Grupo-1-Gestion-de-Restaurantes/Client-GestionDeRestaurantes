@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Plus, Search, Table2, MapPinned, Users, Power, PowerOff, PencilLine, BadgeCheck } from "lucide-react";
+import { Plus, Search, Table2, MapPinned, Users, Power, PowerOff, PencilLine, BadgeCheck, Filter } from "lucide-react";
 import { useTableStore } from "../store/useTableStore.js";
 import { useRestaurantStore } from "../../restaurants/store/useRestaurantStore.js";
 import { useAuthStore } from "../../../features/auth/store/useAuthStore.js";
@@ -128,7 +128,12 @@ export const Tables = () => {
 					</div>
 
 					<div className="w-full lg:w-64">
-						<label className="mb-2 block text-sm font-semibold text-[var(--text-primary)]">Mostrar</label>
+						<label className="mb-2 block text-sm font-semibold text-[var(--text-primary)]">
+							<span className="inline-flex items-center gap-2">
+								<LucideMotionIcon icon={Filter} />
+								Mostrar
+							</span>
+						</label>
 						<select
 							value={activeFilter}
 							onChange={(event) => setActiveFilter(event.target.value)}
@@ -142,7 +147,12 @@ export const Tables = () => {
 
 					{isAdmin && (
 						<div className="w-full lg:w-64">
-							<label className="mb-2 block text-sm font-semibold text-[var(--text-primary)]">Restaurante</label>
+							<label className="mb-2 block text-sm font-semibold text-[var(--text-primary)]">
+								<span className="inline-flex items-center gap-2">
+									<LucideMotionIcon icon={Filter} />
+									Restaurante
+								</span>
+							</label>
 							<select
 								value={restaurantFilter}
 								onChange={(event) => setRestaurantFilter(event.target.value)}

@@ -206,16 +206,18 @@ export const Employees = () => {
 {/* Acciones de Control Perfectamente Centradas */}
                                     <td className="px-6 py-4 text-center whitespace-nowrap">
                                         <div className="flex items-center justify-center gap-4">
-                                            <button
-                                                className="inline-flex items-center gap-2 text-[var(--color-brand-yellow)] hover:opacity-75 font-medium text-sm transition cursor-pointer"
-                                                onClick={() => {
-                                                    setSelectedEmployee(emp);
-                                                    setOpenModal(true);
-                                                }}
-                                            >
-                                                <LucideMotionIcon icon={PencilLine} className="!w-4 !h-4 text-[var(--color-brand-yellow)]" />
-                                                <span>Editar</span>
-                                            </button>
+                                            {(isAdmin || emp.specialty !== "ADMINISTRATIVO") && (
+                                                <button
+                                                    className="inline-flex items-center gap-2 text-[var(--color-brand-yellow)] hover:opacity-75 font-medium text-sm transition cursor-pointer"
+                                                    onClick={() => {
+                                                        setSelectedEmployee(emp);
+                                                        setOpenModal(true);
+                                                    }}
+                                                >
+                                                    <LucideMotionIcon icon={PencilLine} className="!w-4 !h-4 text-[var(--color-brand-yellow)]" />
+                                                    <span>Editar</span>
+                                                </button>
+                                            )}
                                             {emp.isActive ? (
                                                 <button
                                                     className="inline-flex items-center gap-2 text-[var(--color-brand-red)] hover:text-[var(--color-brand-red-dark)] font-medium text-sm transition cursor-pointer"

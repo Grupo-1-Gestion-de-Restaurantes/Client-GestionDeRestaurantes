@@ -46,7 +46,7 @@ export const ReservationModal = ({ isOpen, onClose, reservation }) => {
 
                 reset({
                     client: reservation.client?._id || reservation.client,
-                    restaurant: reservation.restaurant?._id || reservation.restaurant,
+                    restaurant: isManager && myRestaurantId ? myRestaurantId : (reservation.restaurant?._id || reservation.restaurant),
                     table: reservation.table?._id || reservation.table,
                     reservationDate: formattedDate,
                     numberOfPeople: reservation.numberOfPeople,
@@ -57,7 +57,7 @@ export const ReservationModal = ({ isOpen, onClose, reservation }) => {
             } else {
                 reset({
                     client: "",
-                    restaurant: "",
+                    restaurant: isManager && myRestaurantId ? myRestaurantId : "",
                     table: "",
                     reservationDate: "",
                     numberOfPeople: 1,

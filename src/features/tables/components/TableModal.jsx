@@ -41,7 +41,7 @@ export const TableModal = ({ isOpen, onClose, table }) => {
 
 		if (table) {
 			reset({
-				restaurant: table.restaurant?._id || table.restaurant || "",
+				restaurant: isManager && myRestaurantId ? myRestaurantId : table.restaurant?._id || table.restaurant || "",
 				tableNumber: table.tableNumber || "",
 				capacity: table.capacity || "",
 				location: table.location || "Salón Principal",
@@ -51,7 +51,7 @@ export const TableModal = ({ isOpen, onClose, table }) => {
 			});
 		} else {
 			reset({
-				restaurant: "",
+				restaurant: isManager && myRestaurantId ? myRestaurantId : "",
 				tableNumber: "",
 				capacity: "",
 				location: "Salón Principal",
@@ -61,7 +61,7 @@ export const TableModal = ({ isOpen, onClose, table }) => {
 			});
 		}
 		setAvailabilityError("");
-	}, [isOpen, table, reset]);
+	}, [isOpen, table, reset, isManager, myRestaurantId]);
 
 	// Validación de availability (horarios válidos y sin solapamiento)
 	const validateAvailability = (availability) => {
@@ -226,10 +226,10 @@ export const TableModal = ({ isOpen, onClose, table }) => {
 							))}
 							<button
 								type="button"
-								className="mt-2 px-3 py-1 rounded bg-[var(--color-brand-dark)] text-white text-sm font-semibold hover:bg-[var(--color-brand-yellow)]"
+								className="mt-2 rounded-lg bg-[linear-gradient(90deg,var(--color-brand-dark)_0%,var(--color-brand-red-dark)_100%)] px-4 py-2 text-sm font-semibold text-white shadow transition hover:opacity-90"
 								onClick={() => append({ day: "", startTime: "", endTime: "" })}
 							>
-								Agregar horario
+								+ Agregar horario
 							</button>
 							{availabilityError && <p className="text-xs text-red-600 mt-1">{availabilityError}</p>}
 						</div>

@@ -135,7 +135,12 @@ export const Promotions = () => {
           </div>
 
           <div className="w-full lg:w-64">
-            <label className="mb-2 block text-sm font-semibold text-[var(--text-primary)]">Mostrar</label>
+            <label className="mb-2 block text-sm font-semibold text-[var(--text-primary)]">
+              <span className="inline-flex items-center gap-2">
+                <LucideMotionIcon icon={Filter} />
+                Mostrar
+              </span>
+            </label>
             <select
               value={activeFilter}
               onChange={(event) => setActiveFilter(event.target.value)}
@@ -149,7 +154,12 @@ export const Promotions = () => {
 
           {isAdmin && (
             <div className="w-full lg:w-64">
-              <label className="mb-2 block text-sm font-semibold text-[var(--text-primary)]">Restaurante</label>
+              <label className="mb-2 block text-sm font-semibold text-[var(--text-primary)]">
+                <span className="inline-flex items-center gap-2">
+                  <LucideMotionIcon icon={Filter} />
+                  Restaurante
+                </span>
+              </label>
               <select
                 value={restaurantFilter}
                 onChange={(event) => setRestaurantFilter(event.target.value)}

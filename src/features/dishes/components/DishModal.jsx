@@ -64,7 +64,7 @@ export const DishModal = ({ isOpen, onClose, dish }) => {
                     description: dish.description || "",
                     price: dish.price || 0,
                     dishType: dish.dishType || "PLATO_FUERTE",
-                    restaurant: dish.restaurant?._id || dish.restaurant || "",
+                    restaurant: dish.restaurant?._id || dish.restaurant || (isManager ? myRestaurantId : ""),
                     ingredients: dish.ingredients?.map(ing => ({
                         inventoryItem: ing.inventoryItem?._id || ing.inventoryItem || "",
                         quantityUsed: ing.quantityUsed || ""
@@ -76,8 +76,8 @@ export const DishModal = ({ isOpen, onClose, dish }) => {
                     description: "",
                     price: "",
                     dishType: "PLATO_FUERTE",
-                    restaurant: "",
-                    ingredients: [] 
+                    restaurant: isManager ? myRestaurantId : "",
+                    ingredients: []
                 });
             }
         }

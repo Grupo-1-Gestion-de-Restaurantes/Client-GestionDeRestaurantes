@@ -45,7 +45,7 @@ export const OrderModal = ({ isOpen, onClose, order }) => {
         if (order) {
             reset({
                 client: order.client?._id || order.client,
-                restaurant: order.restaurant?._id || order.restaurant,
+                restaurant: (isManager && myRestaurantId) ? myRestaurantId : (order.restaurant?._id || order.restaurant),
                 paymentMethod: order.paymentMethod,
                 deliveryType: order.deliveryType || "DOMICILIO",
                 "deliveryAddress.alias": order.deliveryAddress?.alias,
@@ -57,6 +57,7 @@ export const OrderModal = ({ isOpen, onClose, order }) => {
             });
         } else {
             reset({
+                restaurant: (isManager && myRestaurantId) ? myRestaurantId : "",
                 paymentMethod: "EFECTIVO",
                 deliveryType: "DOMICILIO",
                 "deliveryAddress.alias": "Casa",
