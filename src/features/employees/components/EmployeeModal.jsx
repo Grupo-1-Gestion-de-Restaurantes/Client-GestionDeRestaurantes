@@ -72,8 +72,6 @@ export const EmployeeModal = ({ isOpen, onClose, employeeItem }) => {
             reset();
             onClose();
         } catch (error) {
-            console.error(error);
-
             // Validaciones del backend Node (ej. email ya registrado como cliente)
             const validationErrors = error.response?.data?.errors;
             const fieldError = validationErrors?.find((e) => e.field === "email" || e.field === "username");

@@ -64,10 +64,9 @@ export const useEmployeeStore = create((set, get) => ({
             // Refrescar la lista de empleados tras crear uno nuevo
             await get().getEmployees();
         } catch (error) {
-            set({
-                loading: false,
-                error: error.response?.data?.message || "Error al registrar el empleado."
-            });
+            // El modal ya muestra el error específico (campo duplicado, etc.);
+            // no seteamos "error" aquí para evitar un segundo toast genérico.
+            set({ loading: false });
             throw error;
         }
     },
@@ -80,10 +79,8 @@ export const useEmployeeStore = create((set, get) => ({
             // Refrescar la lista de empleados tras actualizar uno
             await get().getEmployees();
         } catch (error) {
-            set({
-                loading: false,
-                error: error.response?.data?.message || "Error al actualizar el empleado."
-            });
+            // El modal ya muestra el error específico; evitamos un segundo toast genérico.
+            set({ loading: false });
             throw error;
         }
     },
