@@ -3,7 +3,8 @@ import {
     getEvents as getEventsRequest,
     createEvent as createEventRequest,
     updateEvent as updateEventRequest,
-    deleteEvent as deleteEventRequest
+    deleteEvent as deleteEventRequest,
+    activateEvent as activateEventRequest
 } from "../../../shared/api/";
 
 export const useEventStore = create((set, get) => ({
@@ -82,6 +83,22 @@ export const useEventStore = create((set, get) => ({
             set({
                 loading: false,
                 error: error.response?.data?.message || "Error al eliminar el evento"
+            });
+            throw error;
+        }
+    },
+
+    activateEvent: async (id) => {
+        try {
+            set({ loading: true, error: null });
+            await activateEventRequest(id);
+
+            // Refrescar la lista de eventos tras reactivar uno
+            await get().getEvents();
+        } catch (error) {
+            set({
+                loading: false,
+                error: error.response?.data?.message || "Error al activar el evento"
             });
             throw error;
         }

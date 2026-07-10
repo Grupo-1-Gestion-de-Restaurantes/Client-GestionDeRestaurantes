@@ -55,6 +55,10 @@ export const deleteClient = async (id) => {
     return await axiosAdmin.put(`/clients/${id}/deactivate`);
 }
 
+export const activateClient = async (id) => {
+    return await axiosAdmin.put(`/clients/${id}/activate`);
+}
+
 //Facturas
 export const getMyInvoices = async (params = {}) => {
     return axiosAdmin.get("/invoices/myInvoices", { params });
@@ -67,6 +71,10 @@ export const getComments = async (params = {}) => {
 
 export const deleteComment = async (id) => {
     return await axiosAdmin.put(`/comments/deactivate/${id}`);
+}
+
+export const activateComment = async (id) => {
+    return await axiosAdmin.put(`/comments/activate/${id}`);
 }
 
 
@@ -99,6 +107,10 @@ export const getEmployees = async (params = {}) => {
     return axiosAdmin.get("/employees/", { params });
 }
 
+export const getMyEmployee = async () => {
+    return axiosAdmin.get("/employees/me");
+}
+
 export const createEmployee = async (formData) => {
     return await axiosAdmin.post("/employees/", formData, {
         headers: { "Content-Type": "multipart/form-data" }
@@ -117,6 +129,10 @@ export const updateEmployee = async (id, data) => {
 
 export const deleteEmployee = async (id) => {
     return await axiosAdmin.put(`/employees/${id}/status`, { isActive: false });
+}
+
+export const activateEmployee = async (id) => {
+    return await axiosAdmin.put(`/employees/${id}/status`, { isActive: true });
 }
 
 //Inventarios
@@ -219,4 +235,8 @@ export const updateEvent = async (id, data) => {
 
 export const deleteEvent = async (id) => {
     return await axiosAdmin.patch(`/events/${id}`, { isActive: false });
+};
+
+export const activateEvent = async (id) => {
+    return await axiosAdmin.patch(`/events/${id}`, { isActive: true });
 };

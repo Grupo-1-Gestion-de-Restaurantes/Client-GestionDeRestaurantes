@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { usePartnerLeadsStore } from "../store/usePartnerLeadsStore";
 import { Spinner } from "../../../shared/components/layout/Spinner.jsx";
 import { showError, showSuccess } from "../../../shared/utils/toast.js";
@@ -13,7 +13,10 @@ import {
     MapPin,
     Calendar,
     Utensils,
-    Users
+    Users,
+    Filter,
+    BadgeCheck,
+    Search
 } from "lucide-react";
 import { LucideMotionIcon } from "../../../shared/components/ui/LucideMotionIcon.jsx";
 import { PartnerLeadModal } from "./PartnerLeadModal.jsx";
@@ -24,18 +27,43 @@ export const PartnersLeads = () => {
     const [selectedLead, setSelectedLead] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const { openConfirm } = useUIStore();
+    
+    // Filtros
+    const [statusFilter, setStatusFilter] = useState("all");
+    const [searchTerm, setSearchTerm] = useState("");
 
     useEffect(() => {
-        getLeads({ page: 1 });
-    }, [getLeads]);
+        const params = { page: 1 };
+        if (statusFilter !== "all") {
+            params.status = statusFilter;
+        }
+        getLeads(params);
+    }, [getLeads, statusFilter]);
 
     const handlePageChange = (page) => {
-        getLeads({ page });
+        const params = { page };
+        if (statusFilter !== "all") {
+            params.status = statusFilter;
+        }
+        getLeads(params);
     };
 
     useEffect(() => {
         if (error) showError(error);
     }, [error]);
+
+    // Filtrar localmente por búsqueda
+    const filteredLeads = useMemo(() => {
+        if (!searchTerm.trim()) return leads;
+        const term = searchTerm.toLowerCase().trim();
+        return leads.filter(lead => 
+            lead.restaurantName.toLowerCase().includes(term) ||
+            lead.contactName.toLowerCase().includes(term) ||
+            lead.email.toLowerCase().includes(term) ||
+            lead.city.toLowerCase().includes(term) ||
+            lead.cityAddress.toLowerCase().includes(term)
+        );
+    }, [leads, searchTerm]);
 
     const handleUpdateStatus = async (id, status, restaurantName) => {
         const action = status === 'APPROVED' ? 'aprobar' : 'rechazar';
@@ -79,6 +107,64 @@ export const PartnersLeads = () => {
                 </div>
             </div>
 
+            {/* FILTROS */}
+            <div className="mb-6 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-4 shadow-sm">
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                    <div className="flex-1 lg:w-auto">
+                        <label className="mb-2 block text-sm font-semibold text-[var(--text-primary)]">
+                            <span className="inline-flex items-center gap-2">
+                                <LucideMotionIcon icon={Search} />
+                                Buscar solicitudes
+                            </span>
+                        </label>
+                        <div className="relative">
+                            <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-[var(--text-muted)]">
+                                <LucideMotionIcon icon={Search} className="!w-4 !h-4 md:!w-5 md:!h-5 text-[var(--text-muted)]" />
+                            </span>
+                            <input
+                                value={searchTerm}
+                                onChange={(event) => setSearchTerm(event.target.value)}
+                                placeholder="Buscar por restaurante, contacto, email o ciudad"
+                                className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-base)] pl-10 pr-4 py-2.5 text-sm outline-none transition focus:border-[var(--color-brand-dark)]"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="w-full lg:w-48">
+                        <label className="mb-2 block text-sm font-semibold text-[var(--text-primary)]">
+                            <span className="inline-flex items-center gap-2">
+                                <LucideMotionIcon icon={Filter} />
+                                Estado
+                            </span>
+                        </label>
+                        <select
+                            value={statusFilter}
+                            onChange={(event) => setStatusFilter(event.target.value)}
+                            className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-base)] px-4 py-2.5 text-sm outline-none transition focus:border-[var(--color-brand-dark)]"
+                        >
+                            <option value="all">Todos</option>
+                            <option value="PENDING">PENDING</option>
+                            <option value="APPROVED">APPROVED</option>
+                            <option value="REJECTED">REJECTED</option>
+                        </select>
+                    </div>
+
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setStatusFilter("all");
+                            setSearchTerm("");
+                        }}
+                        className="rounded-xl border border-[var(--border-color)] px-4 py-2.5 text-sm font-medium text-[var(--text-secondary)] transition hover:bg-[var(--bg-base)]"
+                    >
+                        <span className="inline-flex items-center gap-2">
+                            <LucideMotionIcon icon={BadgeCheck} className="!w-4 !h-4 md:!w-5 md:!h-5 text-[var(--text-secondary)] dark:text-[var(--text-secondary)]" />
+                            Limpiar
+                        </span>
+                    </button>
+                </div>
+            </div>
+
             {/* TABLA */}
             <div className="bg-[var(--bg-surface)] rounded-xl shadow-md border border-[var(--border-color)] overflow-x-auto">
                 <table className="w-full text-left border-collapse">
@@ -95,8 +181,8 @@ export const PartnersLeads = () => {
                     </thead>
 
                     <tbody className="divide-y divide-[var(--border-color)]">
-                        {leads.length > 0 ? (
-                            leads.map((lead) => (
+                        {filteredLeads.length > 0 ? (
+                            filteredLeads.map((lead) => (
                                 <tr key={lead._id} className="hover:bg-[var(--bg-base)] transition-colors">
                                     <td className="px-6 py-4">
                                         <div className="font-semibold text-[var(--text-primary)]">{lead.restaurantName}</div>

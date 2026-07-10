@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { useSaveTable } from "../hooks/useSaveTable.jsx";
 import { useRestaurantStore } from "../../restaurants/store/useRestaurantStore.js";
+import { useManagerRestaurant } from "../../../shared/hooks/useManagerRestaurant.js";
 
 export const TableModal = ({ isOpen, onClose, table }) => {
 	const {
@@ -11,6 +12,7 @@ export const TableModal = ({ isOpen, onClose, table }) => {
 		control,
 		setError,
 		clearErrors,
+		setValue,
 		formState: { errors },
 	} = useForm({
 		defaultValues: {
@@ -25,14 +27,21 @@ export const TableModal = ({ isOpen, onClose, table }) => {
 
 	const { saveTable } = useSaveTable();
 	const restaurants = useRestaurantStore((state) => state.restaurants);
+	const { isManager, myRestaurantId, myRestaurantName } = useManagerRestaurant();
 	const [availabilityError, setAvailabilityError] = useState("");
+
+	useEffect(() => {
+		if (isOpen && isManager && myRestaurantId) {
+			setValue("restaurant", myRestaurantId);
+		}
+	}, [isOpen, isManager, myRestaurantId, setValue]);
 
 	useEffect(() => {
 		if (!isOpen) return;
 
 		if (table) {
 			reset({
-				restaurant: table.restaurant?._id || table.restaurant || "",
+				restaurant: isManager && myRestaurantId ? myRestaurantId : table.restaurant?._id || table.restaurant || "",
 				tableNumber: table.tableNumber || "",
 				capacity: table.capacity || "",
 				location: table.location || "Salón Principal",
@@ -42,7 +51,7 @@ export const TableModal = ({ isOpen, onClose, table }) => {
 			});
 		} else {
 			reset({
-				restaurant: "",
+				restaurant: isManager && myRestaurantId ? myRestaurantId : "",
 				tableNumber: "",
 				capacity: "",
 				location: "Salón Principal",
@@ -52,7 +61,7 @@ export const TableModal = ({ isOpen, onClose, table }) => {
 			});
 		}
 		setAvailabilityError("");
-	}, [isOpen, table, reset]);
+	}, [isOpen, table, reset, isManager, myRestaurantId]);
 
 	// Validación de availability (horarios válidos y sin solapamiento)
 	const validateAvailability = (availability) => {
@@ -103,7 +112,7 @@ export const TableModal = ({ isOpen, onClose, table }) => {
 	return (
 		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
 			<div className="w-full max-w-2xl overflow-hidden rounded-2xl bg-[var(--bg-surface)] text-[var(--text-primary)] shadow-2xl">
-				<div className="bg-[linear-gradient(90deg,var(--main-blue)_0%,#1956a3_100%)] p-5 text-white">
+				<div className="bg-[linear-gradient(90deg,var(--color-brand-dark)_0%,var(--color-brand-red-dark)_100%)] p-5 text-white">
 					<h2 className="text-2xl font-bold">{table ? "Editar Mesa" : "Nueva Mesa"}</h2>
 					<p className="text-sm opacity-80">Administra las mesas del restaurante</p>
 				</div>
@@ -111,17 +120,27 @@ export const TableModal = ({ isOpen, onClose, table }) => {
 				<form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 p-5 md:grid-cols-2">
 					<div className="md:col-span-2">
 						<label className="mb-1 block text-sm font-semibold">Restaurante</label>
-						<select
-							className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-base)] px-4 py-2.5 text-sm outline-none"
-							{...register("restaurant", { required: "El restaurante es obligatorio" })}
-						>
-							<option value="">Selecciona un restaurante</option>
-							{restaurants.map((restaurant) => (
-								<option key={restaurant._id} value={restaurant._id}>
-									{restaurant.name}
-								</option>
-							))}
-						</select>
+						{isManager ? (
+							<input
+								type="text"
+								value={myRestaurantName || "Cargando..."}
+								disabled
+								readOnly
+								className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface-alt)] px-4 py-2.5 text-sm text-[var(--text-muted)] cursor-not-allowed outline-none"
+							/>
+						) : (
+							<select
+								className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-base)] px-4 py-2.5 text-sm outline-none"
+								{...register("restaurant", { required: "El restaurante es obligatorio" })}
+							>
+								<option value="">Selecciona un restaurante</option>
+								{restaurants.map((restaurant) => (
+									<option key={restaurant._id} value={restaurant._id}>
+										{restaurant.name}
+									</option>
+								))}
+							</select>
+						)}
 						{errors.restaurant && <p className="mt-1 text-xs text-red-600">{errors.restaurant.message}</p>}
 					</div>
 
@@ -173,7 +192,7 @@ export const TableModal = ({ isOpen, onClose, table }) => {
 							{fields.map((field, idx) => (
 								<div key={field.id} className="flex flex-wrap gap-2 items-center border border-[var(--border-color)] rounded-lg p-2 bg-[var(--bg-base)]">
 									<select
-										className="rounded border px-2 py-1 text-sm"
+										className="rounded border border-[var(--border-color)] px-2 py-1 text-sm bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--color-brand-dark)]"
 										{...register(`availability.${idx}.day`, { required: true })}
 									>
 										<option value="">Día</option>
@@ -187,18 +206,18 @@ export const TableModal = ({ isOpen, onClose, table }) => {
 									</select>
 									<input
 										type="time"
-										className="rounded border px-2 py-1 text-sm"
+										className="rounded border border-[var(--border-color)] px-2 py-1 text-sm bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--color-brand-dark)]"
 										{...register(`availability.${idx}.startTime`, { required: true })}
 									/>
-									<span className="text-xs">a</span>
+									<span className="text-xs text-[var(--text-secondary)]">a</span>
 									<input
 										type="time"
-										className="rounded border px-2 py-1 text-sm"
+										className="rounded border border-[var(--border-color)] px-2 py-1 text-sm bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--color-brand-dark)]"
 										{...register(`availability.${idx}.endTime`, { required: true })}
 									/>
 									<button
 										type="button"
-										className="ml-2 px-2 py-1 rounded bg-red-100 text-red-700 text-xs font-semibold hover:bg-red-200"
+										className="ml-2 px-2 py-1 rounded bg-red-100 text-red-700 text-xs font-semibold hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50"
 										onClick={() => remove(idx)}
 									>
 										Quitar
@@ -207,10 +226,10 @@ export const TableModal = ({ isOpen, onClose, table }) => {
 							))}
 							<button
 								type="button"
-								className="mt-2 px-3 py-1 rounded bg-[var(--color-brand-dark)] text-white text-sm font-semibold hover:bg-[var(--color-brand-yellow)]"
+								className="mt-2 rounded-lg bg-[linear-gradient(90deg,var(--color-brand-dark)_0%,var(--color-brand-red-dark)_100%)] px-4 py-2 text-sm font-semibold text-white shadow transition hover:opacity-90"
 								onClick={() => append({ day: "", startTime: "", endTime: "" })}
 							>
-								Agregar horario
+								+ Agregar horario
 							</button>
 							{availabilityError && <p className="text-xs text-red-600 mt-1">{availabilityError}</p>}
 						</div>

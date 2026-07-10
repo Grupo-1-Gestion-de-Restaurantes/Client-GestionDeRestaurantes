@@ -1,18 +1,21 @@
 import { useState, useEffect, useMemo } from "react";
 import { useEventStore } from "../store/useEventsStore.js";
 import { useRestaurantStore } from "../../restaurants/store/useRestaurantStore.js";
+import { useAuthStore } from "../../auth/store/useAuthStore.js";
 import { Spinner } from "../../../shared/components/layout/Spinner.jsx";
 import { useEffect as useToastEffect } from "react";
 import { showError } from "../../../shared/utils/toast.js";
 import { EventModal } from "./EventModal.jsx";
 import { useUIStore } from "../../../shared/components/ui/store/uiStore.js";
-import { Search, Filter, BadgeCheck, Plus, PencilLine, Trash2, Users, Utensils, Briefcase, Table as TableIcon } from "lucide-react";
+import { Search, Filter, BadgeCheck, Plus, PencilLine, Trash2, RotateCcw, Users, Utensils, Briefcase, Table as TableIcon } from "lucide-react";
 import { LucideMotionIcon } from "../../../shared/components/ui/LucideMotionIcon.jsx";
 import { Pagination } from "../../../shared/components/ui/Pagination.jsx";
 
 export const Events = () => {
-    const { events, loading, error, getEvents, deleteEvent, pagination } = useEventStore();
+    const { events, loading, error, getEvents, deleteEvent, activateEvent, pagination } = useEventStore();
     const { restaurants, getRestaurants } = useRestaurantStore();
+    const { user } = useAuthStore();
+    const isAdmin = user?.role === "ADMIN_ROLE";
     const [openModal, setOpenModal] = useState(false);
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
@@ -143,24 +146,26 @@ export const Events = () => {
                         </div>
                     </div>
 
-                    <div className="w-full lg:w-64">
-                        <label className="block text-sm font-semibold text-[var(--text-primary)] mb-2">
-                            <span className="inline-flex items-center gap-2">
-                                <LucideMotionIcon icon={Filter} />
-                                Restaurante
-                            </span>
-                        </label>
-                        <select
-                            value={restaurantFilter}
-                            onChange={(e) => setRestaurantFilter(e.target.value)}
-                            className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-base)] px-4 py-2.5 text-sm text-[var(--text-primary)] outline-none transition focus:border-[var(--color-brand-dark)]"
-                        >
-                            <option value="all">Todos los restaurantes</option>
-                            {restaurants?.map((r) => (
-                                <option key={r._id} value={r._id}>{r.name}</option>
-                            ))}
-                        </select>
-                    </div>
+                    {isAdmin && (
+                        <div className="w-full lg:w-64">
+                            <label className="block text-sm font-semibold text-[var(--text-primary)] mb-2">
+                                <span className="inline-flex items-center gap-2">
+                                    <LucideMotionIcon icon={Filter} />
+                                    Restaurante
+                                </span>
+                            </label>
+                            <select
+                                value={restaurantFilter}
+                                onChange={(e) => setRestaurantFilter(e.target.value)}
+                                className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-base)] px-4 py-2.5 text-sm text-[var(--text-primary)] outline-none transition focus:border-[var(--color-brand-dark)]"
+                            >
+                                <option value="all">Todos los restaurantes</option>
+                                {restaurants?.map((r) => (
+                                    <option key={r._id} value={r._id}>{r.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
 
                     <div className="w-full lg:w-48">
                         <label className="block text-sm font-semibold text-[var(--text-primary)] mb-2">
@@ -266,7 +271,7 @@ export const Events = () => {
                                             <div className="flex flex-wrap gap-1 max-w-[150px]">
                                                 {evt.additionalServices?.map((service, idx) => (
                                                     <span key={idx} className="px-1.5 py-0.5 rounded bg-[var(--bg-surface-alt)] border border-[var(--border-color)] text-[10px] font-medium uppercase tracking-tighter">
-                                                        {service.replace(/_/g, ' ')}
+                                                        {service === "OTRO" && evt.otherServiceDescription ? evt.otherServiceDescription : service.replace(/_/g, ' ')}
                                                     </span>
                                                 ))}
                                                 {(!evt.additionalServices || evt.additionalServices.length === 0) && (
@@ -296,19 +301,35 @@ export const Events = () => {
                                                 <LucideMotionIcon icon={PencilLine} className="!w-4 !h-4 text-[var(--color-brand-yellow)]" />
                                                 Editar
                                             </button>
-                                            <button
-                                                className="inline-flex items-center gap-2 text-[var(--color-brand-red)] hover:text-[var(--color-brand-red-dark)] font-medium transition cursor-pointer"
-                                                onClick={() =>
-                                                    openConfirm({
-                                                        title: "Eliminar Evento",
-                                                        message: `¿Estás seguro de eliminar el evento "${evt.name}"?`,
-                                                        onConfirm: () => deleteEvent(evt._id)
-                                                    })
-                                                }
-                                            >
-                                                <LucideMotionIcon icon={Trash2} className="!w-4 !h-4 text-[var(--color-brand-red)]" />
-                                                Eliminar
-                                            </button>
+                                            {evt.isActive ? (
+                                                <button
+                                                    className="inline-flex items-center gap-2 text-[var(--color-brand-red)] hover:text-[var(--color-brand-red-dark)] font-medium transition cursor-pointer"
+                                                    onClick={() =>
+                                                        openConfirm({
+                                                            title: "Eliminar Evento",
+                                                            message: `¿Estás seguro de eliminar el evento "${evt.name}"?`,
+                                                            onConfirm: () => deleteEvent(evt._id)
+                                                        })
+                                                    }
+                                                >
+                                                    <LucideMotionIcon icon={Trash2} className="!w-4 !h-4 text-[var(--color-brand-red)]" />
+                                                    Eliminar
+                                                </button>
+                                            ) : (
+                                                <button
+                                                    className="inline-flex items-center gap-2 text-green-700 hover:opacity-75 font-medium transition cursor-pointer"
+                                                    onClick={() =>
+                                                        openConfirm({
+                                                            title: "Activar Evento",
+                                                            message: `¿Estás seguro de activar el evento "${evt.name}"?`,
+                                                            onConfirm: () => activateEvent(evt._id)
+                                                        })
+                                                    }
+                                                >
+                                                    <LucideMotionIcon icon={RotateCcw} className="!w-4 !h-4 text-green-700 dark:text-[var(--color-brand-yellow)]" />
+                                                    Activar
+                                                </button>
+                                            )}
                                         </td>
                                     </tr>
                                 );

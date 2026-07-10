@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useSaveReservation } from "../hooks/UseSaveReservation";
 import { useReservationStore } from "../store/useReservationStore";
@@ -6,6 +6,7 @@ import { useClientStore } from "../../clients/store/useClientStore.js";
 import { useRestaurantStore } from "../../restaurants/store/useRestaurantStore.js";
 import { useTableStore } from "../../tables/store/useTableStore.js";
 import { Spinner } from "../../../shared/components/layout/Spinner.jsx";
+import { useManagerRestaurant } from "../../../shared/hooks/useManagerRestaurant.js";
 
 export const ReservationModal = ({ isOpen, onClose, reservation }) => {
     const {
@@ -13,16 +14,26 @@ export const ReservationModal = ({ isOpen, onClose, reservation }) => {
         handleSubmit,
         reset,
         watch,
+        setValue,
         formState: { errors },
     } = useForm();
 
     const { saveReservation } = useSaveReservation();
-    const loading = useReservationStore((state) => state.loading);
     const { clients, getClients } = useClientStore();
     const { restaurants, getRestaurants } = useRestaurantStore();
     const { tables, getTables } = useTableStore();
+    const { isManager, myRestaurantId, myRestaurantName } = useManagerRestaurant();
+
+    // Use local loading state instead of store loading to prevent spinner on edit
+    const [localLoading, setLocalLoading] = useState(false);
 
     const selectedRestaurant = watch("restaurant");
+
+    useEffect(() => {
+        if (isOpen && isManager && myRestaurantId) {
+            setValue("restaurant", myRestaurantId);
+        }
+    }, [isOpen, isManager, myRestaurantId, setValue]);
 
     useEffect(() => {
         if (isOpen) {
@@ -35,7 +46,7 @@ export const ReservationModal = ({ isOpen, onClose, reservation }) => {
 
                 reset({
                     client: reservation.client?._id || reservation.client,
-                    restaurant: reservation.restaurant?._id || reservation.restaurant,
+                    restaurant: isManager && myRestaurantId ? myRestaurantId : (reservation.restaurant?._id || reservation.restaurant),
                     table: reservation.table?._id || reservation.table,
                     reservationDate: formattedDate,
                     numberOfPeople: reservation.numberOfPeople,
@@ -46,7 +57,7 @@ export const ReservationModal = ({ isOpen, onClose, reservation }) => {
             } else {
                 reset({
                     client: "",
-                    restaurant: "",
+                    restaurant: isManager && myRestaurantId ? myRestaurantId : "",
                     table: "",
                     reservationDate: "",
                     numberOfPeople: 1,
@@ -65,22 +76,34 @@ export const ReservationModal = ({ isOpen, onClose, reservation }) => {
     }, [isOpen, selectedRestaurant, getTables]);
 
     const onSubmit = async (data) => {
+        setLocalLoading(true);
         try {
             await saveReservation(data, reservation?._id);
             reset();
             onClose();
         } catch (error) {
             console.error(error);
+            // Handle the error but don't break the UI
+        } finally {
+            setLocalLoading(false);
         }
     };
 
     if (!isOpen) return null;
 
+    // Min date for datetime-local (now) to prevent past dates in browser UI
+    const minDateTime = new Date().toISOString().slice(0, 16);
+
+    // Get selected restaurant data for hours validation
+    const selectedRestaurantData = restaurants?.find(r => r._id === selectedRestaurant);
+    const restaurantOpening = selectedRestaurantData?.openingTime;
+    const restaurantClosing = selectedRestaurantData?.closingTime;
+
     return (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50 px-3 sm:px-4">
             <div className="w-full max-w-lg md:max-w-2xl overflow-hidden rounded-2xl bg-[var(--bg-surface)] text-[var(--text-primary)] shadow-2xl transition-colors duration-300">
                 {/* HEADER */}
-                <div className="bg-[linear-gradient(90deg,var(--main-blue)_0%,#1956a3_100%)] p-4 sm:p-5 text-white sticky top-0 z-10 transition-colors duration-300">
+                <div className="bg-[linear-gradient(90deg,var(--color-brand-dark)_0%,var(--color-brand-red-dark)_100%)] p-4 sm:p-5 text-white sticky top-0 z-10 transition-colors duration-300">
                     <h2 className="text-xl sm:text-2xl font-bold">
                         {reservation ? "Editar Reservación" : "Nueva Reservación"}
                     </h2>
@@ -113,17 +136,27 @@ export const ReservationModal = ({ isOpen, onClose, reservation }) => {
 
                         <div className="flex flex-col">
                             <label className="text-sm font-semibold text-[var(--text-secondary)] mb-1">Restaurante</label>
-                            <select
-                                className="w-full px-3 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--ring-color)] transition"
-                                {...register("restaurant", { required: "El restaurante es requerido" })}
-                            >
-                                <option value="">Seleccione un restaurante</option>
-                                {restaurants.map((restaurant) => (
-                                    <option key={restaurant._id} value={restaurant._id}>
-                                        {restaurant.name}
-                                    </option>
-                                ))}
-                            </select>
+                            {isManager ? (
+                                <input
+                                    type="text"
+                                    value={myRestaurantName || "Cargando..."}
+                                    disabled
+                                    readOnly
+                                    className="w-full px-3 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-surface-alt)] text-[var(--text-muted)] cursor-not-allowed"
+                                />
+                            ) : (
+                                <select
+                                    className="w-full px-3 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--ring-color)] transition"
+                                    {...register("restaurant", { required: "El restaurante es requerido" })}
+                                >
+                                    <option value="">Seleccione un restaurante</option>
+                                    {restaurants.map((restaurant) => (
+                                        <option key={restaurant._id} value={restaurant._id}>
+                                            {restaurant.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            )}
                             {errors.restaurant && <p className="text-[var(--color-brand-red)] text-xs mt-1">{errors.restaurant.message}</p>}
                         </div>
 
@@ -143,20 +176,39 @@ export const ReservationModal = ({ isOpen, onClose, reservation }) => {
                             {errors.table && <p className="text-[var(--color-brand-red)] text-xs mt-1">{errors.table.message}</p>}
                         </div>
 
-                        {/* Fecha y Hora */}
+{/* Fecha y Hora */}
                         <div className="flex flex-col">
                             <label className="text-sm font-semibold text-[var(--text-secondary)] mb-1">
                                 Fecha y Hora
                             </label>
                             <input
                                 type="datetime-local"
+                                min={minDateTime}
                                 className="w-full px-3 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--ring-color)] transition"
                                 {...register("reservationDate", {
                                     required: "La fecha y hora son requeridas",
-                                    validate: value => new Date(value) > new Date() || "La fecha de reservación no puede ser en el pasado"
+                                    validate: value => {
+                                        // Validate past dates
+                                        if (new Date(value) <= new Date()) {
+                                            return "La fecha de reservación no puede ser en el pasado";
+                                        }
+                                        // Validate restaurant hours
+                                        if (restaurantOpening && restaurantClosing) {
+                                            const reservationDate = new Date(value);
+                                            const timeStr = reservationDate.toTimeString().slice(0, 5); // HH:MM
+                                            if (timeStr < restaurantOpening || timeStr >= restaurantClosing) {
+                                                return `El horario debe estar entre ${restaurantOpening} y ${restaurantClosing}`;
+                                            }
+                                        }
+                                    }
                                 })}
                             />
                             {errors.reservationDate && <p className="text-[var(--color-brand-red)] text-xs mt-1">{errors.reservationDate.message}</p>}
+                            {restaurantOpening && restaurantClosing && (
+                                <p className="text-xs text-[var(--text-muted)] mt-1">
+                                    Horario del restaurante: {restaurantOpening} - {restaurantClosing}
+                                </p>
+                            )}
                         </div>
 
                         {/* Personas */}
@@ -237,9 +289,10 @@ export const ReservationModal = ({ isOpen, onClose, reservation }) => {
 
                         <button
                             type="submit"
-                            className="w-full sm:w-auto px-5 py-2 rounded-lg font-medium transition-all duration-300 shadow bg-[var(--color-brand-dark)] text-white border border-transparent hover:bg-[var(--color-brand-red)] dark:bg-[var(--bg-surface-alt)] dark:text-[var(--text-primary)] dark:border-[var(--border-color)] dark:hover:bg-[var(--color-brand-yellow)] dark:hover:text-[var(--color-brand-dark)] dark:hover:border-transparent"
+                            disabled={localLoading || Object.keys(errors).length > 0}
+                            className="w-full sm:w-auto px-5 py-2 rounded-lg font-medium transition-all duration-300 shadow bg-[var(--color-brand-dark)] text-white border border-transparent hover:bg-[var(--color-brand-red)] dark:bg-[var(--bg-surface-alt)] dark:text-[var(--text-primary)] dark:border-[var(--border-color)] dark:hover:bg-[var(--color-brand-yellow)] dark:hover:text-[var(--color-brand-dark)] dark:hover:border-transparent disabled:opacity-60 disabled:cursor-not-allowed"
                         >
-                            {loading ? <Spinner /> : reservation ? "Guardar Cambios" : "Crear Reservación"}
+                            {localLoading ? <Spinner /> : reservation ? "Guardar Cambios" : "Crear Reservación"}
                         </button>
                     </div>
                 </form>

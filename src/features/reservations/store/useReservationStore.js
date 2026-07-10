@@ -26,7 +26,6 @@ export const useReservationStore = create((set, get) => ({
                 ...params 
             };
             const response = await getReservationsRequest(queryParams);
-            console.log(response.data)
 
             set({
                 reservations: response.data.data || response.data,

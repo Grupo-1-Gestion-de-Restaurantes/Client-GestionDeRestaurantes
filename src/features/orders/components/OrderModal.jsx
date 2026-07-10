@@ -6,9 +6,11 @@ import { useClientStore } from "../../clients/store/useClientStore.js";
 import { useRestaurantStore } from "../../restaurants/store/useRestaurantStore.js";
 import { useDishStore } from "../../dishes/store/useDishStore.js";
 import { Spinner } from "../../../shared/components/layout/Spinner.jsx";
+import { X, Trash2 } from "lucide-react";
+import { useManagerRestaurant } from "../../../shared/hooks/useManagerRestaurant.js";
 
 export const OrderModal = ({ isOpen, onClose, order }) => {
-    const { register, handleSubmit, reset, control, watch, formState: { errors } } = useForm({
+    const { register, handleSubmit, reset, control, watch, setValue, formState: { errors } } = useForm({
         defaultValues: {
             items: [{ dishId: "", quantity: 1 }] // Valor inicial para el array de items
         }
@@ -25,18 +27,25 @@ export const OrderModal = ({ isOpen, onClose, order }) => {
     const { clients, getClients } = useClientStore();
     const { restaurants, getRestaurants } = useRestaurantStore();
     const { dishes, getDishes } = useDishStore();
+    const { isManager, myRestaurantId, myRestaurantName } = useManagerRestaurant();
 
     const selectedRestaurant = watch("restaurant");
 
     useEffect(() => {
+        if (isManager && myRestaurantId) {
+            setValue("restaurant", myRestaurantId);
+        }
+    }, [isManager, myRestaurantId, setValue]);
+
+    useEffect(() => {
         getClients();
         getRestaurants({ isActive: true, limit: 100 });
-        getDishes();
+        getDishes({ isActive: 'all', limit: 100 });
 
         if (order) {
             reset({
                 client: order.client?._id || order.client,
-                restaurant: order.restaurant?._id || order.restaurant,
+                restaurant: (isManager && myRestaurantId) ? myRestaurantId : (order.restaurant?._id || order.restaurant),
                 paymentMethod: order.paymentMethod,
                 deliveryType: order.deliveryType || "DOMICILIO",
                 "deliveryAddress.alias": order.deliveryAddress?.alias,
@@ -48,6 +57,7 @@ export const OrderModal = ({ isOpen, onClose, order }) => {
             });
         } else {
             reset({
+                restaurant: (isManager && myRestaurantId) ? myRestaurantId : "",
                 paymentMethod: "EFECTIVO",
                 deliveryType: "DOMICILIO",
                 "deliveryAddress.alias": "Casa",
@@ -73,8 +83,6 @@ export const OrderModal = ({ isOpen, onClose, order }) => {
                 }))
             };
 
-            console.log("Datos listos para enviar:", formattedData);
-
             if (!formattedData.deliveryAddress.addressLine) {
                 alert("La dirección de entrega es obligatoria");
                 return;
@@ -94,11 +102,13 @@ export const OrderModal = ({ isOpen, onClose, order }) => {
             <div className="bg-[var(--bg-surface)] w-full max-w-3xl rounded-2xl shadow-2xl border border-[var(--border-color)] overflow-hidden flex flex-col max-h-[90vh]">
 
                 {/* Header */}
-                <div className="px-6 py-4 border-b border-[var(--border-color)] flex justify-between items-center bg-[linear-gradient(90deg,var(--main-blue)_0%,#1956a3_100%)] text-white">
+                <div className="px-6 py-4 border-b border-[var(--border-color)] flex justify-between items-center bg-[linear-gradient(90deg,var(--color-brand-dark)_0%,var(--color-brand-red-dark)_100%)] text-white">
                     <h2 className="text-xl font-bold">
                         {order ? "Editar Pedido Administrativo" : "Nuevo Pedido (Admin)"}
                     </h2>
-                    <button onClick={onClose} className="text-white opacity-80 hover:opacity-100 transition-opacity">✕</button>
+                    <button onClick={onClose} className="text-white opacity-80 hover:opacity-100 transition-opacity">
+                        <X size={20} />
+                    </button>
                 </div>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="p-6 overflow-y-auto space-y-6">
@@ -119,14 +129,24 @@ export const OrderModal = ({ isOpen, onClose, order }) => {
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">Restaurante</label>
-                            <select {...register("restaurant", { required: "El restaurante es obligatorio" })} className="w-full px-4 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)]">
-                                <option value="">Seleccione un restaurante</option>
-                                {restaurants.map((restaurant) => (
-                                    <option key={restaurant._id} value={restaurant._id}>
-                                        {restaurant.name}
-                                    </option>
-                                ))}
-                            </select>
+                            {isManager ? (
+                                <input
+                                    type="text"
+                                    value={myRestaurantName || "Cargando..."}
+                                    disabled
+                                    readOnly
+                                    className="w-full px-4 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-surface-alt)] text-[var(--text-muted)] cursor-not-allowed"
+                                />
+                            ) : (
+                                <select {...register("restaurant", { required: "El restaurante es obligatorio" })} className="w-full px-4 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)]">
+                                    <option value="">Seleccione un restaurante</option>
+                                    {restaurants.map((restaurant) => (
+                                        <option key={restaurant._id} value={restaurant._id}>
+                                            {restaurant.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            )}
                             {errors.restaurant && <p className="mt-1 text-xs text-red-600">{errors.restaurant.message}</p>}
                         </div>
                     </div>
@@ -225,7 +245,7 @@ export const OrderModal = ({ isOpen, onClose, order }) => {
                                             onClick={() => remove(index)}
                                             className="text-red-500 p-1.5 hover:bg-red-100 rounded self-end mb-1"
                                         >
-                                            🗑️
+                                            <Trash2 size={16} />
                                         </button>
                                     )}
                                 </div>

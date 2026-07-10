@@ -153,7 +153,7 @@ export const Notifications = () => {
 									<td className="px-6 py-4 text-sm text-[var(--text-secondary)]">
 										<div className="flex flex-col">
 											<span className="font-semibold text-[var(--text-primary)]">
-												{notification.referenceId?.client?.name || notification.referenceId?.client?.email || "N/A"}
+												{(typeof notification.referenceId?.client === 'object' ? notification.referenceId?.client?.name || notification.referenceId?.client?.email : notification.referenceId?.client?.name || notification.referenceId?.client?.email) || "N/A"}
 											</span>
 											<span className="text-xs opacity-70">
 												{notification.referenceType === 'Order' ? 'Pedido' : 'Reservación'}
@@ -161,7 +161,7 @@ export const Notifications = () => {
 										</div>
 									</td>
 									<td className="px-6 py-4 text-sm text-[var(--text-secondary)]">
-										<span className={`rounded-full px-3 py-1 text-xs font-medium ${notification.isRead ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400" : "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400"}`}>
+										<span className={`rounded-full px-3 py-1 text-xs font-medium ${notification.isRead ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400" : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400"}`}>
 											{notification.isRead ? "Leída" : "Pendiente"}
 										</span>
 									</td>

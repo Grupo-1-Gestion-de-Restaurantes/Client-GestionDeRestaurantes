@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { Plus, Search, Table2, MapPinned, Users, Power, PowerOff, PencilLine } from "lucide-react";
+import { Plus, Search, Table2, MapPinned, Users, Power, PowerOff, PencilLine, BadgeCheck, Filter } from "lucide-react";
 import { useTableStore } from "../store/useTableStore.js";
 import { useRestaurantStore } from "../../restaurants/store/useRestaurantStore.js";
+import { useAuthStore } from "../../../features/auth/store/useAuthStore.js";
 import { TableModal } from "./TableModal.jsx";
 import { Spinner } from "../../../shared/components/layout/Spinner.jsx";
 import { showError } from "../../../shared/utils/toast.js";
@@ -12,12 +13,15 @@ import { Pagination } from "../../../shared/components/ui/Pagination.jsx";
 export const Tables = () => {
 	const { tables, loading, error, getTables, deactivateTable, activateTable, pagination } = useTableStore();
 	const { restaurants, getRestaurants } = useRestaurantStore();
+	const { user } = useAuthStore();
+	const isAdmin = user?.role === "ADMIN_ROLE";
 	const { openConfirm } = useUIStore();
 
 	const [openModal, setOpenModal] = useState(false);
 	const [selectedTable, setSelectedTable] = useState(null);
 	const [searchTerm, setSearchTerm] = useState("");
 	const [activeFilter, setActiveFilter] = useState("active");
+	const [restaurantFilter, setRestaurantFilter] = useState("");
 
 	useEffect(() => {
 		getRestaurants({ isActive: 'all', limit: 100 });
@@ -31,17 +35,25 @@ export const Tables = () => {
 				filters.isActive = activeFilter === "active";
 			}
 
+			if (isAdmin && restaurantFilter) {
+				filters.restaurant = restaurantFilter;
+			}
+
 			getTables(filters);
 		}, 200);
 
 		return () => clearTimeout(timeoutId);
-	}, [activeFilter, getTables]);
+	}, [activeFilter, restaurantFilter, getTables, isAdmin]);
 
 	const handlePageChange = (page) => {
 		const filters = { page };
 
 		if (activeFilter !== "all") {
 			filters.isActive = activeFilter === "active";
+		}
+
+		if (isAdmin && restaurantFilter) {
+			filters.restaurant = restaurantFilter;
 		}
 
 		getTables(filters);
@@ -63,9 +75,14 @@ export const Tables = () => {
 				.toLowerCase()
 				.includes(normalizedSearch);
 		});
-	}, [tables, searchTerm]);
+	}, [tables, searchTerm, restaurantFilter, isAdmin]);
 
-	const emptyMessage = searchTerm.trim() || activeFilter !== "active"
+	const filteredByRestaurant = useMemo(() => {
+		if (!isAdmin || !restaurantFilter) return filteredTables;
+		return filteredTables.filter(table => String(table.restaurant?._id || table.restaurant) === restaurantFilter);
+	}, [filteredTables, restaurantFilter, isAdmin]);
+
+	const emptyMessage = (searchTerm.trim() || activeFilter !== "active" || (isAdmin && restaurantFilter))
 		? "No hay mesas con esos filtros."
 		: "No hay mesas registradas.";
 
@@ -94,8 +111,8 @@ export const Tables = () => {
 			</div>
 
 			<div className="mb-6 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-4 shadow-sm">
-				<div className="grid gap-4 lg:grid-cols-[1fr_240px_auto] lg:items-end">
-					<div>
+				<div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+					<div className="flex-1">
 						<label className="mb-2 block text-sm font-semibold text-[var(--text-primary)]">Buscar mesas</label>
 						<div className="relative">
 							<span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-[var(--text-muted)]">
@@ -110,8 +127,13 @@ export const Tables = () => {
 						</div>
 					</div>
 
-					<div>
-						<label className="mb-2 block text-sm font-semibold text-[var(--text-primary)]">Mostrar</label>
+					<div className="w-full lg:w-64">
+						<label className="mb-2 block text-sm font-semibold text-[var(--text-primary)]">
+							<span className="inline-flex items-center gap-2">
+								<LucideMotionIcon icon={Filter} />
+								Mostrar
+							</span>
+						</label>
 						<select
 							value={activeFilter}
 							onChange={(event) => setActiveFilter(event.target.value)}
@@ -123,15 +145,40 @@ export const Tables = () => {
 						</select>
 					</div>
 
+					{isAdmin && (
+						<div className="w-full lg:w-64">
+							<label className="mb-2 block text-sm font-semibold text-[var(--text-primary)]">
+								<span className="inline-flex items-center gap-2">
+									<LucideMotionIcon icon={Filter} />
+									Restaurante
+								</span>
+							</label>
+							<select
+								value={restaurantFilter}
+								onChange={(event) => setRestaurantFilter(event.target.value)}
+								className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-base)] px-4 py-2.5 text-sm outline-none"
+							>
+								<option value="">Todos los restaurantes</option>
+								{restaurants?.map((r) => (
+									<option key={r._id} value={r._id}>{r.name}</option>
+								))}
+							</select>
+						</div>
+					)}
+
 					<button
 						type="button"
 						onClick={() => {
 							setSearchTerm("");
 							setActiveFilter("active");
+							setRestaurantFilter("");
 						}}
 						className="rounded-xl border border-[var(--border-color)] px-4 py-2.5 text-sm font-medium text-[var(--text-secondary)] transition hover:bg-[var(--bg-base)]"
 					>
-						Limpiar
+						<span className="inline-flex items-center gap-2">
+							<LucideMotionIcon icon={BadgeCheck} className="!w-4 !h-4 md:!w-5 md:!h-5 text-[var(--text-secondary)] dark:text-[var(--text-secondary)]" />
+							Limpiar
+						</span>
 					</button>
 				</div>
 			</div>
@@ -150,8 +197,8 @@ export const Tables = () => {
 						</tr>
 					</thead>
 					<tbody className="divide-y divide-[var(--border-color)]">
-						{filteredTables.length > 0 ? (
-							filteredTables.map((table) => (
+						{filteredByRestaurant.length > 0 ? (
+							filteredByRestaurant.map((table) => (
 								<tr key={table._id} className="transition-colors hover:bg-[var(--bg-base)]">
 									<td className="px-6 py-4 font-medium text-[var(--text-primary)]">
 										<span className="inline-flex items-center gap-2">

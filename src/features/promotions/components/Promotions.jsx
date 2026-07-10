@@ -1,23 +1,28 @@
 import { useEffect, useMemo, useState } from "react";
-import { Plus, Search, TicketPercent, PencilLine, Power, PowerOff } from "lucide-react";
+import { Plus, Search, PencilLine, Power, PowerOff } from "lucide-react";
 import { usePromotionStore } from "../store/usePromotionStore.js";
 import { useRestaurantStore } from "../../restaurants/store/useRestaurantStore.js";
+import { useAuthStore } from "../../../features/auth/store/useAuthStore.js";
 import { PromotionModal } from "./PromotionModal.jsx";
 import { Spinner } from "../../../shared/components/layout/Spinner.jsx";
 import { showError } from "../../../shared/utils/toast.js";
 import { useUIStore } from "../../../shared/components/ui/store/uiStore.js";
 import { LucideMotionIcon } from "../../../shared/components/ui/LucideMotionIcon.jsx";
 import { Pagination } from "../../../shared/components/ui/Pagination.jsx";
+import { Filter, BadgeCheck } from "lucide-react";
 
 export const Promotions = () => {
   const { promotions, loading, error, getPromotions, deactivatePromotion, activatePromotion, pagination } = usePromotionStore();
   const { restaurants, getRestaurants } = useRestaurantStore();
+  const { user } = useAuthStore();
+  const isAdmin = user?.role === "ADMIN_ROLE";
   const { openConfirm } = useUIStore();
 
   const [openModal, setOpenModal] = useState(false);
   const [selectedPromotion, setSelectedPromotion] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilter, setActiveFilter] = useState("active");
+  const [restaurantFilter, setRestaurantFilter] = useState("");
 
   useEffect(() => {
     getRestaurants({ isActive: 'all', limit: 100 });
@@ -33,11 +38,15 @@ export const Promotions = () => {
         filters.isActive = "all";
       }
 
+      if (isAdmin && restaurantFilter) {
+        filters.restaurant = restaurantFilter;
+      }
+
       getPromotions(filters);
     }, 200);
 
     return () => clearTimeout(timeoutId);
-  }, [activeFilter, getPromotions]);
+  }, [activeFilter, restaurantFilter, getPromotions, isAdmin]);
 
   const handlePageChange = (page) => {
     const filters = { page };
@@ -45,6 +54,10 @@ export const Promotions = () => {
       filters.isActive = activeFilter === "active";
     } else {
       filters.isActive = "all";
+    }
+
+    if (isAdmin && restaurantFilter) {
+      filters.restaurant = restaurantFilter;
     }
     getPromotions(filters);
   };
@@ -105,8 +118,8 @@ export const Promotions = () => {
       </div>
 
       <div className="mb-6 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-4 shadow-sm">
-        <div className="grid gap-4 lg:grid-cols-[1fr_240px_auto] lg:items-end">
-          <div>
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="flex-1">
             <label className="mb-2 block text-sm font-semibold text-[var(--text-primary)]">Buscar promociones</label>
             <div className="relative">
               <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-[var(--text-muted)]">
@@ -121,8 +134,13 @@ export const Promotions = () => {
             </div>
           </div>
 
-          <div>
-            <label className="mb-2 block text-sm font-semibold text-[var(--text-primary)]">Mostrar</label>
+          <div className="w-full lg:w-64">
+            <label className="mb-2 block text-sm font-semibold text-[var(--text-primary)]">
+              <span className="inline-flex items-center gap-2">
+                <LucideMotionIcon icon={Filter} />
+                Mostrar
+              </span>
+            </label>
             <select
               value={activeFilter}
               onChange={(event) => setActiveFilter(event.target.value)}
@@ -134,15 +152,40 @@ export const Promotions = () => {
             </select>
           </div>
 
+          {isAdmin && (
+            <div className="w-full lg:w-64">
+              <label className="mb-2 block text-sm font-semibold text-[var(--text-primary)]">
+                <span className="inline-flex items-center gap-2">
+                  <LucideMotionIcon icon={Filter} />
+                  Restaurante
+                </span>
+              </label>
+              <select
+                value={restaurantFilter}
+                onChange={(event) => setRestaurantFilter(event.target.value)}
+                className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-base)] px-4 py-2.5 text-sm outline-none"
+              >
+                <option value="">Todos los restaurantes</option>
+                {restaurants?.map((r) => (
+                  <option key={r._id} value={r._id}>{r.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
+
           <button
             type="button"
             onClick={() => {
               setSearchTerm("");
               setActiveFilter("active");
+              setRestaurantFilter("");
             }}
             className="rounded-xl border border-[var(--border-color)] px-4 py-2.5 text-sm font-medium text-[var(--text-secondary)] transition hover:bg-[var(--bg-base)]"
           >
-            Limpiar
+            <span className="inline-flex items-center gap-2">
+              <LucideMotionIcon icon={BadgeCheck} className="!w-4 !h-4 md:!w-5 md:!h-5 text-[var(--text-secondary)] dark:text-[var(--text-secondary)]" />
+              Limpiar
+            </span>
           </button>
         </div>
       </div>
@@ -175,7 +218,7 @@ export const Promotions = () => {
                     {promotion.startDate ? new Date(promotion.startDate).toLocaleDateString() : "N/A"} - {promotion.endDate ? new Date(promotion.endDate).toLocaleDateString() : "N/A"}
                   </td>
                   <td className="px-6 py-4 text-sm text-[var(--text-secondary)]">
-                    <span className={`rounded-full px-3 py-1 text-xs font-medium ${promotion.status === "APPROVED" ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400" : promotion.status === "REJECTED" ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400" : "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400"}`}>
+                    <span className={`rounded-full px-3 py-1 text-xs font-medium ${promotion.status === "APPROVED" ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400" : promotion.status === "REJECTED" ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400" : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400"}`}>
                       {promotion.status}
                     </span>
                   </td>

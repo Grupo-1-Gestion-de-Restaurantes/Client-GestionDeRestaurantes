@@ -1,18 +1,21 @@
 import { useState, useEffect, useMemo } from "react";
 import { useInventoryStore } from "../store/useInventoryStore.js";
 import { useRestaurantStore } from "../../restaurants/store/useRestaurantStore.js";
+import { useAuthStore } from "../../auth/store/useAuthStore.js";
 import { Spinner } from "../../../shared/components/layout/Spinner.jsx";
 import { useEffect as useToastEffect } from "react";
 import { showError } from "../../../shared/utils/toast.js";
 import { InventoryModal } from "./InventoryModal.jsx";
 import { useUIStore } from "../../../shared/components/ui/store/uiStore.js";
-import { PencilLine, Trash2, Search, Filter, BadgeCheck } from "lucide-react";
+import { PencilLine, Trash2, Search, Filter, BadgeCheck, TriangleAlert } from "lucide-react";
 import { LucideMotionIcon } from "../../../shared/components/ui/LucideMotionIcon.jsx";
 import { Pagination } from "../../../shared/components/ui/Pagination.jsx";
 
 export const Inventories = () => {
     const { inventories, loading, error, getInventories, deleteInventory, pagination } = useInventoryStore();
     const { restaurants, getRestaurants } = useRestaurantStore();
+    const { user } = useAuthStore();
+    const isAdmin = user?.role === "ADMIN_ROLE";
     const [openModal, setOpenModal] = useState(false);
     const [selectedItem, setSelectedItem] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
@@ -108,24 +111,26 @@ export const Inventories = () => {
                         </div>
                     </div>
 
-                    <div className="w-full lg:w-64">
-                        <label className="block text-sm font-semibold text-[var(--text-primary)] mb-2">
-                            <span className="inline-flex items-center gap-2">
-                                <LucideMotionIcon icon={Filter} />
-                                Restaurante
-                            </span>
-                        </label>
-                        <select
-                            value={restaurantFilter}
-                            onChange={(e) => setRestaurantFilter(e.target.value)}
-                            className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-base)] px-4 py-2.5 text-sm text-[var(--text-primary)] outline-none transition focus:border-[var(--color-brand-dark)]"
-                        >
-                            <option value="all">Todos los restaurantes</option>
-                            {restaurants?.map((r) => (
-                                <option key={r._id} value={r._id}>{r.name}</option>
-                            ))}
-                        </select>
-                    </div>
+                    {isAdmin && (
+                        <div className="w-full lg:w-64">
+                            <label className="block text-sm font-semibold text-[var(--text-primary)] mb-2">
+                                <span className="inline-flex items-center gap-2">
+                                    <LucideMotionIcon icon={Filter} />
+                                    Restaurante
+                                </span>
+                            </label>
+                            <select
+                                value={restaurantFilter}
+                                onChange={(e) => setRestaurantFilter(e.target.value)}
+                                className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-base)] px-4 py-2.5 text-sm text-[var(--text-primary)] outline-none transition focus:border-[var(--color-brand-dark)]"
+                            >
+                                <option value="all">Todos los restaurantes</option>
+                                {restaurants?.map((r) => (
+                                    <option key={r._id} value={r._id}>{r.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
 
                     <div className="w-full lg:w-48">
                         <label className="block text-sm font-semibold text-[var(--text-primary)] mb-2">
@@ -178,7 +183,7 @@ export const Inventories = () => {
                     <tbody className="divide-y divide-[var(--border-color)]">
                         {filteredItems.length > 0 ? (
                             filteredItems.map((item) => {
-                                // 🚨 Lógica de Alerta de Stock Bajo
+                                // Lógica de Alerta de Stock Bajo
                                 const isLowStock = item.quantity <= (item.minStock || 5);
 
                                 return (
@@ -196,8 +201,8 @@ export const Inventories = () => {
                                         </td>
                                         <td className="px-6 py-4 text-sm">
                                             {isLowStock ? (
-                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-950/40 dark:text-red-400">
-                                                    ⚠️ Stock Bajo (Mín. {item.minStock || 5})
+                                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-950/40 dark:text-red-400">
+                                                    <TriangleAlert size={12} /> Stock Bajo (Mín. {item.minStock || 5})
                                                 </span>
                                             ) : (
                                                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-950/40 dark:text-green-400">

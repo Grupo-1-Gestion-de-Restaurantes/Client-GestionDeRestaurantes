@@ -1,18 +1,21 @@
 import { useState, useEffect, useMemo } from "react";
 import { useEmployeeStore } from "../store/useEmployeeStore.js";
 import { useRestaurantStore } from "../../restaurants/store/useRestaurantStore.js";
+import { useAuthStore } from "../../auth/store/useAuthStore.js";
 import { Spinner } from "../../../shared/components/layout/Spinner.jsx";
 import { useEffect as useToastEffect } from "react";
 import { showError } from "../../../shared/utils/toast.js";
 import { EmployeeModal } from "./EmployeeModal.jsx";
 import { useUIStore } from "../../../shared/components/ui/store/uiStore.js";
-import { PencilLine, Trash2, Search, Filter, BadgeCheck } from "lucide-react";
+import { PencilLine, Trash2, Search, Filter, BadgeCheck, RotateCcw } from "lucide-react";
 import { LucideMotionIcon } from "../../../shared/components/ui/LucideMotionIcon.jsx";
 import { Pagination } from "../../../shared/components/ui/Pagination.jsx";
 
 export const Employees = () => {
-    const { employees, loading, error, getEmployees, deleteEmployee, pagination } = useEmployeeStore();
+    const { employees, loading, error, getEmployees, deleteEmployee, activateEmployee, pagination } = useEmployeeStore();
     const { restaurants, getRestaurants } = useRestaurantStore();
+    const { user } = useAuthStore();
+    const isAdmin = user?.role === "ADMIN_ROLE";
     const [openModal, setOpenModal] = useState(false);
     const [selectedEmployee, setSelectedEmployee] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
@@ -109,24 +112,26 @@ export const Employees = () => {
                         </div>
                     </div>
 
-                    <div className="w-full lg:w-64">
-                        <label className="block text-sm font-semibold text-[var(--text-primary)] mb-2">
-                            <span className="inline-flex items-center gap-2">
-                                <LucideMotionIcon icon={Filter} />
-                                Restaurante
-                            </span>
-                        </label>
-                        <select
-                            value={restaurantFilter}
-                            onChange={(e) => setRestaurantFilter(e.target.value)}
-                            className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-base)] px-4 py-2.5 text-sm text-[var(--text-primary)] outline-none transition focus:border-[var(--color-brand-dark)]"
-                        >
-                            <option value="all">Todos los restaurantes</option>
-                            {restaurants?.map((r) => (
-                                <option key={r._id} value={r._id}>{r.name}</option>
-                            ))}
-                        </select>
-                    </div>
+                    {isAdmin && (
+                        <div className="w-full lg:w-64">
+                            <label className="block text-sm font-semibold text-[var(--text-primary)] mb-2">
+                                <span className="inline-flex items-center gap-2">
+                                    <LucideMotionIcon icon={Filter} />
+                                    Restaurante
+                                </span>
+                            </label>
+                            <select
+                                value={restaurantFilter}
+                                onChange={(e) => setRestaurantFilter(e.target.value)}
+                                className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-base)] px-4 py-2.5 text-sm text-[var(--text-primary)] outline-none transition focus:border-[var(--color-brand-dark)]"
+                            >
+                                <option value="all">Todos los restaurantes</option>
+                                {restaurants?.map((r) => (
+                                    <option key={r._id} value={r._id}>{r.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
 
                     <div className="w-full lg:w-48">
                         <label className="block text-sm font-semibold text-[var(--text-primary)] mb-2">
@@ -198,32 +203,50 @@ export const Employees = () => {
                                         </span>
                                     </td>
 
-                                    {/* Acciones de Control Perfectamente Centradas */}
+{/* Acciones de Control Perfectamente Centradas */}
                                     <td className="px-6 py-4 text-center whitespace-nowrap">
                                         <div className="flex items-center justify-center gap-4">
-                                            <button
-                                                className="inline-flex items-center gap-2 text-[var(--color-brand-yellow)] hover:opacity-75 font-medium text-sm transition cursor-pointer"
-                                                onClick={() => {
-                                                    setSelectedEmployee(emp);
-                                                    setOpenModal(true);
-                                                }}
-                                            >
-                                                <LucideMotionIcon icon={PencilLine} className="!w-4 !h-4 text-[var(--color-brand-yellow)]" />
-                                                <span>Editar</span>
-                                            </button>
-                                            <button
-                                                className="inline-flex items-center gap-2 text-[var(--color-brand-red)] hover:text-[var(--color-brand-red-dark)] font-medium text-sm transition cursor-pointer"
-                                                onClick={() =>
-                                                    openConfirm({
-                                                        title: "Dar de Baja Empleado",
-                                                        message: `¿Estás seguro de desactivar al empleado "${emp.fullName || 'este usuario'}"? Ya no tendrá acceso operativo a la sucursal.`,
-                                                        onConfirm: () => deleteEmployee(emp._id)
-                                                    })
-                                                }
-                                            >
-                                                <LucideMotionIcon icon={Trash2} className="!w-4 !h-4 text-[var(--color-brand-red)]" />
-                                                <span>Eliminar</span>
-                                            </button>
+                                            {(isAdmin || emp.specialty !== "ADMINISTRATIVO") && (
+                                                <button
+                                                    className="inline-flex items-center gap-2 text-[var(--color-brand-yellow)] hover:opacity-75 font-medium text-sm transition cursor-pointer"
+                                                    onClick={() => {
+                                                        setSelectedEmployee(emp);
+                                                        setOpenModal(true);
+                                                    }}
+                                                >
+                                                    <LucideMotionIcon icon={PencilLine} className="!w-4 !h-4 text-[var(--color-brand-yellow)]" />
+                                                    <span>Editar</span>
+                                                </button>
+                                            )}
+                                            {emp.isActive ? (
+                                                <button
+                                                    className="inline-flex items-center gap-2 text-[var(--color-brand-red)] hover:text-[var(--color-brand-red-dark)] font-medium text-sm transition cursor-pointer"
+                                                    onClick={() =>
+                                                        openConfirm({
+                                                            title: "Dar de Baja Empleado",
+                                                            message: `¿Estás seguro de desactivar al empleado "${emp.fullName || 'este usuario'}"? Ya no tendrá acceso operativo a la sucursal.`,
+                                                            onConfirm: () => deleteEmployee(emp._id)
+                                                        })
+                                                    }
+                                                >
+                                                    <LucideMotionIcon icon={Trash2} className="!w-4 !h-4 text-[var(--color-brand-red)]" />
+                                                    <span>Eliminar</span>
+                                                </button>
+                                            ) : (
+                                                <button
+                                                    className="inline-flex items-center gap-2 text-green-700 hover:text-green-500 font-medium text-sm transition cursor-pointer"
+                                                    onClick={() =>
+                                                        openConfirm({
+                                                            title: "Activar Empleado",
+                                                            message: `¿Estás seguro de activar al empleado "${emp.fullName || 'este usuario'}"?`,
+                                                            onConfirm: () => activateEmployee(emp._id)
+                                                        })
+                                                    }
+                                                >
+                                                    <LucideMotionIcon icon={RotateCcw} className="!w-4 !h-4 text-green-700 dark:text-[var(--color-brand-yellow)]" />
+                                                    <span>Activar</span>
+                                                </button>
+                                            )}
                                         </div>
                                     </td>
                                 </tr>

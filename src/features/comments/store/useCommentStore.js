@@ -1,8 +1,9 @@
 import { create } from "zustand";
 import {
     getComments as getCommentsRequest,
-    deleteComment as deleteCommentRequest
-} from "../../../shared/api/";
+    deleteComment as deleteCommentRequest,
+    activateComment as activateCommentRequest
+} from "../../../shared/api/admin.js";
 
 export const useCommentStore = create((set, get) => ({
     comments: [],
@@ -60,6 +61,20 @@ export const useCommentStore = create((set, get) => ({
             set({
                 loading: false,
                 error: error.response?.data?.message || "Error al eliminar el comentario."
+            });
+            throw error;
+        }
+    },
+
+    activateComment: async (id) => {
+        try {
+            set({ loading: true, error: null });
+            await activateCommentRequest(id);
+            await get().getComments(get().filters);
+        } catch (error) {
+            set({
+                loading: false,
+                error: error.response?.data?.message || "Error al activar el comentario."
             });
             throw error;
         }

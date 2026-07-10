@@ -7,6 +7,7 @@ import { useTableStore } from "../../tables/store/useTableStore.js";
 import { useDishStore } from "../../dishes/store/useDishStore.js";
 import { useEmployeeStore } from "../../employees/store/useEmployeeStore.js";
 import { showError } from "../../../shared/utils/toast.js";
+import { useManagerRestaurant } from "../../../shared/hooks/useManagerRestaurant.js";
 
 export const EventModal = ({ isOpen, onClose, eventItem }) => {
     const {
@@ -14,6 +15,7 @@ export const EventModal = ({ isOpen, onClose, eventItem }) => {
         handleSubmit,
         reset,
         watch,
+        setValue,
         formState: { errors },
     } = useForm();
 
@@ -23,17 +25,28 @@ export const EventModal = ({ isOpen, onClose, eventItem }) => {
     const { tables, getTables } = useTableStore();
     const { dishes, getDishes } = useDishStore();
     const { employees, getEmployees } = useEmployeeStore();
+    const { isManager, myRestaurantId, myRestaurantName } = useManagerRestaurant();
 
     const selectedRestaurant = watch("restaurant");
+    const selectedRestaurantData = restaurants?.find(r => r._id === selectedRestaurant);
+    const restaurantCapacity = selectedRestaurantData?.capacity || 0;
+    const selectedAdditionalServices = watch("additionalServices") || [];
+    const isOtherServiceSelected = selectedAdditionalServices.includes("OTRO");
 
     useEffect(() => {
         if (isOpen) {
-            if (getRestaurants) getRestaurants();
-            if (getTables) getTables({ isActive: true });
-            if (getDishes) getDishes();
-            if (getEmployees) getEmployees();
+            if (getRestaurants) getRestaurants({ isActive: 'all', limit: 100 });
+            if (getTables) getTables({ isActive: true, limit: 100 });
+            if (getDishes) getDishes({ isActive: 'all', limit: 100 });
+            if (getEmployees) getEmployees({ isActive: 'all', limit: 100 });
         }
     }, [isOpen, getRestaurants, getTables, getDishes, getEmployees]);
+
+    useEffect(() => {
+        if (isOpen && isManager && myRestaurantId) {
+            setValue("restaurant", myRestaurantId);
+        }
+    }, [isOpen, isManager, myRestaurantId, setValue]);
 
     useEffect(() => {
         if (isOpen) {
@@ -46,9 +59,10 @@ export const EventModal = ({ isOpen, onClose, eventItem }) => {
                     typeEvent: eventItem.typeEvent || "CENA_TEMATICA",
                     capacity: eventItem.capacity || "",
                     price: eventItem.price || "",
-                    restaurant: eventItem.restaurant?._id || eventItem.restaurant || "",
+                    restaurant: isManager && myRestaurantId ? myRestaurantId : (eventItem.restaurant?._id || eventItem.restaurant || ""),
                     dateTime: localDate,
                     additionalServices: eventItem.additionalServices || [],
+                    otherServiceDescription: eventItem.otherServiceDescription || "",
                     assignedTables: eventItem.assignedTables?.map(t => t._id || t) || [],
                     specialDishes: eventItem.specialDishes?.map(d => d._id || d) || [],
                     assignedEmployees: eventItem.assignedEmployees?.map(e => e._id || e) || []
@@ -60,16 +74,17 @@ export const EventModal = ({ isOpen, onClose, eventItem }) => {
                     typeEvent: "CENA_TEMATICA",
                     capacity: "",
                     price: "",
-                    restaurant: "",
+                    restaurant: isManager && myRestaurantId ? myRestaurantId : "",
                     dateTime: "",
                     additionalServices: [],
+                    otherServiceDescription: "",
                     assignedTables: [],
                     specialDishes: [],
                     assignedEmployees: []
                 });
             }
         }
-    }, [isOpen, eventItem, reset]);
+    }, [isOpen, eventItem, reset, isManager, myRestaurantId]);
 
     const filteredTables = tables.filter(t => t.restaurant?._id === selectedRestaurant || t.restaurant === selectedRestaurant);
     const filteredDishes = dishes.filter(d => d.restaurant?._id === selectedRestaurant || d.restaurant === selectedRestaurant);
@@ -150,15 +165,25 @@ export const EventModal = ({ isOpen, onClose, eventItem }) => {
                         {/* Sucursal Destino */}
                         <div className="flex flex-col">
                             <label className="text-xs font-semibold mb-1">Sucursal / Sede Anfitriona</label>
-                            <select
-                                className="w-full px-3 py-1.5 text-sm rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none"
-                                {...register("restaurant", { required: "Sede obligatoria" })}
-                            >
-                                <option value="">Selecciona restaurante...</option>
-                                {restaurants?.map((r) => (
-                                    <option key={r._id} value={r._id}>{r.name}</option>
-                                ))}
-                            </select>
+                            {isManager ? (
+                                <input
+                                    type="text"
+                                    value={myRestaurantName || "Cargando..."}
+                                    disabled
+                                    readOnly
+                                    className="w-full px-3 py-1.5 text-sm rounded-lg border border-[var(--border-color)] bg-[var(--bg-surface-alt)] text-[var(--text-muted)] cursor-not-allowed"
+                                />
+                            ) : (
+                                <select
+                                    className="w-full px-3 py-1.5 text-sm rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none"
+                                    {...register("restaurant", { required: "Sede obligatoria" })}
+                                >
+                                    <option value="">Selecciona restaurante...</option>
+                                    {restaurants?.map((r) => (
+                                        <option key={r._id} value={r._id}>{r.name}</option>
+                                    ))}
+                                </select>
+                            )}
                             {errors.restaurant && <p className="text-[var(--color-brand-red)] text-[10px] mt-0.5">{errors.restaurant.message}</p>}
                         </div>
                     </div>
@@ -173,10 +198,18 @@ export const EventModal = ({ isOpen, onClose, eventItem }) => {
                                 placeholder="50"
                                 {...register("capacity", { 
                                     required: "Requerido", 
-                                    min: { value: 1, message: "Mínimo 1" } 
+                                    min: { value: 1, message: "Mínimo 1" },
+                                    validate: value => {
+                                        if (restaurantCapacity > 0 && value > restaurantCapacity) {
+                                            return `La capacidad no puede exceder la del restaurante (${restaurantCapacity})`;
+                                        }
+                                    }
                                 })}
                             />
                             {errors.capacity && <p className="text-[var(--color-brand-red)] text-[10px] mt-0.5">{errors.capacity.message}</p>}
+                            {restaurantCapacity > 0 && (
+                                <p className="text-[10px] text-[var(--text-muted)] mt-1">Capacidad máxima del restaurante: {restaurantCapacity}</p>
+                            )}
                         </div>
 
                         {/* Precio por Entrada */}
@@ -231,6 +264,21 @@ export const EventModal = ({ isOpen, onClose, eventItem }) => {
                                 Otro Servicio
                             </label>
                         </div>
+                        {isOtherServiceSelected && (
+                            <div className="mt-3 flex flex-col">
+                                <label className="text-xs font-semibold mb-1">Especifica el otro servicio</label>
+                                <input
+                                    type="text"
+                                    className="w-full px-3 py-1.5 text-sm rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none"
+                                    placeholder="Ej. Servicio de valet parking"
+                                    {...register("otherServiceDescription", {
+                                        required: isOtherServiceSelected ? "Especifica el otro servicio" : false,
+                                        maxLength: { value: 100, message: "Máximo 100 caracteres" }
+                                    })}
+                                />
+                                {errors.otherServiceDescription && <p className="text-[var(--color-brand-red)] text-[10px] mt-0.5">{errors.otherServiceDescription.message}</p>}
+                            </div>
+                        )}
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -310,7 +358,7 @@ export const EventModal = ({ isOpen, onClose, eventItem }) => {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="px-5 py-2 rounded-lg text-sm font-medium  bg-[var(--color-brand-dark)] hover:bg-[var(--color-brand-red)] transition disabled:opacity-60"
+                            className="px-5 py-2 rounded-lg text-sm font-medium bg-[var(--color-brand-dark)] text-white border border-transparent hover:bg-[var(--color-brand-red)] dark:bg-[var(--bg-surface-alt)] dark:text-[var(--text-primary)] dark:border-[var(--border-color)] dark:hover:bg-[var(--color-brand-yellow)] dark:hover:text-[var(--color-brand-dark)] dark:hover:border-transparent transition disabled:opacity-60"
                         >
                             {loading ? "Guardando..." : eventItem ? "Guardar Cambios" : "Agendar Evento"}
                         </button>

@@ -3,8 +3,11 @@ import {
     getEmployees as getEmployeesRequest,
     createEmployee as createEmployeeRequest,
     updateEmployee as updateEmployeeRequest,
-    deleteEmployee as deleteEmployeeRequest
+    deleteEmployee as deleteEmployeeRequest,
+    activateEmployee as activateEmployeeRequest,
+    getMyEmployee as getMyEmployeeRequest
 } from "../../../shared/api/";
+import { useAuthStore } from "../../auth/store/useAuthStore.js";
 
 export const useEmployeeStore = create((set, get) => ({
     employees: [],
@@ -15,6 +18,19 @@ export const useEmployeeStore = create((set, get) => ({
         limit: 20,
         totalRecords: 0,
         totalPages: 0
+    },
+    myEmployee: null,
+
+    getMyRestaurant: async () => {
+        if (get().myEmployee) return get().myEmployee;
+        try {
+            const response = await getMyEmployeeRequest();
+            const myEmployee = response.data.data;
+            set({ myEmployee });
+            return myEmployee;
+        } catch {
+            return null;
+        }
     },
 
     getEmployees: async (params = {}) => {
@@ -48,10 +64,9 @@ export const useEmployeeStore = create((set, get) => ({
             // Refrescar la lista de empleados tras crear uno nuevo
             await get().getEmployees();
         } catch (error) {
-            set({
-                loading: false,
-                error: error.response?.data?.message || "Error al registrar el empleado."
-            });
+            // El modal ya muestra el error específico (campo duplicado, etc.);
+            // no seteamos "error" aquí para evitar un segundo toast genérico.
+            set({ loading: false });
             throw error;
         }
     },
@@ -64,16 +79,19 @@ export const useEmployeeStore = create((set, get) => ({
             // Refrescar la lista de empleados tras actualizar uno
             await get().getEmployees();
         } catch (error) {
-            set({
-                loading: false,
-                error: error.response?.data?.message || "Error al actualizar el empleado."
-            });
+            // El modal ya muestra el error específico; evitamos un segundo toast genérico.
+            set({ loading: false });
             throw error;
         }
     },
 
     deleteEmployee: async (id) => {
         try {
+            const currentUser = useAuthStore.getState().user;
+            if (currentUser?._id === id) {
+                throw new Error("No puedes eliminarte a ti mismo.");
+            }
+
             set({ loading: true, error: null });
             await deleteEmployeeRequest(id);
 
@@ -82,7 +100,23 @@ export const useEmployeeStore = create((set, get) => ({
         } catch (error) {
             set({
                 loading: false,
-                error: error.response?.data?.message || "Error al eliminar el empleado."
+                error: error.response?.data?.message || error.message || "Error al eliminar el empleado."
+            });
+            throw error;
+        }
+    },
+
+    activateEmployee: async (id) => {
+        try {
+            set({ loading: true, error: null });
+            await activateEmployeeRequest(id);
+
+            // Refrescar la lista de empleados tras activar uno
+            await get().getEmployees();
+        } catch (error) {
+            set({
+                loading: false,
+                error: error.response?.data?.message || "Error al activar el empleado."
             });
             throw error;
         }

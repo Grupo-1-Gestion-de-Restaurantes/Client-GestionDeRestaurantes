@@ -83,13 +83,7 @@ export const RestaurantModal = ({ isOpen, onClose, restaurant }) => {
             {/* CONTENEDOR */}
             <div className="bg-[var(--bg-surface)] text-[var(--text-primary)] rounded-2xl shadow-2xl w-full max-w-lg md:max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
                 {/* HEADER */}
-                <div
-                    className="p-4 sm:p-5 text-white sticky top-0 z-10"
-                    style={{
-                        background:
-                            "linear-gradient(90deg, var(--main-blue) 0%, #1956a3 100%)",
-                    }}
-                >
+                <div className="p-4 sm:p-5 text-white sticky top-0 z-10 bg-[linear-gradient(90deg,var(--color-brand-dark)_0%,var(--color-brand-red-dark)_100%)]">
                     <h2 className="text-xl sm:text-2xl font-bold">
                         {restaurant ? "Editar Restaurante" : "Nuevo Restaurante"}
                     </h2>
@@ -320,8 +314,8 @@ export const RestaurantModal = ({ isOpen, onClose, restaurant }) => {
                                 {...register("phone", {
                                     required: "El teléfono es obligatorio",
                                     pattern: {
-                                        value: /^[0-9]{8,15}$/,
-                                        message: "Ingrese un número válido (8-15 dígitos)",
+                                        value: /^[0-9]{8}$/,
+                                        message: "El teléfono debe tener exactamente 8 dígitos",
                                     },
                                 })}
                             />
@@ -357,11 +351,13 @@ export const RestaurantModal = ({ isOpen, onClose, restaurant }) => {
                             </label>
                             <input
                                 type="number"
-                                className="w-full px-3 py-2 rounded-lg border-2 border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] shadow-sm 
+                                step="0.1"
+                                className="w-full px-3 py-2 rounded-lg border-2 border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] shadow-sm
                                            focus:outline-none focus:border-[var(--color-brand-dark)] focus:ring-2 focus:ring-[var(--color-brand-dark)] transition"
-                                placeholder="Ej. 4"
+                                placeholder="Ej. 4.5"
                                 {...register("rating", {
                                     required: "El rating es obligatorio",
+                                    valueAsNumber: true,
                                     min: { value: 1, message: "El mínimo es 1" },
                                     max: { value: 5, message: "El máximo es 5" },
                                 })}
@@ -420,12 +416,8 @@ export const RestaurantModal = ({ isOpen, onClose, restaurant }) => {
 
                         <button
                             type="submit"
-                            className="w-full sm:w-auto px-5 py-2 rounded-lg text-white font-medium transition shadow"
-                            style={{
-                                background:
-                                    "linear-gradient(90deg, var(--main-blue) 0%, #1956a3 100%)",
-                                border: "none",
-                            }}
+                            disabled={loading}
+                            className="w-full sm:w-auto px-5 py-2 rounded-lg font-medium transition-all duration-300 shadow bg-[var(--color-brand-dark)] text-white border border-transparent hover:bg-[var(--color-brand-red)] dark:bg-[var(--bg-surface-alt)] dark:text-[var(--text-primary)] dark:border-[var(--border-color)] dark:hover:bg-[var(--color-brand-yellow)] dark:hover:text-[var(--color-brand-dark)] dark:hover:border-transparent disabled:opacity-60 disabled:cursor-not-allowed"
                         >
                             {loading ? <Spinner /> : restaurant ? "Guardar Cambios" : "Crear Restaurante"}
                         </button>

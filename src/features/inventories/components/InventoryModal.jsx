@@ -3,24 +3,33 @@ import { useForm } from "react-hook-form";
 import { useSaveInventory } from "../hooks/useSaveInventory.jsx";
 import { useInventoryStore } from "../store/useInventoryStore";
 import { useRestaurantStore } from "../../restaurants/store/useRestaurantStore.js";
+import { useManagerRestaurant } from "../../../shared/hooks/useManagerRestaurant.js";
 
 export const InventoryModal = ({ isOpen, onClose, item }) => {
     const {
         register,
         handleSubmit,
         reset,
+        setValue,
         formState: { errors },
     } = useForm();
 
     const { saveInventory } = useSaveInventory();
     const loading = useInventoryStore((state) => state.loading);
     const { restaurants, getRestaurants } = useRestaurantStore();
+    const { isManager, myRestaurantId, myRestaurantName } = useManagerRestaurant();
 
     useEffect(() => {
         if (isOpen && getRestaurants) {
             getRestaurants();
         }
     }, [isOpen, getRestaurants]);
+
+    useEffect(() => {
+        if (isOpen && isManager && myRestaurantId) {
+            setValue("restaurant", myRestaurantId);
+        }
+    }, [isOpen, isManager, myRestaurantId, setValue]);
 
     useEffect(() => {
         if (isOpen) {
@@ -30,7 +39,7 @@ export const InventoryModal = ({ isOpen, onClose, item }) => {
                     quantity: item.quantity ?? 0,
                     unit: item.unit || "UNIDAD",
                     minStock: item.minStock ?? 5,
-                    restaurant: item.restaurant?._id || item.restaurant || "",
+                    restaurant: item.restaurant?._id || item.restaurant || (isManager ? myRestaurantId : ""),
                 });
             } else {
                 reset({
@@ -38,7 +47,7 @@ export const InventoryModal = ({ isOpen, onClose, item }) => {
                     quantity: "",
                     unit: "UNIDAD",
                     minStock: 5,
-                    restaurant: "",
+                    restaurant: isManager ? myRestaurantId : "",
                 });
             }
         }
@@ -60,7 +69,7 @@ export const InventoryModal = ({ isOpen, onClose, item }) => {
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50 px-3 sm:px-4">
             <div className="bg-[var(--bg-surface)] rounded-2xl shadow-2xl w-full max-w-lg border border-[var(--border-color)] transition-colors duration-300">
                 {/* HEADER */}
-                <div className="p-4 sm:p-5 bg-[linear-gradient(90deg,var(--main-blue)_0%,#1956a3_100%)]  border-b border-[var(--border-color)] rounded-t-2xl transition-colors duration-300">
+                <div className="p-4 sm:p-5 bg-[linear-gradient(90deg,var(--color-brand-dark)_0%,var(--color-brand-red-dark)_100%)] text-white border-b border-[var(--border-color)] rounded-t-2xl transition-colors duration-300">
                     <h2 className="text-xl sm:text-2xl font-bold">
                         {item ? "Editar Ingrediente" : "Nuevo Ingrediente de Almacén"}
                     </h2>
@@ -85,17 +94,32 @@ export const InventoryModal = ({ isOpen, onClose, item }) => {
                     {/* Restaurante Desplegable */}
                     <div className="flex flex-col">
                         <label className="text-sm font-semibold text-[var(--text-secondary)] mb-1">Sucursal / Restaurante Destino</label>
-                        <select
-                            className="w-full px-3 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--ring-color)] transition"
-                            {...register("restaurant", { required: "El restaurante es obligatorio" })}
-                        >
-                            <option value="">Selecciona una sucursal...</option>
-                            {restaurants?.map((r) => (
-                                <option key={r._id} value={r._id}>
-                                    {r.name}
-                                </option>
-                            ))}
-                        </select>
+                        {isManager ? (
+                            <>
+                                <input
+                                    type="text"
+                                    value={myRestaurantName || "Cargando..."}
+                                    disabled
+                                    readOnly
+                                    className="w-full px-3 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-surface-alt)] text-[var(--text-muted)] cursor-not-allowed"
+                                />
+                                <p className="text-xs text-[var(--text-muted)] mt-1">
+                                    Los gerentes solo pueden gestionar el inventario de su propio restaurante.
+                                </p>
+                            </>
+                        ) : (
+                            <select
+                                className="w-full px-3 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--ring-color)] transition"
+                                {...register("restaurant", { required: "El restaurante es obligatorio" })}
+                            >
+                                <option value="">Selecciona una sucursal...</option>
+                                {restaurants?.map((r) => (
+                                    <option key={r._id} value={r._id}>
+                                        {r.name}
+                                    </option>
+                                ))}
+                            </select>
+                        )}
                         {errors.restaurant && <p className="text-[var(--color-brand-red)] text-xs mt-1">{errors.restaurant.message}</p>}
                     </div>
 
@@ -154,7 +178,7 @@ export const InventoryModal = ({ isOpen, onClose, item }) => {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full sm:w-auto px-5 py-2 rounded-lg font-medium transition-all duration-300 shadow bg-[var(--color-brand-dark)]  border border-transparent hover:bg-[var(--color-brand-red)] dark:bg-[var(--bg-surface-alt)] dark:text-[var(--text-primary)] dark:border-[var(--border-color)] dark:hover:bg-[var(--color-brand-yellow)] dark:hover:text-[var(--color-brand-dark)] dark:hover:border-transparent disabled:opacity-60 disabled:cursor-not-allowed"
+                            className="w-full sm:w-auto px-5 py-2 rounded-lg font-medium transition-all duration-300 shadow bg-[var(--color-brand-dark)] text-white border border-transparent hover:bg-[var(--color-brand-red)] dark:bg-[var(--bg-surface-alt)] dark:text-[var(--text-primary)] dark:border-[var(--border-color)] dark:hover:bg-[var(--color-brand-yellow)] dark:hover:text-[var(--color-brand-dark)] dark:hover:border-transparent disabled:opacity-60 disabled:cursor-not-allowed"
                         >
                             {loading ? "Guardando..." : item ? "Guardar Cambios" : "Crear Ingrediente"}
                         </button>

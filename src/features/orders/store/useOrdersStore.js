@@ -27,7 +27,6 @@ export const useOrderStore = create((set, get) => ({
                 ...params 
             };
             const response = await getOrdersRequest(queryParams);
-            console.log(response.data);
 
             set({
                 orders: response.data.orders || response.data.data || response.data,
@@ -45,12 +44,10 @@ export const useOrderStore = create((set, get) => ({
     createOrder: async (data) => {
         try {
             set({ loading: true, error: null });
-            const response = await createOrderRequest(data);
+            await createOrderRequest(data);
 
-            set({
-                orders: [response.data.order || response.data.data || response.data, ...get().orders],
-                loading: false
-            });
+            // Refrescar la lista de órdenes tras crear una nueva
+            await get().getOrders();
         } catch (error) {
             set({
                 loading: false,
@@ -62,29 +59,26 @@ export const useOrderStore = create((set, get) => ({
 
     updateOrder: async (id, data) => {
         try {
-            const response = await updateOrderRequest(id, data); // Llamada a axios
+            set({ loading: true, error: null });
+            await updateOrderRequest(id, data);
 
-            // Actualizamos el estado local para que la UI cambie al instante
-            set((state) => ({
-                orders: state.orders.map((order) =>
-                    order._id === id ? { ...order, ...response.data.order } : order
-                ),
-            }));
+            // Refrescar la lista de órdenes tras actualizar una
+            await get().getOrders();
         } catch (error) {
-            console.error("Error en store:", error);
-            throw error; // Lanzamos el error para que el catch del componente lo vea
+            set({
+                loading: false,
+                error: error.response?.data?.message || "Error al actualizar la orden."
+            });
+            throw error;
         }
     },
 
     updateOrderStatus: async (id, data) => {
         try {
-            const response = await updateOrderStatusRequest(id, data);
+            await updateOrderStatusRequest(id, data);
 
-            set((state) => ({
-                orders: state.orders.map((order) =>
-                    order._id === id ? { ...order, ...response.data.order } : order
-                ),
-            }));
+            // Refrescar la lista de órdenes tras cambiar el estado
+            await get().getOrders();
         } catch (error) {
             console.error("Error en store status:", error);
             throw error;
@@ -96,10 +90,8 @@ export const useOrderStore = create((set, get) => ({
             set({ loading: true, error: null });
             await deleteOrderRequest(id);
 
-            set({
-                orders: get().orders.filter(o => o._id !== id),
-                loading: false
-            });
+            // Refrescar la lista de órdenes tras eliminar una
+            await get().getOrders();
         } catch (error) {
             set({
                 loading: false,

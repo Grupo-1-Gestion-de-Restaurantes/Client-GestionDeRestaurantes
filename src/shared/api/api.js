@@ -39,13 +39,6 @@ const axiosAdmin = axios.create({
 axiosAuth.interceptors.request.use((config) => {
     config._axiosClient = "auth";
     const token = getRequestToken();
-    // Debug log temporal: indicar si hay token al hacer la request
-    try {
-        // Mostrar solamente presencia y primeros 8 caracteres para seguridad
-        const short = token ? token.slice(0, 8) + '...' : null;
-        // eslint-disable-next-line no-console
-        console.log('[API][auth][request]', { url: config.url, client: config._axiosClient, hasToken: !!token, tokenPreview: short });
-    } catch (e) {}
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
         config.headers['x-token'] = token;
@@ -65,10 +58,6 @@ axiosAuth.interceptors.request.use((config) => {
 axiosAdmin.interceptors.request.use((config) => {
     config._axiosClient = "admin";
     const token = getRequestToken();
-    // Debug log temporal: indicar si hay token al hacer la request
-    try {
-        const short = token ? token.slice(0, 8) + '...' : null;
-    } catch (e) {}
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
         config.headers['x-token'] = token;
@@ -84,8 +73,6 @@ axiosAdmin.interceptors.request.use((config) => {
         }
         // Explicitly set to false — AxiosHeaders special value meaning "don't send this header"
         config.headers['Content-Type'] = false;
-        // eslint-disable-next-line no-console
-        console.log('[API][admin][request] FormData detected. Content-Type set to false.');
     }
 
     return config;
@@ -140,7 +127,10 @@ const handleRefreshToken = async function (_error) {
         _isRefreshing = true;
         const refreshToken = useAuthStore.getState().refreshToken;
         if (!refreshToken) {
-            useAuthStore.getState().logout();
+            // Este backend no emite refreshToken, así que no hay forma de refrescar.
+            // No cerramos la sesión aquí: un 401 aislado (p. ej. una carrera al
+            // montar un componente) no debe invalidar un token válido en memoria.
+            _isRefreshing = false;
             return Promise.reject(_error);
         }
         try {

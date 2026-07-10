@@ -9,7 +9,7 @@ import { ThemeToggleButton } from "./ThemeToggleButton.jsx";
 export const AvatarUser = () => {
     const store = useAuthStore ? useAuthStore() : {};
     const user = store?.user || null;
-    const logout = store?.logout || (() => console.log("Logout pendiente de implementar"));
+    const logout = store?.logout || (() => {});
 
     const [open, setOpen] = useState(false);
     const [isLoggingOut, setIsLoggingOut] = useState(false);

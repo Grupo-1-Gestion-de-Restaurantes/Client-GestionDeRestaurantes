@@ -7,15 +7,18 @@ import { useEffect as useToastEffect } from "react";
 import { showError } from "../../../shared/utils/toast.js";
 import { DishModal } from "./DishModal.jsx";
 import { useUIStore } from "../../../shared/components/ui/store/uiStore.js";
+import { useAuthStore } from "../../../features/auth/store/useAuthStore.js";
 import { PencilLine, Trash2, Search, Filter, BadgeCheck, Plus } from "lucide-react";
 import { LucideMotionIcon } from "../../../shared/components/ui/LucideMotionIcon.jsx";
 import { Pagination } from "../../../shared/components/ui/Pagination.jsx";
 
 export const Dishes = () => {
     const { dishes, loading, error, filters, setFilters, getDishes, deleteDish, pagination } = useDishStore();
-    const { searchTerm, activeFilter, dishTypeFilter } = filters;
+    const { searchTerm, activeFilter, dishTypeFilter, restaurantFilter } = filters;
     const { restaurants, getRestaurants } = useRestaurantStore();
     const { inventories, getInventories } = useInventoryStore();
+    const { user } = useAuthStore();
+    const isAdmin = user?.role === "ADMIN_ROLE";
     const [openModal, setOpenModal] = useState(false);
     const [selectedDish, setSelectedDish] = useState(null);
     const { openConfirm } = useUIStore();
@@ -34,11 +37,15 @@ export const Dishes = () => {
                 params.isActive = "all";
             }
 
+            if (isAdmin && restaurantFilter) {
+                params.restaurant = restaurantFilter;
+            }
+
             getDishes(params);
         }, 250);
 
         return () => clearTimeout(timeoutId);
-    }, [getDishes, activeFilter, searchTerm, dishTypeFilter]);
+    }, [getDishes, activeFilter, searchTerm, dishTypeFilter, restaurantFilter, isAdmin]);
 
     const handlePageChange = (page) => {
         const params = {
@@ -51,6 +58,10 @@ export const Dishes = () => {
             params.isActive = activeFilter === "active";
         } else {
             params.isActive = "all";
+        }
+
+        if (isAdmin && restaurantFilter) {
+            params.restaurant = restaurantFilter;
         }
 
         getDishes(params);
@@ -174,6 +185,27 @@ export const Dishes = () => {
                         </select>
                     </div>
 
+                    {isAdmin && (
+                        <div className="w-full lg:w-48">
+                            <label className="block text-sm font-semibold text-[var(--text-primary)] mb-2">
+                                <span className="inline-flex items-center gap-2">
+                                    <LucideMotionIcon icon={Filter} />
+                                    Restaurante
+                                </span>
+                            </label>
+                            <select
+                                value={restaurantFilter}
+                                onChange={(e) => setFilters({ restaurantFilter: e.target.value })}
+                                className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-base)] px-4 py-2.5 text-sm text-[var(--text-primary)] outline-none transition focus:border-[var(--color-brand-dark)]"
+                            >
+                                <option value="">Todos los restaurantes</option>
+                                {restaurants?.map((r) => (
+                                    <option key={r._id} value={r._id}>{r.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
+
                     <div className="w-full lg:w-48">
                         <label className="block text-sm font-semibold text-[var(--text-primary)] mb-2">
                             <span className="inline-flex items-center gap-2">
@@ -195,7 +227,7 @@ export const Dishes = () => {
                     <button
                         type="button"
                         onClick={() => {
-                            setFilters({ searchTerm: "", activeFilter: "all", dishTypeFilter: "" });
+                            setFilters({ searchTerm: "", activeFilter: "all", dishTypeFilter: "", restaurantFilter: "" });
                         }}
                         className="rounded-xl border border-[var(--border-color)] px-4 py-2.5 text-sm font-medium text-[var(--text-secondary)] transition hover:bg-[var(--bg-base)]"
                     >
@@ -247,7 +279,7 @@ export const Dishes = () => {
                                                 {dishItem.description}
                                             </p>
                                         )}
-                                        {/* 📝 Mapeo Visual de la Receta */}
+                                        {/* Mapeo Visual de la Receta */}
                                         <div className="flex flex-wrap gap-1 mt-1">
                                             {dishItem.ingredients && dishItem.ingredients.length > 0 ? (
                                                 dishItem.ingredients.map((ing, i) => (

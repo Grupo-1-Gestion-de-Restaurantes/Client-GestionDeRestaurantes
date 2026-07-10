@@ -5,12 +5,12 @@ import { useEffect as useToastEffect } from "react";
 import { showError } from "../../../shared/utils/toast.js";
 import { ClientModal } from "./ClientModal.jsx";
 import { useUIStore } from "../../../shared/components/ui/store/uiStore.js";
-import { PencilLine, Trash2, Search, Filter, BadgeCheck } from "lucide-react";
+import { PencilLine, Trash2, Search, Filter, BadgeCheck, RotateCcw } from "lucide-react";
 import { LucideMotionIcon } from "../../../shared/components/ui/LucideMotionIcon.jsx";
 import { Pagination } from "../../../shared/components/ui/Pagination.jsx";
 
 export const Clients = () => {
-    const { clients, loading, error, filters, setFilters, getClients, deleteClient, pagination } = useClientStore();
+    const { clients, loading, error, filters, setFilters, getClients, deleteClient, activateClient, pagination } = useClientStore();
     const { searchTerm, activeFilter } = filters;
     const [openModal, setOpenModal] = useState(false);
     const [selectedClient, setSelectedClient] = useState(null);
@@ -182,19 +182,35 @@ export const Clients = () => {
                                             <LucideMotionIcon icon={PencilLine} className="!w-4 !h-4 text-[var(--color-brand-yellow)]" />
                                             Editar
                                         </button>
-                                        <button
-                                            className="inline-flex items-center gap-2 text-[var(--color-brand-red)] hover:text-[var(--color-brand-red-dark)] font-medium transition cursor-pointer"
-                                            onClick={() =>
-                                                openConfirm({
-                                                    title: "Eliminar Cliente",
-                                                    message: `¿Estás seguro de desactivar al cliente ${client.name || ''}?`,
-                                                    onConfirm: () => deleteClient(client._id)
-                                                })
-                                            }
-                                        >
-                                            <LucideMotionIcon icon={Trash2} className="!w-4 !h-4 text-[var(--color-brand-red)]" />
-                                            Eliminar
-                                        </button>
+                                        {client.isActive ? (
+                                            <button
+                                                className="inline-flex items-center gap-2 text-[var(--color-brand-red)] hover:text-[var(--color-brand-red-dark)] font-medium transition cursor-pointer"
+                                                onClick={() =>
+                                                    openConfirm({
+                                                        title: "Eliminar Cliente",
+                                                        message: `¿Estás seguro de desactivar al cliente ${client.name || ''}?`,
+                                                        onConfirm: () => deleteClient(client._id)
+                                                    })
+                                                }
+                                            >
+                                                <LucideMotionIcon icon={Trash2} className="!w-4 !h-4 text-[var(--color-brand-red)]" />
+                                                Eliminar
+                                            </button>
+                                        ) : (
+                                            <button
+                                                className="inline-flex items-center gap-2 text-green-700 hover:text-green-500 font-medium transition cursor-pointer"
+                                                onClick={() =>
+                                                    openConfirm({
+                                                        title: "Activar Cliente",
+                                                        message: `¿Estás seguro de activar al cliente ${client.name || ''}?`,
+                                                        onConfirm: () => activateClient(client._id)
+                                                    })
+                                                }
+                                            >
+                                                <LucideMotionIcon icon={RotateCcw} className="!w-4 !h-4 text-green-700 dark:text-[var(--color-brand-yellow)]" />
+                                                Activar
+                                            </button>
+                                        )}
                                     </td>
                                 </tr>
                             ))

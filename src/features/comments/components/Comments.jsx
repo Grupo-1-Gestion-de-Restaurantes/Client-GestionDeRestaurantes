@@ -6,15 +6,19 @@ import { showError } from "../../../shared/utils/toast.js";
 import { useUIStore } from "../../../shared/components/ui/store/uiStore.js";
 import { useRestaurantStore } from "../../restaurants/store/useRestaurantStore.js";
 import { useDishStore } from "../../dishes/store/useDishStore.js"; // Lo mismo para platillos
-import { Trash2, Search, Filter, BadgeCheck } from "lucide-react";
+import { useAuthStore } from "../../auth/store/useAuthStore.js";
+import { Trash2, Search, Filter, BadgeCheck, Eye } from "lucide-react";
 import { LucideMotionIcon } from "../../../shared/components/ui/LucideMotionIcon.jsx";
+import { RatingStars } from "../../../shared/components/ui/RatingStars.jsx";
 import { Pagination } from "../../../shared/components/ui/Pagination.jsx";
 
 export const Comments = () => {
-    const { comments, loading, error, filters, setFilters, getComments, deleteComment, pagination } = useCommentStore();
+    const { comments, loading, error, filters, setFilters, getComments, deleteComment, activateComment, pagination } = useCommentStore();
     const { searchTerm, activeFilter, restaurantFilter } = filters;
     const { restaurants, getRestaurants } = useRestaurantStore();
     const { dishes, getDishes } = useDishStore();
+    const { user } = useAuthStore();
+    const isAdmin = user?.role === "ADMIN_ROLE";
     const { openConfirm } = useUIStore();
 
     useEffect(() => {
@@ -132,26 +136,28 @@ export const Comments = () => {
                         </div>
                     </div>
 
-                    <div className="w-full lg:w-48">
-                        <label className="block text-sm font-semibold text-[var(--text-primary)] mb-2">
-                            <span className="inline-flex items-center gap-2">
-                                <LucideMotionIcon icon={Filter} />
-                                Restaurante
-                            </span>
-                        </label>
-                        <select
-                            value={restaurantFilter}
-                            onChange={(e) => setFilters({ restaurantFilter: e.target.value })}
-                            className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-base)] px-4 py-2.5 text-sm text-[var(--text-primary)] outline-none transition focus:border-[var(--color-brand-dark)]"
-                        >
-                            <option value="">Todos los Rest.</option>
-                            {restaurants?.map((r) => (
-                                <option key={r._id} value={r._id}>
-                                    {r.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+                    {isAdmin && (
+                        <div className="w-full lg:w-48">
+                            <label className="block text-sm font-semibold text-[var(--text-primary)] mb-2">
+                                <span className="inline-flex items-center gap-2">
+                                    <LucideMotionIcon icon={Filter} />
+                                    Restaurante
+                                </span>
+                            </label>
+                            <select
+                                value={restaurantFilter}
+                                onChange={(e) => setFilters({ restaurantFilter: e.target.value })}
+                                className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-base)] px-4 py-2.5 text-sm text-[var(--text-primary)] outline-none transition focus:border-[var(--color-brand-dark)]"
+                            >
+                                <option value="">Todos los Rest.</option>
+                                {restaurants?.map((r) => (
+                                    <option key={r._id} value={r._id}>
+                                        {r.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
 
                     <div className="w-full lg:w-48">
                         <label className="block text-sm font-semibold text-[var(--text-primary)] mb-2">
@@ -208,8 +214,9 @@ export const Comments = () => {
                                 return (
                                     <tr key={com._id} className="hover:bg-[var(--bg-base)] transition-colors">
 
-                                        <td className="px-6 py-4 text-sm font-bold text-amber-500 whitespace-nowrap">
-                                            {"⭐".repeat(com.review)} <span className="text-[var(--text-secondary)] font-normal ml-1">({com.review})</span>
+                                        <td className="px-6 py-4 text-sm font-bold whitespace-nowrap">
+                                            <RatingStars rating={com.review} />
+                                            <span className="text-[var(--text-secondary)] font-normal ml-1">({com.review})</span>
                                         </td>
 
                                         <td className="px-6 py-4 text-sm text-[var(--text-primary)] max-w-xs md:max-w-md break-words">
@@ -250,21 +257,37 @@ export const Comments = () => {
                                             )}
                                         </td>
 
-                                        <td className="px-6 py-4 text-center whitespace-nowrap">
-                                            <button
-                                                className="inline-flex items-center gap-2 text-[var(--color-brand-red)] hover:text-[var(--color-brand-red-dark)] hover:underline font-medium text-sm transition cursor-pointer"
-                                                onClick={() =>
-                                                    openConfirm({
-                                                        title: "Ocultar Comentario",
-                                                        message: `¿Estás seguro de que deseas retirar esta reseña del feed público? El cliente no será eliminado, pero el comentario ya no se mostrará.`,
-                                                        onConfirm: () => deleteComment(com._id)
-                                                    })
-                                                }
-                                            >
-                                                <LucideMotionIcon icon={Trash2} className="!w-4 !h-4 text-[var(--color-brand-red)]" />
-                                                Ocultar
-                                            </button>
-                                        </td>
+<td className="px-6 py-4 text-center whitespace-nowrap">
+    {com.isActive ? (
+        <button
+            className="inline-flex items-center gap-2 text-[var(--color-brand-red)] hover:text-[var(--color-brand-red-dark)] hover:underline font-medium text-sm transition cursor-pointer"
+            onClick={() =>
+                openConfirm({
+                    title: "Ocultar Comentario",
+                    message: `¿Estás seguro de que deseas retirar esta reseña del feed público? El cliente no será eliminado, pero el comentario ya no se mostrará.`,
+                    onConfirm: () => deleteComment(com._id)
+                })
+            }
+        >
+            <LucideMotionIcon icon={Trash2} className="!w-4 !h-4 text-[var(--color-brand-red)]" />
+            Ocultar
+        </button>
+    ) : (
+        <button
+            className="inline-flex items-center gap-2 text-green-600 hover:text-green-700 hover:underline font-medium text-sm transition cursor-pointer"
+            onClick={() =>
+                openConfirm({
+                    title: "Mostrar Comentario",
+                    message: `¿Deseas volver a mostrar esta reseña en el feed público?`,
+                    onConfirm: () => activateComment(com._id)
+                })
+            }
+        >
+            <LucideMotionIcon icon={Eye} className="!w-4 !h-4 text-green-600" />
+            Mostrar
+        </button>
+    )}
+</td>
                                     </tr>
                                 );
                             })

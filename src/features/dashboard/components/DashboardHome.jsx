@@ -51,7 +51,6 @@ export const DashboardHome = () => {
                 const params = {};
                 if (restaurantId) params.restaurantId = restaurantId;
 
-                console.log('Fetching report with params:', params);
                 const reportRes = await getGeneralReport(params);
                 setReportData(reportRes.data.data);
             } catch (error) {
@@ -118,12 +117,12 @@ export const DashboardHome = () => {
 
                 <div className="flex flex-wrap gap-3">
                     {isAdmin && (
-                        <div className="flex items-center gap-2 bg-surface-alt px-3 py-2 rounded-xl border border-stroke shadow-sm">
-                            <Filter size={18} className="text-muted" />
-                            <select 
-                                value={selectedRestaurant} 
+                        <div className="flex items-center gap-2 bg-[var(--bg-surface-alt)] px-3 py-2 rounded-xl border border-[var(--border-color)] shadow-sm">
+                            <Filter size={18} className="text-[var(--text-muted)]" />
+                            <select
+                                value={selectedRestaurant}
                                 onChange={(e) => setSelectedRestaurant(e.target.value)}
-                                className="bg-transparent text-sm focus:outline-none"
+                                className="bg-[var(--bg-surface-alt)] text-sm text-[var(--text-primary)] focus:outline-none"
                             >
                                 <option value="">Todos los restaurantes</option>
                                 {restaurants.map(r => (
@@ -166,7 +165,7 @@ export const DashboardHome = () => {
                 />
                 <Card 
                     title="Satisfacción Promedio" 
-                    value={`${currentStats.satisfaccion} / 5.0`} 
+                    value={`${Number(currentStats.satisfaccion).toFixed(1)} / 5.0`} 
                     icon={Star} 
                     color="bg-yellow-500" 
                 />
