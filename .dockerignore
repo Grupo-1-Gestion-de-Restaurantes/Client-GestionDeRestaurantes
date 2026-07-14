@@ -1,0 +1,49 @@
+# --- Dependencias del host (se instalan en la imagen con pnpm) ---
+node_modules
+**/node_modules
+
+# --- Salida de build local de Vite (se genera dentro del stage build) ---
+dist
+dist-ssr
+*.local
+
+# --- Control de versiones y docs ---
+.git
+.gitignore
+README.md
+**/*.md
+
+# --- Entorno local ---
+# En producción las VITE_* se pasan como build-args de Docker, no desde este .env.
+.env
+.env.*
+!.env.example
+
+# --- Logs y caché ---
+*.log
+npm-debug.log*
+pnpm-debug.log*
+.cache/
+
+# --- IDE / editor / ESLint cache ---
+.vscode/
+.idea/
+.eslintcache
+
+# --- Docker meta ---
+Dockerfile*
+.dockerignore
+nginx.conf.bak
+
+# --- Tests / coverage ---
+coverage/
+**/__tests__/
+**/*.test.js
+**/*.test.jsx
+**/*.spec.js
+**/*.spec.jsx
+
+# --- Sistema operativo ---
+Thumbs.db
+Desktop.ini
+.DS_Store
